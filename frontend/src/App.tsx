@@ -1,25 +1,20 @@
-import React from 'react';
-import {
-    Routes,
-    Route,
-    Navigate,
-} from 'react-router-dom';
-import Test from './pages/Test';
-import Admin from './pages/Admin';
-import './App.css';
+import Navbar from "./Navbar/Navbar";
+import Footer from "./Footer/Footer";
+import { Routes, Route } from "react-router-dom";
+import Admin from "./Admin/Admin";
+import Home from "./Home/Home";
 
 function App() {
-    return (
-        <Routes>
-            <Route path="/" element={<Test/>}/>
-            <Route path="/admin" element={<Admin/>}/>
-            <Route
-                path="/*"
-                element={<Navigate to="/" replace />}
-            />
-        </Routes>
-        
-    );
+	return (
+		<>
+			<Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/admin" element={<Admin />} />
+      </Routes>
+			<Footer />
+		</>
+	);
 }
 
 export default App;

@@ -8,10 +8,11 @@ const port = 3001;
 
 app.use(morgan("tiny"));
 
-app.use(express.static(path.join(__dirname, '../../frontend/build')));
-
 app.use("/api/", routes);
 
+//app.use(express.static(path.join(__dirname, '../../frontend/build')));
+
+/*
 app.get('/*', function(req: Request, res: Response) {
   res.sendFile(path.join(__dirname, '../../frontend/build/index.html'), function(err: Error) {
     if (err) {
@@ -19,6 +20,7 @@ app.get('/*', function(req: Request, res: Response) {
     }
   })
 })
+*/
 
 app.listen(port, () => {
   console.log("⚡️[server]: Server is running at http://localhost:"+port);

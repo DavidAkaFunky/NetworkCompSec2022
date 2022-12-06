@@ -1,0 +1,20 @@
+server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+
+        root /var/www/html;
+
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name 194.210.62.158;
+
+        location / {
+                try_files $uri $uri/ =404;
+        }
+        location /admin {
+                return 302 /;
+                deny all; 
+                try_files $uri $uri/ =404;
+
+        }
+}
