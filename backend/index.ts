@@ -4,7 +4,7 @@ import morgan from "morgan";
 import { routes } from "./routes";
 
 const app: Express = express();
-const port = 3000;
+const port = 3001;
 
 app.use(morgan("tiny"));
 
