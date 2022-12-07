@@ -11,7 +11,7 @@ const root = ReactDOM.createRoot(
 root.render(
 	<Router>
 		<React.StrictMode>
-      <CssBaseline />
+      		<CssBaseline />
 			<App />
 		</React.StrictMode>
 	</Router>
