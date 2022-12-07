@@ -1,10 +1,19 @@
 import express, { Request, Response } from "express";
+const { usersService } = require('../services');
 
-export const userRoute = express.Router();
+const router = express.Router();
 
+router.use(express.json());
 // express validator existe
 
-userRoute.get("/users", (req: Request, res: Response): void => {
+router.get("/add", async (req: Request, res: Response): Promise<void> => {
+    const username = req.query.username;
+    const pwd = req.query.pwd;
+    await usersService.addUser(username, pwd);
+    res.json(username);
+});
+
+/*usersRoute.get("/users", (req: Request, res: Response): void => {
     res.json([
         {
             username: "user1",
@@ -17,7 +26,7 @@ userRoute.get("/users", (req: Request, res: Response): void => {
     ]);
 });
 
-userRoute.post("/user/:userId/details", (req: Request, res: Response): void => {
+usersRoute.post("/user/:userId/details", (req: Request, res: Response): void => {
     const userId = req.params.userId;
     res.json({
         userid: userId,
@@ -26,11 +35,11 @@ userRoute.post("/user/:userId/details", (req: Request, res: Response): void => {
     });
 });
 
-userRoute.post("/login", (req: Request, res: Response): void => {
+usersRoute.post("/login", (req: Request, res: Response): void => {
     const username = req.body.user;
     const password = req.body.password;
     console.log(username, password)
     res.json({
         token: "omegatoken",
     });
-});
+});*/

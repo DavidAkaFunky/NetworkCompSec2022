@@ -1,14 +1,17 @@
 import express, { Express, Request, Response } from "express";
 import path from "path";
 import morgan from "morgan";
-import { routes } from "./routes";
 
+const { databaseSchema } = require('./database');
+const { usersRoute } = require("./routes");
 const app: Express = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 app.use(morgan("tiny"));
+// create db tables if needed
+databaseSchema.initializeSchema();
 
-app.use("/api/", routes);
+app.use("/api/user", usersRoute);
 
 //app.use(express.static(path.join(__dirname, '../../frontend/build')));
 
