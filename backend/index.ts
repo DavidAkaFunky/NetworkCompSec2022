@@ -5,13 +5,13 @@ import morgan from "morgan";
 const { databaseSchema } = require('./database');
 const { usersRoute } = require("./routes");
 const app: Express = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
 app.use(morgan("tiny"));
 // create db tables if needed
 databaseSchema.initializeSchema();
 
-app.use("/api/user", usersRoute);
+app.use("/api/users", usersRoute);
 
 //app.use(express.static(path.join(__dirname, '../../frontend/build')));
 
@@ -26,5 +26,5 @@ app.get('/*', function(req: Request, res: Response) {
 */
 
 app.listen(port, () => {
-  console.log("⚡️[server]: Server is running at http://localhost:"+port);
+    console.log("⚡️[server]: Server is running at http://localhost:" + port);
 });

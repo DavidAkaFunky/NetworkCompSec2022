@@ -6,9 +6,11 @@ const router = express.Router();
 router.use(express.json());
 // express validator existe
 
-router.get("/add", async (req: Request, res: Response): Promise<void> => {
-    const username = req.query.username;
-    const pwd = req.query.pwd;
+router.post("/create", async (req: Request, res: Response): Promise<void> => {
+    res.json({requestBody: req.body});
+    const username = req.body.username;
+    const pwd = req.body.pwd;
+    console.log(username, pwd);
     await usersService.addUser(username, pwd);
     res.json(username);
 });
