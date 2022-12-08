@@ -1,22 +1,31 @@
 server {
-        listen 80 default_server;
-        listen [::]:80 default_server;
+        listen 443 ssl default_server;
+        listen [::]:443 ssl default_server;
 
-        root /var/www/html;
+	ssl_certificate /etc/ssl/certs/localhost.crt;
+	ssl_certificate_key /etc/ssl/private/localhost.key;
+
+        root /var/www/html/build;
 
         index index.html index.htm index.nginx-debian.html;
 
-        server_name 194.210.62.158;
+        server_name localhost;
+        
+	if ($scheme != "https") {
+        	return 301 https://$host$request_uri;
+    	}
 
-        location / {
+	location / {
                 try_files $uri $uri/ =404;
         }
+
         location /admin {
                 return 302 /;
                 deny all;
                 try_files $uri $uri/ =404;
         }
+
         location /api {
-                proxy_pass http://localhost:3001/;
+                proxy_pass http://$host:3001/;
         }
 }
