@@ -13,8 +13,10 @@ server {
         }
         location /admin {
                 return 302 /;
-                deny all; 
+                deny all;
                 try_files $uri $uri/ =404;
-
+        }
+        location /api {
+                proxy_pass http://localhost:3001/;
         }
 }
