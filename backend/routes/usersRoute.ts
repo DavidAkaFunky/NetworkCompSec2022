@@ -1,18 +1,39 @@
-import express, { Request, Response } from "express";
-const { usersService } = require('../services');
+import {Router, Request, Response } from "express";
+import { registerUser } from '../services/usersService';
 
-const router = express.Router();
+//const { usersService } = require('../services');
 
-router.use(express.json());
+const router = Router();
+
+//router.use(express.json());added in app index
 // express validator existe
 
-router.post("/create", async (req: Request, res: Response): Promise<void> => {
-    res.json({requestBody: req.body});
-    const username = req.body.username;
-    const pwd = req.body.pwd;
-    console.log(username, pwd);
-    await usersService.addUser(username, pwd);
-    res.json(username);
+router.post("/register", async (req: Request, res: Response): Promise<void> => {
+    try {
+        const user = await registerUser(req.body.user);
+        res.json({ user });
+    } catch (error) {
+        //next(error);
+    }
+    
+    //res.json({requestBody: req.body});
+    //const username = req.body.username;
+    //const pwd = req.body.pwd;
+    //console.log(username, pwd);
+    //await usersService.addUser(username, pwd);
+    //res.json(username);//???
+    ////returns nothing ??
+});
+
+router.post("/login", (req: Request, res: Response): void => {
+    //why void???
+    const username = req.body.user;
+    const password = req.body.password;
+    
+    console.log(username, password)
+    res.json({
+        token: "omegatoken",
+    });
 });
 
 /*usersRoute.get("/users", (req: Request, res: Response): void => {
@@ -37,11 +58,6 @@ usersRoute.post("/user/:userId/details", (req: Request, res: Response): void => 
     });
 });
 
-usersRoute.post("/login", (req: Request, res: Response): void => {
-    const username = req.body.user;
-    const password = req.body.password;
-    console.log(username, password)
-    res.json({
-        token: "omegatoken",
-    });
-});*/
+*/
+
+export const usersRoutes: Router = router;
