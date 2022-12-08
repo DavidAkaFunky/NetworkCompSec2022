@@ -1,13 +1,9 @@
-import { User } from '../models/userModel';
+import { RegisteredUser } from '../models/registeredUserModel';
 import { RegisterUser } from '../models/registerUserModel';
+import { createUser } from '../database/usersDatabase';
 
-const { userDatabase } = require('../database');
 
-/* export const registerUser = async (username: string, pwd: string): Promise<void> => {
-    userDatabase.addUser(username, pwd);
-}; */
-
-export const registerUser = async (input: RegisterUser): Promise<User> => {
+export const registerUser = async (input: RegisterUser): Promise<boolean> => {
     const email = input.email?.trim();
     const username = input.username?.trim();
     const password = input.password?.trim();
@@ -28,20 +24,10 @@ export const registerUser = async (input: RegisterUser): Promise<User> => {
   
     //const hashedPassword = await bcrypt.hash(password, 10);
   
-    const user = await prisma.user.create({
-      data: {
-        username,
-        email,
-        password: /*hashedPassword*/"dummy",
-      },
-      select: {
-        email: true,
-        username: true,
-      },
-    });
-  
-    return {
+    return createUser(username, email, /* hashed */password)
+
+    /* return {
       ...user,
       token: generateToken(user),
-    };
+    }; */
 };
