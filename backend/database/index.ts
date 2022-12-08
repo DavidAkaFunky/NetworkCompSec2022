@@ -1,4 +1,4 @@
-const usersDatabase = require('./usersDatabase');
+import { usersDatabase } from './usersDatabase';
 
 module.exports = {
     usersDatabase

@@ -1,21 +1,16 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from "../prisma/prisma-client"
 
-const prisma = new PrismaClient()
-
-const addUser = async (username: string, pwd: string): Promise<void> => {
+export const addUser = async (username: string, email: string, pwd: string): Promise<void> => {
     await prisma.user.create({
-        data: {
-            username: username,
-            pwd: pwd
-        }
+      data: {
+        username,
+        email,
+        pwd: /*hashedPassword*/pwd,
+      }
     })
-    .then(async () => {
-        await prisma.$disconnect();
-    })
-    .catch(async (e) => {
-        console.error(e);
-        await prisma.$disconnect();
-        process.exit(1);
+    .then(/* CLIENTE COM USERNAME X CRIADO */)
+    .catch(async () => {
+        /* DEU ERRO */
     });
 }
 

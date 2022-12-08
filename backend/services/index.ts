@@ -1,6 +1,4 @@
-//is this necessary???
-
-const usersService = require('./usersService');
+import usersService from './usersService';
 
 module.exports = {
     usersService

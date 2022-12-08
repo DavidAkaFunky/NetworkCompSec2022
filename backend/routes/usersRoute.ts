@@ -1,28 +1,15 @@
-import {Router, Request, Response } from "express";
-import { registerUser } from '../services/usersService';
-
-//const { usersService } = require('../services');
+import { Router, Request, Response } from "express";
+import { usersService } from "../services";
 
 const router = Router();
 
-//router.use(express.json());added in app index
-// express validator existe
-
 router.post("/register", async (req: Request, res: Response): Promise<void> => {
     try {
-        const user = await registerUser(req.body.user);
+        const user = await usersService.registerUser(req.body.user);
         res.json({ user });
     } catch (error) {
         //next(error);
     }
-    
-    //res.json({requestBody: req.body});
-    //const username = req.body.username;
-    //const pwd = req.body.pwd;
-    //console.log(username, pwd);
-    //await usersService.addUser(username, pwd);
-    //res.json(username);//???
-    ////returns nothing ??
 });
 
 router.post("/login", (req: Request, res: Response): void => {

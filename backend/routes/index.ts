@@ -8,4 +8,4 @@ router.use('/users', usersRoutes);
 //add more routes
 
 
-export const mainRouter: Router = router;
+export const mainRoute: Router = router;
