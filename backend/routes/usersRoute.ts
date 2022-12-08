@@ -1,26 +1,15 @@
 import { Router, Request, Response } from "express";
-import { usersService } from "../services";
+import { registerUser } from "../services/usersService";
 
 const router = Router();
 
-router.post("/register", async (req: Request, res: Response): Promise<void> => {
-    try {
-        const user = await usersService.registerUser(req.body.user);
-        res.json({ user });
-    } catch (error) {
-        //next(error);
-    }
+router.post("/register", (req: Request, res: Response): void => {
+    const user = registerUser(req.body.user);
+    res.json({ user });
 });
 
 router.post("/login", (req: Request, res: Response): void => {
-    //why void???
-    const username = req.body.user;
-    const password = req.body.password;
-    
-    console.log(username, password)
-    res.json({
-        token: "omegatoken",
-    });
+    // TODO
 });
 
 /*usersRoute.get("/users", (req: Request, res: Response): void => {

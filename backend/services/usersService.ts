@@ -1,9 +1,9 @@
 import { RegisteredUser } from '../models/registeredUserModel';
 import { RegisterUser } from '../models/registerUserModel';
-import { usersDatabase } from '../database';
+import { createUser } from '../database/usersDatabase';
 
 
-export const registerUser = async (input: RegisterUser): Promise<RegisteredUser> => {
+export const registerUser = async (input: RegisterUser): Promise<boolean> => {
     const email = input.email?.trim();
     const username = input.username?.trim();
     const password = input.password?.trim();
@@ -24,10 +24,8 @@ export const registerUser = async (input: RegisterUser): Promise<RegisteredUser>
   
     //const hashedPassword = await bcrypt.hash(password, 10);
   
-    const user = usersDatabase.addUser(username, email, /* hashed */password)
+    return createUser(username, email, /* hashed */password)
 
-    return user;
-  
     /* return {
       ...user,
       token: generateToken(user),
