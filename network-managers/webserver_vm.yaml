@@ -1,0 +1,15 @@
+# Webserver network settings
+network:
+    version: 2
+    renderer: NetworkManager
+    ethernets:
+        # Internal network - [Firewall, Webserver]
+        enp0s3:
+            addresses:
+                - 192.168.0.2/24
+            # For webserver <-> database communication
+            routes:
+                - to: 0.0.0.0/0
+                via: 192.168.0.1
+            nameservers:
+                addresses: [8.8.8.8, 8.8.4.4]

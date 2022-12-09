@@ -4,30 +4,32 @@ import Copyright from "./Copyright";
 const footers = [
 	{
 		title: "Company",
-		description: ["Team", "History", "Contact us", "Locations"],
-	},
-	{
-		title: "Features",
 		description: [
-			"Cool stuff",
-			"Random feature",
-			"Team feature",
-			"Developer stuff",
-			"Another one",
+			{name: "Team", "href": "/"},
+			{name: "Contact us", "href": "/"},
+			{name: "Locations", "href": "/"},
 		],
 	},
 	{
-		title: "Resources",
+		title: "Services",
 		description: [
-			"Resource",
-			"Resource name",
-			"Another resource",
-			"Final resource",
+			{name: "Credit Cards", "href": "/services/credit-cards"},
+			{name: "Mortgages", "href": "/services/mortgages"},
+			{name: "Loans", "href": "/services/loans"},
+		],
+	},
+	{
+		title: "Products",
+		description: [
+			{name: "Stocks", "href": "/products/stocks"},
 		],
 	},
 	{
 		title: "Legal",
-		description: ["Privacy policy", "Terms of use"],
+		description: [
+			{name: "Privacy policy", "href": "/"},
+			{name: "Terms of use", "href": "/"},
+		],
 	},
 ];
 
@@ -53,14 +55,14 @@ function Footer() {
 							</Typography>
 							<ul>
 								{footer.description.map((item) => (
-									<li key={item}>
+									<li key={item.name}>
 										<Link
-											href="#"
+											href={item.href}
 											variant="subtitle1"
 											color="text.secondary"
 											style={{ textDecoration: "none" }}
 										>
-											{item}
+											{item.name}
 										</Link>
 									</li>
 								))}
