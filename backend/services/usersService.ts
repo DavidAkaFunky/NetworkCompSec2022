@@ -1,35 +1,41 @@
 import { RegisterUser } from '../models/registerUserModel';
 import { UserDatabase } from '../database/index';
+import bcrypt from 'bcryptjs';
 
 class UserService {
-  static registerUser = async (input: RegisterUser): Promise<boolean> => {
-    const name = input.username?.trim();
-    const email = input.email?.trim();
-    const password = input.password?.trim();
+    static registerUser = async (name: string, email: string, password: string): Promise<boolean> => {
+        return true;
+    };
+    
+    static loginUser = async (input: RegisterUser): Promise<RegisterUser> => {
+        const email = input.email?.trim();
+        const password = input.password?.trim();
 
-    if (!email) {
-      //throw new HttpException(422, { errors: { email: ["can't be blank"] } });
-    }
+        if (!email) {
+            throw new Error();
+            //throw new HttpException(422, { message: { email: ["can't be blank"] } });
+        }
 
-    if (!name) {
-      //throw new HttpException(422, { errors: { username: ["can't be blank"] } });
-    }
+        if (!password) {
+            throw new Error();
+            //throw new HttpException(422, { message: { password: ["can't be blank"] } });
+        }
 
-    if (!password) {
-      //throw new HttpException(422, { errors: { password: ["can't be blank"] } });
-    }
+        const user: RegisterUser | null = await UserDatabase.getUser(email);
 
-    //await checkUserUniqueness(email, username);
+        if (!user){
+            throw new Error();
+            //throw new HttpException(401, { message: { username: ["No user exists with this e-mail"] } });
+        }
 
-    //const hashedPassword = await bcrypt.hash(password, 10);
+        const match = await bcrypt.compare(password, user.password);
 
-    return UserDatabase.createUser(name, email, /* hashed */password)
-
-    /* return {
-      ...user,
-      token: generateToken(user),
-    }; */
-  };
+        if (!match) {
+            throw new Error();
+            //throw new HttpException(401, { message: { username: ["Wrong password"] } });
+        }
+        return user;
+    };
 }
 
 export default UserService;
