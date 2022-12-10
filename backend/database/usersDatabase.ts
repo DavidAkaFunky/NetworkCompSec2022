@@ -2,11 +2,11 @@ import prisma from "../prisma/prisma-client"
 
 class UserDatabase {
 
-  static createUser = (username: string, email: string, pwd: string) => {
+  static createUser = (name: string, email: string, pwd: string) => {
     try {
       prisma.user.create({
         data: {
-          username: username,
+          name: name,
           email: email,
           password: pwd,
         }

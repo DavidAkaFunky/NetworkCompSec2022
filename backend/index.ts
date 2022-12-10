@@ -1,10 +1,9 @@
-import express, { Express, Request, Response } from "express";
-//import path from "path";
+import express from "express";
 import morgan from "morgan";
 import bodyParser from 'body-parser';
 import { mainRoute } from "./routes";
 
-const app: Express = express();
+const app = express();
 const port = process.env.PORT;
 
 app.use(morgan("tiny"));

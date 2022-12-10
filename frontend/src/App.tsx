@@ -1,10 +1,12 @@
+import { Routes, Route } from "react-router-dom";
+import { Box, ThemeProvider } from "@mui/material";
+import Services from "./Services/Services";
 import Navbar from "./Navbar/Navbar";
 import Footer from "./Footer/Footer";
-import { Routes, Route } from "react-router-dom";
 import Admin from "./Admin/Admin";
+import Register from "./Auth/Register";
+import Login from "./Auth/Login";
 import Home from "./Home/Home";
-import Services from "./Services/Services";
-import { Box } from "@mui/material";
 
 function App() {
 	return (
@@ -13,6 +15,8 @@ function App() {
 			<Box component="main" sx={{ flex: 1, py: 6, px: 4 }}>
 				<Routes>
 					<Route path="/" element={<Home />} />
+					<Route path="/login" element={<Login />} />
+					<Route path="/register" element={<Register />} />
 					<Route path="/servicse" element={<Services />} />
 					<Route path="/admin" element={<Admin />} />
 				</Routes>

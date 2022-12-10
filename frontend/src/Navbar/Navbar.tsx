@@ -10,7 +10,7 @@ import {
 	Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import { useState } from "react";
 
 const pages = [
@@ -19,7 +19,7 @@ const pages = [
 	{ name: "Products", href: "/products", requiresAuth: false },
 	{ name: "Dashboard", href: "/dashboard", requiresAuth: true },
 	{ name: "Portfolio", href: "/portfolio", requiresAuth: true },
-]
+];
 
 function Navbar() {
 	const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
@@ -36,7 +36,9 @@ function Navbar() {
 		<AppBar position="static">
 			<Container maxWidth="xl">
 				<Toolbar disableGutters>
-					<AccountBalanceIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
+					<AccountBalanceIcon
+						sx={{ display: { xs: "none", md: "flex" }, mr: 1 }}
+					/>
 					<Typography
 						variant="h6"
 						noWrap
@@ -91,12 +93,14 @@ function Navbar() {
 							))}
 						</Menu>
 					</Box>
-					<AccountBalanceIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
+					<AccountBalanceIcon
+						sx={{ display: { xs: "flex", md: "none" }, mr: 1 }}
+					/>
 					<Typography
 						variant="h5"
 						noWrap
 						component="a"
-						href=""
+						href="/"
 						sx={{
 							mr: 2,
 							display: { xs: "flex", md: "none" },
@@ -115,12 +119,15 @@ function Navbar() {
 							<Button
 								key={page.name}
 								onClick={handleCloseNavMenu}
-								sx={{ my: 2, color: "white", display: "block" }}
+								sx={{ my: 2, color: "inherit" }}
 							>
 								{page.name}
 							</Button>
 						))}
 					</Box>
+					<Button href="/login" sx={{ my: 2, color: "inherit" }}>
+						Login
+					</Button>
 				</Toolbar>
 			</Container>
 		</AppBar>

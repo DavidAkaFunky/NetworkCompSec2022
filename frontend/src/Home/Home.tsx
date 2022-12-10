@@ -15,7 +15,7 @@ const testRequest = async () => {
 };
 
 function Home() {
-	testRequest();
+	//testRequest();
 
 	return (
 		<>
