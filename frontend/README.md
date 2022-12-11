@@ -1,1 +1,1 @@
-# Frontend - ReactJS
+# Frontend - ReactJS / Material-UI / TypeScript

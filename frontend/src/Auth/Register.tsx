@@ -8,7 +8,7 @@ function Register() {
 	const [password, setPassword] = useState("");
 	const [repeatPassword, setRepeatPassword] = useState("");
 	const [missing, setMissing] = useState(false);
-    const [sending, setSending] = useState(false);
+	const [sending, setSending] = useState(false);
 
 	const handleNameChange = (e: any) => {
 		setName(e.target.value);
@@ -37,29 +37,30 @@ function Register() {
 			return;
 		}
 		setMissing(false);
-        setSending(true);
+		setSending(true);
 
-		const response = await fetch("http://localhost:3001/api/users/register", {
+		const url = "http://localhost:3001/api/users/register";
+
+		const data = {
+			name: name,
+			email: email,
+			password: password,
+		};
+
+		const response = await fetch(url, {
 			method: "POST",
-			body: JSON.stringify({
-				name: name,
-                email: email,
-                password: password,
-			}),
+			mode: "cors",
+			body: JSON.stringify(data),
 			headers: {
 				"Content-Type": "application/json",
 				Accept: "application/json",
 			},
 		});
 
-		console.log(response)
-
-        if(response.status === 200) {
-            // maybe change component to say succesful and button to go to login
-			console.log("user created successfully");
-			console.log(response.body); 
-			setSending(false);   
-        }
+		if (response.status === 200) {
+			// maybe change component to say succesful and button to go to login
+			setSending(false);
+		}
 	};
 
 	return (
@@ -129,9 +130,9 @@ function Register() {
 					onClick={handleSubmit}
 					variant="contained"
 					sx={{ mt: 3 }}
-                    disabled={sending}
+					disabled={sending}
 				>
-					{sending? "Sending..." : "Submit"}
+					{sending ? "Sending..." : "Submit"}
 				</Button>
 				<Button color="primary" fullWidth sx={{ mt: 2 }}>
 					<Link to="/login">Already have an account?</Link>

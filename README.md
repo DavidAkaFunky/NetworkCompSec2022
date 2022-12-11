@@ -22,3 +22,101 @@ The system has integration with external institutions, namely, the Bank of Portu
 
 
 ## Configuration
+
+Update package manager on every machine:
+```bash
+sudo apt update
+sudo apt upgrade
+```
+
+Copy the corresponding configuration file:
+```bash
+cp /network-managers/<file>.yaml /etc/netplan/01-network-manager.yaml
+```
+
+Refresh the network configuration:
+```bash
+sudo netplan try
+sudo netplan apply
+```
+
+Apply the firewall rules:
+```bash
+#TODO
+```
+
+To have persistent iptables rules:
+```bash
+sudo apt install iptables-persistent
+# FOR IPv4
+sudo sh -c 'iptables-save > /etc/iptables/rules.v4'
+# FOR IPv6
+sudo sh -c 'ip6tables-save > /etc/iptables/rules.v6'
+```
+
+## TODO: GERAR CERTIFICADOS
+## NGINX ASSUME CERTIFICADOS, CASO NAO TENHA
+## USAR PORTA 80 E MUDAR LINKS PARA HTTP
+
+### Firewall
+
+Allow IP forwarding:
+```bash
+net.ipv4.ip_forward=1
+```
+
+### Database
+
+Install postgresql:
+```bash
+sudo apt install postgresql
+```
+ 
+ya not sure o que fazer aqui
+testar que o prisma cria bem as coisas
+
+### Web server
+
+Install and configure nginx:
+```bash
+sudo apt install nginx
+rm /etc/nginx/sites-available/default
+cp nginx_config /etc/nginx/sites-available/default
+sudo systemctl restart nginx
+```
+
+Install nodejs and npm:
+```bash
+sudo apt install nodejs
+sudo apt install npm ## NECESSARY?
+```
+
+Build and copy the frontend to nginx:
+```bash
+cd frontend
+npm i ## NECESSARY?
+npm run build
+cp -r build/* /var/www/html
+```
+
+Populate the .env for the backend:
+```bash
+cp backend/.env.example backend/.env
+```
+
+Setup to prisma
+```bash
+# Nao tenho a certeza de que mais é preciso
+npm i
+npx prisma migrate dev --name init
+#IMPORTANTE
+# TESTAR SE O PRISMA FUNCIONA COM UMA
+# BASE DE DADOS REMOTA
+# QUE TIPO DE PACOTES ENVIA
+```
+
+Start the backend:
+```bash
+npm run build
+npm start
+```

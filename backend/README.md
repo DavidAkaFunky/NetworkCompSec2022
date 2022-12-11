@@ -1,4 +1,4 @@
-# Backend - Express.js with PostgreSQL (Prisma)
+# Backend - Express.js / Prisma / PostgreSQL / TypeScript
 
 ## Prisma commands
 npx prisma migrate dev --name init
@@ -8,7 +8,6 @@ npx prisma migrate dev --name init
 Se o vscode ficar parvo com o tipos do prisma, apagar o node_modules
 
 ## Database commands
-
 psql -> enter postgres
 \list -> show databases
 \c ncmb -> connect to database
