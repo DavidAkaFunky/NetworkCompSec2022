@@ -1,6 +1,7 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "../Axios/Axios";
 
 function Register() {
 	const [name, setName] = useState("");
@@ -47,15 +48,7 @@ function Register() {
 			password: password,
 		};
 
-		const response = await fetch(url, {
-			method: "POST",
-			mode: "cors",
-			body: JSON.stringify(data),
-			headers: {
-				"Content-Type": "application/json",
-				Accept: "application/json",
-			},
-		});
+		const response = await axios.post(url, data);
 
 		if (response.status === 200) {
 			// maybe change component to say succesful and button to go to login

@@ -1,6 +1,7 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "../Axios/Axios";
 
 function Login() {
 	const [email, setEmail] = useState("");
@@ -15,14 +16,37 @@ function Login() {
 		setPassword(e.target.value);
 	};
 
-	const handleSubmit = (e: any) => {
-		if (email.length || password.length) {
+	// JUST A TEST
+	const handleToken = async (e: any) => {
+		const url = "http://localhost:3001/api/products/userProducts";
+		const response = await axios.get(url);
+	};
+
+	const handleSubmit = async (e: any) => {
+		if (!email.length || !password.length) {
 			setMissing(true);
 			return;
 		}
 		setMissing(false);
 
-		// send http request to endpoint /login
+		const url = "http://localhost:3001/api/users/login";
+
+		const data = {
+			email: email,
+			password: password,
+		}
+
+		const response = await axios.post(url, data);
+
+		// store access token
+		if (response.status === 200) {
+			const data = await response.data;
+			localStorage.setItem("accessToken", data.accessToken);
+		}
+
+		// redirect to home
+
+
 	};
 
 	// acho que nao está a 100%
@@ -77,6 +101,14 @@ function Login() {
 					sx={{ mt: 3 }}
 				>
 					Submit
+				</Button>
+				<Button
+					fullWidth
+					onClick={handleToken}
+					variant="contained"
+					sx={{ mt: 3 }}
+				>
+					envia token pff
 				</Button>
 				<Button color="primary" fullWidth sx={{ mt: 2 }}>
 					<Link to={"/register"}>

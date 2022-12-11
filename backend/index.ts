@@ -13,6 +13,7 @@ app.use(bodyParser.json());
 
 app.use("/api", routes);
 
+// Error handling middleware
 app.use((err: any, req: any, res: any, next: any) => {
 
     if (err instanceof HttpException) {
@@ -21,7 +22,6 @@ app.use((err: any, req: any, res: any, next: any) => {
         res.status(500).json({ errors: { global: "Something went wrong" } });
     }
 });
-
 
 // Start the server
 const port = process.env.PORT || 3000;
