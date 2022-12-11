@@ -28,10 +28,10 @@ function Register() {
 
 	const handleSubmit = async (e: any) => {
 		if (
-			name.length ||
-			email.length ||
-			password.length ||
-			repeatPassword.length
+			!name.length ||
+			!email.length ||
+			!password.length ||
+			!repeatPassword.length
 		) {
 			setMissing(true);
 			return;
@@ -39,7 +39,6 @@ function Register() {
 		setMissing(false);
         setSending(true);
 
-		// send http request to endpoint /register
 		const response = await fetch("http://localhost:3001/api/users/register", {
 			method: "POST",
 			body: JSON.stringify({
@@ -53,9 +52,13 @@ function Register() {
 			},
 		});
 
+		console.log(response)
+
         if(response.status === 200) {
-            // redirect to login
-            console.log("User registered successfully")
+            // maybe change component to say succesful and button to go to login
+			console.log("user created successfully");
+			console.log(response.body); 
+			setSending(false);   
         }
 	};
 

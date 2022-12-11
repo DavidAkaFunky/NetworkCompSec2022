@@ -5,4 +5,4 @@ const router: Router = Router();
 
 router.use('/users', usersRoutes);
 
-export const mainRoute: Router = router;
+export default router;
