@@ -69,12 +69,80 @@ net.ipv4.ip_forward=1
 
 Install postgresql:
 ```bash
-sudo apt install postgresql
-```
- 
-ya not sure o que fazer aqui
-testar que o prisma cria bem as coisas
+sudo wget http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc
 
+sudo apt-key add ACCC4CF8.asc
+
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+
+sudo apt -y update
+
+sudo apt -y install postgresql-14
+```
+Check that postgres is working:
+
+```bash
+systemctl status postgresql
+```
+
+
+Edit `/etc/postgresql/14/main/postgresql.conf`: 
+
+```bash
+nano /etc/postgresql/14/main/postgresql.conf
+```
+
+Change this line to listen to all addresses:
+
+```bash
+listen_addresses = '*'(maybe just the one with the webserver)
+```
+
+Edit `/etc/postgresql/14/main/pg_hba.conf`: 
+
+```bash
+nano /etc/postgresql/14/main/pg_hba.conf
+```
+
+Append at the end:
+
+```bash
+(maybe change md5 -> sha, restrict other parameters)
+[CONNECTION_TYPE][DATABASE][USER] [ADDRESS]   [METHOD]
+ host             all       all    0.0.0.0/0   md5
+```
+
+Restart postgres:
+```bash
+systemctl restart postgresql
+```
+
+Check that server is listening to port 5432:
+```bash
+ss -nlt | grep 5432
+```
+
+```bash
+seed@VM:~/.../Project$ ss -nlt | grep 5432
+LISTEN  0        244              0.0.0.0:5432           0.0.0.0:*              
+LISTEN  0        244                 [::]:5432              [::]:*
+```
+
+Run psql:
+```bash
+sudo -u postgres psql
+```
+
+Change password:
+```bash
+ALTER USER postgres WITH ENCRYPTED PASSWORD 'postgres';
+```
+
+Create database with name `ncmb`:
+
+```bash
+CREATE DATABASE ncmb;
+```
 ### Web server
 
 Install and configure nginx:

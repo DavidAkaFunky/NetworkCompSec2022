@@ -16,11 +16,11 @@ network:
             nameservers:
                 addresses: [8.8.8.8, 8.8.4.4]
         # Internal network - [Firewall, Internal users]
-        enp0s8:
-            addresses:
-                - 192.168.2.1/24
-            nameservers:
-                addresses: [8.8.8.8, 8.8.4.4]
+        #enp0s8:
+            #addresses:
+                #- 192.168.2.1/24
+            #nameservers:
+                #addresses: [8.8.8.8, 8.8.4.4]
         # Host-only network
         enp0s9:
             dhcp4: no
@@ -31,3 +31,5 @@ network:
         # NAT network
         enp0s10:
             dhcp4: yes
+            nameservers:
+                addresses: [8.8.8.8, 8.8.4.4]
