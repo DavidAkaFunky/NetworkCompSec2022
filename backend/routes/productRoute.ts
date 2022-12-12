@@ -1,9 +1,9 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { ProductService, AuthService } from "../services/index";
+import { ProductService, TokenService } from "../services/index";
 
 const router = Router();
 
-router.get("/userProducts", AuthService.authenticateToken, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.get("/userProducts", TokenService.authenticateAccessToken, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         await ProductService.getUserProducts(req.body.id)
         res.status(200);

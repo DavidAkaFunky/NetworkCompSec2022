@@ -1,9 +1,9 @@
-import UserService from "./usersService";
 import AuthService from "./authService";
+import TokenService from "./tokenService";
 import ProductService from "./productService";
 
 export {
-    UserService,
+    TokenService,
     AuthService,
     ProductService,
 }

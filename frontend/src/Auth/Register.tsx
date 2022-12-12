@@ -40,7 +40,7 @@ function Register() {
 		setMissing(false);
 		setSending(true);
 
-		const url = "http://localhost:3001/api/users/register";
+		const url = "http://localhost:3001/api/auth/register";
 
 		const data = {
 			name: name,

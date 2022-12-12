@@ -18,8 +18,19 @@ function Login() {
 
 	// JUST A TEST
 	const handleToken = async (e: any) => {
-		const url = "http://localhost:3001/api/products/userProducts";
-		const response = await axios.get(url);
+		const url = "/api/products/userProducts";
+
+		try {
+			const response = await axios.get(url, {
+				withCredentials: true,
+			});
+			console.log("response1");
+			console.log(response);
+		} catch (error) {
+			console.log("error1");
+			console.log(error);
+		}
+		
 	};
 
 	const handleSubmit = async (e: any) => {
@@ -29,7 +40,7 @@ function Login() {
 		}
 		setMissing(false);
 
-		const url = "http://localhost:3001/api/users/login";
+		const url = "/api/auth/login";
 
 		const data = {
 			email: email,
@@ -41,6 +52,7 @@ function Login() {
 		// store access token
 		if (response.status === 200) {
 			const data = await response.data;
+			// maybe store in user context
 			localStorage.setItem("accessToken", data.accessToken);
 		}
 
