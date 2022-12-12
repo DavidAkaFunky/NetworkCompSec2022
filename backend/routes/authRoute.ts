@@ -4,12 +4,24 @@ import { AuthService } from "../services/index";
 
 const router = Router();
 
+router.post("/check-register", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const content = await AuthService.checkRegisterUser(req.body.email);
+        res.status(200).json({
+            secret: content.secret,
+            qrCode: content.qrCode
+        });
+    } catch (err: any) {
+        next(err);
+    }
+});
+
 router.post("/register", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const user = await AuthService.registerUser(req.body as RegisterUser);
         res.status(200).json({ user });
     } catch (err: any) {
-        next(err)
+        next(err);
     }
 });
 
@@ -26,7 +38,7 @@ router.post("/login", async (req: Request, res: Response, next: NextFunction): P
             accessToken: user.accessToken,
         });
     } catch (err: any) {
-        next(err) 
+        next(err);
     }
 });
 
@@ -44,7 +56,7 @@ router.post("/logout", async (req: Request, res: Response, next: NextFunction): 
         await AuthService.logoutUser(req.body);
         res.status(200);
     } catch (err: any) {
-        next(err) 
+        next(err);
     }
 });
 

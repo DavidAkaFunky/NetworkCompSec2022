@@ -2,6 +2,9 @@ import bcrypt from 'bcryptjs';
 import HttpException from '../models/httpException';
 import RegisterUser from '../models/registerUser';
 import UserTokens from '../models/userTokens';
+import UserSecret from '../models/userSecret';
+import authenticator from '../otp_authenticator/authenticator';
+import qrcode from 'qrcode';
 import { UserDatabase } from '../database/index';
 import { TokenService } from './index';
 
@@ -15,11 +18,22 @@ class AuthService {
     return true;
   };
 
+  public static checkRegisterUser = async (email: string): Promise<UserSecret> => {
+    if (!await this.checkUserUniqueness(email)) {
+      throw new HttpException(422, { errors: { email: ["is already taken"] } });
+    }
+    const secret = authenticator.generateSecret();
+    const otpAuth = authenticator.keyuri(email, "NCMB - Nova Caixa Milenar Bancária", secret);
+    const qrCode = await qrcode.toDataURL(otpAuth);
+    return { secret, qrCode };
+  };
+
   public static registerUser = async (user: RegisterUser): Promise<string> => {
 
     const name = user.name?.trim();
     const email = user.email?.trim();
     const password = user.password?.trim();
+    const secret = user.twoFASecret?.trim();
 
     if (!email) {
       throw new HttpException(422, { errors: { email: ["can't be blank"] } });
@@ -43,7 +57,7 @@ class AuthService {
     // for correct use of bcrypt
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const success = await UserDatabase.createUser(name, email, hashedPassword)
+    const success = await UserDatabase.createUser(name, email, hashedPassword, secret);
 
     if (!success) {
       throw new HttpException(500, { errors: { user: ["fail to create"] } });
