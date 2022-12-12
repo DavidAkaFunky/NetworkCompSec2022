@@ -11,9 +11,8 @@ class ProductService {
         }
     ]
 
-    public static getUserProducts = async (id: string): Promise<void> => {
-
-        const products = ProductService.products.filter(product => product.ownerId === id);
+    public static getUserProducts = async (id: string): Promise<{ ownerId: string; name: string; }[]> => {
+        return this.products.filter(product => product.ownerId === id);
     };
 }
 

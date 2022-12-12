@@ -1,4 +1,4 @@
-import UserDatabase from "./usersDatabase";
+import UserDatabase from "./userDatabase";
 
 export {
     UserDatabase,

@@ -17,7 +17,7 @@ axios.interceptors.request.use(
     }
 )
 
-// response interceptor for status 403
+// response interceptor to renew access token on receiving token expired error
 axios.interceptors.response.use(undefined, async (error: AxiosError) => {
 
     if(error.response?.status === 403 && error.config) {
@@ -25,7 +25,7 @@ axios.interceptors.response.use(undefined, async (error: AxiosError) => {
         const originalRequestConfig = error.config;
         delete originalRequestConfig?.headers!['Authorization'];
         
-        const response = await axios.get('/auth/refresh', {
+        const response = await axios.get('/api/auth/refresh', {
             withCredentials: true,
         });
 

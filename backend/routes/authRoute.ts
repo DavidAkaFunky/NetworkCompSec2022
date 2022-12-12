@@ -42,7 +42,7 @@ router.post("/login", async (req: Request, res: Response, next: NextFunction): P
     }
 });
 
-router.post("/refresh", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.get("/refresh", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const accessToken = await AuthService.refreshToken(req.cookies);
         res.status(200).json({ accessToken });
