@@ -155,8 +155,7 @@ sudo systemctl restart nginx
 
 Install nodejs and npm:
 ```bash
-sudo apt install nodejs
-sudo apt install npm ## NECESSARY?
+install with nvm
 ```
 
 Build and copy the frontend to nginx:
