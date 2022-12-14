@@ -1,7 +1,20 @@
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Box, Button, TextField, Typography, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Slide } from "@mui/material";
+import { maxWidth } from "@mui/system";
+import { auto } from "@popperjs/core";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { TransitionProps } from '@mui/material/transitions';
 import axios from "../Axios/Axios";
+import React from "react";
+
+const Transition = React.forwardRef(function Transition(
+	props: TransitionProps & {
+	  children: React.ReactElement<any, any>;
+	},
+	ref: React.Ref<unknown>,
+	) {
+		return <Slide direction="up" ref={ref} {...props} />;
+});
 
 function Register() {
 	const [name, setName] = useState("");
@@ -10,9 +23,10 @@ function Register() {
 	const [repeatPassword, setRepeatPassword] = useState("");
 	const [secret, setSecret] = useState("");
 	const [qrCode, setQrCode] = useState("");
-	const [missing, setMissing] = useState(false);
+	const [firstTry, setFirstTry] = useState(true);
 	const [sending, setSending] = useState(false);
 	const [twoFA, setTwoFA] = useState(false);
+	const [twoFACode, setTwoFACode] = useState("");
 
 	const handleNameChange = (e: any) => {
 		setName(e.target.value);
@@ -30,18 +44,31 @@ function Register() {
 		setRepeatPassword(e.target.value);
 	};
 
+	const handleTwoFACodeChange = (e: any) => {
+		setTwoFACode(e.target.value);
+	};
+
+	const handleOpen = () => {
+		setTwoFA(true);
+	};
+
+	const handleClose = () => {
+		setTwoFA(false);
+	};
+
 	const handleFirstSubmit = async (e: any) => {
+		setSending(true);
+		setFirstTry(false);
+
 		if (
 			!name.length ||
-			!email.length ||
-			!password.length ||
-			!repeatPassword.length
+			!email.length || !email.includes("@") ||
+			password.length < 4 ||
+			repeatPassword != password
 		) {
-			setMissing(true);
-			return;
+			setSending(false); 
+			return; 
 		}
-		setMissing(false);
-		setSending(true);
 
 		const url = "/api/auth/check-register";
 
@@ -56,6 +83,7 @@ function Register() {
 		if (response.status === 200) {
 			const data = await response.data;
 			// maybe change component to say succesful and button to go to login
+			setFirstTry(true);
 			setSecret(data.secret);
 			setQrCode(data.qrCode);
 			setTwoFA(true);
@@ -79,86 +107,118 @@ function Register() {
 		setSending(false);
 	};
 
-	if (!twoFA) {
-		return (
-			<Box sx={{ mx: "auto", width: "50vh" }}>
-				<Typography variant="h5" component="h1">
-					<strong>Register</strong>
-				</Typography>
-				<Box component="form">
-					<TextField
-						margin="normal"
-						variant="filled"
-						required
-						fullWidth
-						id="name"
-						label={"Full name"}
-						name="name"
-						autoComplete="name"
-						autoFocus
-						value={name}
-						onChange={handleNameChange}
-						error={missing}
-					/>
-					<TextField
-						margin="normal"
-						variant="filled"
-						required
-						fullWidth
-						id="email"
-						label={"Email Address"}
-						name="email"
-						autoComplete="email"
-						autoFocus
-						value={email}
-						onChange={handleEmailChange}
-						error={missing || (email.length > 0 && !email.includes("@"))}
-					/>
-					<TextField
-						margin="normal"
-						variant="filled"
-						required
-						fullWidth
-						name="password"
-						label={"Password"}
-						type="password"
-						id="password"
-						autoComplete="current-password"
-						value={password}
-						onChange={handlePasswordChange}
-						error={missing || (password.length > 0 && password.length < 4)}
-					/>
-					<TextField
-						margin="normal"
-						variant="filled"
-						required
-						fullWidth
-						name="repeatPassword"
-						label={"Repeat Password"}
-						type="password"
-						id="repeatPassword"
-						autoComplete="current-password"
-						value={repeatPassword}
-						onChange={handleRepeatPasswordChange}
-						error={missing || password !== repeatPassword}
-					/>
-					<Button
-						fullWidth
-						onClick={handleFirstSubmit}
-						variant="contained"
-						sx={{ mt: 3 }}
-						disabled={sending}
-					>
-						{sending ? "Sending..." : "Submit"}
-					</Button>
-					<Button color="primary" fullWidth sx={{ mt: 2 }}>
-						<Link to="/login">Already have an account?</Link>
-					</Button>
-				</Box>
+	return (
+	<div>
+		<Box sx={{ mx: "auto", width: "80vw", maxWidth: 500 }}>
+			<Typography variant="h5" component="h1">
+				<strong>Register</strong>
+			</Typography>
+			<Box component="form">
+				<TextField
+					margin="normal"
+					variant="filled"
+					required
+					fullWidth
+					id="name"
+					label={"Full name"}
+					name="name"
+					autoComplete="name"
+					autoFocus
+					value={name}
+					onChange={handleNameChange}
+					error={!firstTry && name.length <= 0}
+				/>
+				<TextField
+					margin="normal"
+					variant="filled"
+					required
+					fullWidth
+					id="email"
+					label={"Email Address"}
+					name="email"
+					autoComplete="email"
+					autoFocus
+					value={email}
+					onChange={handleEmailChange}
+					error={!firstTry && !(email.length > 1 && email.includes("@"))}
+				/>
+				<TextField
+					margin="normal"
+					variant="filled"
+					required
+					fullWidth
+					name="password"
+					label={"Password"}
+					type="password"
+					id="password"
+					autoComplete="current-password"
+					value={password}
+					onChange={handlePasswordChange}
+					error={!firstTry && password.length < 4}
+				/>
+				<TextField
+					margin="normal"
+					variant="filled"
+					required
+					fullWidth
+					name="repeatPassword"
+					label={"Repeat Password"}
+					type="password"
+					id="repeatPassword"
+					autoComplete="current-password"
+					value={repeatPassword}
+					onChange={handleRepeatPasswordChange}
+					error={!firstTry && password !== repeatPassword}
+				/>
+				<Button
+					fullWidth
+					onClick={handleFirstSubmit}
+					variant="contained"
+					sx={{ mt: 3 }}
+					disabled={ sending }
+				>
+					{sending ? "Sending..." : "Submit"}
+				</Button>
+				<Button color="primary" fullWidth sx={{ mt: 2 }}>
+					<Link to="/login">Already have an account?</Link>
+				</Button>
 			</Box>
-		);
-	}
-	return <div>It's dangerous to go alone, take this: <img src={qrCode}/>Scan this code, it's very safe!</div>;
+		</Box>
+		<Dialog
+			open={twoFA}
+			TransitionComponent={Transition}
+			keepMounted
+			onClose={handleClose}
+			aria-describedby="alert-dialog-slide-description"
+		>
+			<DialogTitle>{"Google Authenticator"}</DialogTitle>
+			<DialogContent>
+				<Box sx={{ mx: "auto", maxWidth: "50vh", maxHeight: "100vw" }}>
+					<img src={qrCode}  width="100%" />
+					<TextField
+						fullWidth
+						variant="filled"
+						required
+						name="twoFACode"
+						label={"Insert Code"}
+						type="password"
+						id="twoFACode"
+						autoComplete="current-password"
+						value={twoFACode}
+						onChange={handleTwoFACodeChange}
+						error={	!firstTry  }
+					/>
+				</Box>
+			</DialogContent>
+			<DialogActions>
+				<Button onClick={handleClose}>Close</Button>
+				<Button onClick={handleClose}>Send</Button>
+			</DialogActions>
+		</Dialog>
+	</div>	
+	);
 }
+
+
 
 export default Register;
