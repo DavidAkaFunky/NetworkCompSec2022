@@ -3,12 +3,13 @@ import prisma from "../prisma/client"
 
 class UserDatabase {
 
-  public static createUser = async (name: string, email: string, pwd: string, twoFASecret: string): Promise<boolean> => {
+  public static createUser = async (name: string, email: string, admin: boolean, pwd: string, twoFASecret: string): Promise<boolean> => {
     try {
       await prisma.user.create({
         data: {
           name: name,
           email: email,
+          admin: admin,
           password: pwd,
           twoFASecret: twoFASecret,
         }

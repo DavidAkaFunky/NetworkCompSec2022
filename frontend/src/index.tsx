@@ -1,18 +1,21 @@
 import React from "react";
 import CssBaseline from "@mui/material/CssBaseline";
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import UserProvider from "./UserContext/UserContext";
 
 const root = ReactDOM.createRoot(
 	document.getElementById("root") as HTMLElement
 );
 
 root.render(
-	<Router>
+	<BrowserRouter>
 		<React.StrictMode>
       		<CssBaseline />
-			<App />
+			<UserProvider>
+				<App />
+			</UserProvider>
 		</React.StrictMode>
-	</Router>
+	</BrowserRouter>
 );

@@ -11,17 +11,16 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
-import { useState } from "react";
-
-const pages = [
-	{ name: "Home", href: "/", requiresAuth: false },
-	{ name: "Services", href: "/services", requiresAuth: false },
-	{ name: "Products", href: "/products", requiresAuth: false },
-	{ name: "Dashboard", href: "/dashboard", requiresAuth: true },
-	{ name: "Portfolio", href: "/portfolio", requiresAuth: true },
-];
+import { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../UserContext/UserContext";
+import { UserContextType } from "../UserContext/UserContextType";
 
 function Navbar() {
+	const { user } = useContext(UserContext) as UserContextType;
+
+	const navigate = useNavigate();
+
 	const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
 
 	const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -30,6 +29,10 @@ function Navbar() {
 
 	const handleCloseNavMenu = () => {
 		setAnchorElNav(null);
+	};
+
+	const handleNavigation = (path: string) => {
+		navigate(path);
 	};
 
 	return (
@@ -86,11 +89,34 @@ function Navbar() {
 								display: { xs: "block", md: "none" },
 							}}
 						>
-							{pages.map((page) => (
-								<MenuItem key={page.name} onClick={handleCloseNavMenu}>
-									<Typography textAlign="center">{page.name}</Typography>
+							<MenuItem
+								onClick={() => {
+									handleCloseNavMenu();
+									handleNavigation("/");
+								}}
+							>
+								<Typography textAlign="center">Landing</Typography>
+							</MenuItem>
+							{user.isLoggedIn && (
+								<MenuItem
+									onClick={() => {
+										handleCloseNavMenu();
+										handleNavigation("/home");
+									}}
+								>
+									<Typography textAlign="center">Home</Typography>
 								</MenuItem>
-							))}
+							)}
+							{user.isAdmin && (
+								<MenuItem
+									onClick={() => {
+										handleCloseNavMenu();
+										handleNavigation("/admin");
+									}}
+								>
+									<Typography textAlign="center">Admin</Typography>
+								</MenuItem>
+							)}
 						</Menu>
 					</Box>
 					<AccountBalanceIcon
@@ -115,17 +141,42 @@ function Navbar() {
 						NCMB
 					</Typography>
 					<Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-						{pages.map((page) => (
+						<Button
+							onClick={() => {
+								handleCloseNavMenu();
+								handleNavigation("/");
+							}}
+							sx={{ my: 2, color: "inherit" }}
+						>
+							Landing
+						</Button>
+						{user.isLoggedIn && (
 							<Button
-								key={page.name}
-								onClick={handleCloseNavMenu}
+								onClick={() => {
+									handleCloseNavMenu();
+									handleNavigation("/home");
+								}}
 								sx={{ my: 2, color: "inherit" }}
 							>
-								{page.name}
+								Home
 							</Button>
-						))}
+						)}
+						{user.isAdmin && (
+							<Button
+								onClick={() => {
+									handleCloseNavMenu();
+									handleNavigation("/admin");
+								}}
+								sx={{ my: 2, color: "inherit" }}
+							>
+								Admin
+							</Button>
+						)}
 					</Box>
-					<Button href="/login" sx={{ my: 2, color: "inherit" }}>
+					<Button
+						onClick={() => handleNavigation("/login")}
+						sx={{ my: 2, color: "inherit" }}
+					>
 						Login
 					</Button>
 				</Toolbar>

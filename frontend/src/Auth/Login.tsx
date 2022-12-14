@@ -1,9 +1,16 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "../Axios/Axios";
+import { UserContext } from "../UserContext/UserContext";
+import { UserContextType } from "../UserContext/UserContextType";
 
 function Login() {
+
+	const { setUser } = useContext(UserContext) as UserContextType;
+
+	const navigate = useNavigate();
+
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [missing, setMissing] = useState(false);
@@ -14,23 +21,6 @@ function Login() {
 
 	const handlePasswordChange = (e: any) => {
 		setPassword(e.target.value);
-	};
-
-	// JUST A TEST
-	const handleToken = async (e: any) => {
-		const url = "/api/products/userProducts";
-
-		try {
-			const response = await axios.get(url, {
-				withCredentials: true,
-			});
-			console.log("response1");
-			console.log(response);
-		} catch (error) {
-			console.log("error1");
-			console.log(error);
-		}
-		
 	};
 
 	const handleSubmit = async (e: any) => {
@@ -49,24 +39,17 @@ function Login() {
 
 		const response = await axios.post(url, data);
 
-		// store access token
 		if (response.status === 200) {
 			const data = await response.data;
-			// maybe store in user context
-			localStorage.setItem("accessToken", data.accessToken);
+			setUser({
+				isLoggedIn: true,
+				isAdmin: data.isAdmin,
+			});
+			sessionStorage.setItem("accessToken", data.accessToken);
+			navigate("/home");
 		}
-
-		// redirect to home
-
-
 	};
 
-	// acho que nao está a 100%
-	/*
-		removi o onSubmit do Box form porque metia coisas no url
-		mas acho que isso retira a verificacao automatica de nao submeter
-		a nao se que todos os campos estejam Ok
-	*/
 	return (
 		<Box sx={{ mx: "auto", width: "50vh" }}>
 			<Typography variant="h5" component="h1">
@@ -113,14 +96,6 @@ function Login() {
 					sx={{ mt: 3 }}
 				>
 					Submit
-				</Button>
-				<Button
-					fullWidth
-					onClick={handleToken}
-					variant="contained"
-					sx={{ mt: 3 }}
-				>
-					envia token pff
 				</Button>
 				<Button color="primary" fullWidth sx={{ mt: 2 }}>
 					<Link to={"/register"}>

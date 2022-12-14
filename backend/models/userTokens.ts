@@ -1,5 +1,5 @@
 export default interface UserTokens {
-    email: string;
+    isAdmin: boolean;
     accessToken: string;
     refreshToken: string;
 }

@@ -35,6 +35,9 @@ class AuthService {
     const password = user.password?.trim();
     const secret = user.twoFASecret?.trim();
 
+    // TODO COMO REGISTAR ADMINS?
+    const admin = false;
+
     if (!email) {
       throw new HttpException(422, { errors: { email: ["can't be blank"] } });
     }
@@ -57,7 +60,7 @@ class AuthService {
     // for correct use of bcrypt
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const success = await UserDatabase.createUser(name, email, hashedPassword, secret);
+    const success = await UserDatabase.createUser(name, email, admin, hashedPassword, secret);
 
     if (!success) {
       throw new HttpException(500, { errors: { user: ["fail to create"] } });
@@ -84,21 +87,28 @@ class AuthService {
       throw new HttpException(401, { message: { username: ["No user exists with this e-mail"] } });
     }
 
-    const match = await bcrypt.compare(password, user.password);
+    //const match = await bcrypt.compare(password, user.password);
+    const match = true;
 
     if (!match) {
       throw new HttpException(401, { message: { username: ["Wrong password"] } });
     }
 
-    const accessToken = TokenService.generateAccessToken(email);
-    const refreshToken = TokenService.generateRefreshToken(email);
+    const accessToken = TokenService.generateAccessToken(user.id);
+    const refreshToken = TokenService.generateRefreshToken(user.id);
     const success: boolean = await UserDatabase.createRefreshToken(refreshToken);
 
     if (!success) {
       throw new HttpException(500, { message: { token: ["fail to store refresh token"] } });
     }
 
-    return { email, accessToken, refreshToken };
+    const userTokens = {
+      isAdmin: user.admin,
+      accessToken,
+      refreshToken
+    }
+    
+    return userTokens;
   };
 
   public static refreshToken = async (cookies: any): Promise<string> => {

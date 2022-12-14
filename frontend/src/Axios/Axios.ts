@@ -20,6 +20,7 @@ axios.interceptors.request.use(
 // response interceptor to renew access token on receiving token expired error
 axios.interceptors.response.use(undefined, async (error: AxiosError) => {
 
+    // Access token expired
     if(error.response?.status === 403 && error.config) {
 
         const originalRequestConfig = error.config;
@@ -30,7 +31,7 @@ axios.interceptors.response.use(undefined, async (error: AxiosError) => {
         });
 
         if(response.status === 200) {
-            localStorage.setItem('accessToken', response.data.accessToken);
+            sessionStorage.setItem("accessToken", response.data.accessToken);
             return axios.request(originalRequestConfig);
         }
     }

@@ -34,7 +34,7 @@ router.post("/login", async (req: Request, res: Response, next: NextFunction): P
             secure: false,    // can only be sent over https
         });
         res.status(200).json({ 
-            user: user.email, 
+            isAdmin: user.isAdmin,
             accessToken: user.accessToken,
         });
     } catch (err: any) {
