@@ -11,14 +11,35 @@ datasource db {
 }
 
 model User {
-  id          Int       @id @default(autoincrement())
-  name        String    @db.VarChar(255)
-  email       String    @unique @db.VarChar(255)
-  admin       Boolean   @default(false)
-  password    String    @db.VarChar(255)
-  twoFASecret String    @db.VarChar(255) @map("two_fa_secret")
+  id           Int                @id @default(autoincrement())
+  name         String             @db.VarChar(255)
+  email        String             @unique @db.VarChar(255)
+  admin        Boolean            @default(false)
+  password     String             @db.VarChar(255)
+  twoFASecret  String             @map("two_fa_secret") @db.VarChar(255)
+  transactions StockTransaction[] @relation("UserTransaction")
 }
 
 model RefreshToken {
-  id          String    @id @db.VarChar(255)
+  id String @id @db.VarChar(255)
+}
+
+model Stock {
+  id           Int                @id @default(autoincrement())
+  name         String             @db.VarChar(255)
+  ISIN         String             @unique @db.VarChar(255)
+  exchange     String             @db.VarChar(255)
+  lastPrice    Float              @default(0)
+  volume       Int                @default(0)
+  transactions StockTransaction[] @relation("StockTransaction")
+}
+
+model StockTransaction {
+  id        Int      @id @default(autoincrement())
+  stockId   Int      @map("stock_id")
+  stock     Stock    @relation("StockTransaction", fields: [stockId], references: [id])
+  userId    Int      @map("user_id")
+  user      User     @relation("UserTransaction", fields: [userId], references: [id])
+  price     Float    @default(0)
+  createdAt DateTime @default(now())
 }
