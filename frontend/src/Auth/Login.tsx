@@ -44,6 +44,7 @@ function Login() {
 			setUser({
 				isLoggedIn: true,
 				isAdmin: data.isAdmin,
+				username: "",//change in UserContext.tsx this to data.username
 			});
 			sessionStorage.setItem("accessToken", data.accessToken);
 			navigate("/home");
