@@ -37,8 +37,8 @@ function Navbar() {
 
 	return (
 		<AppBar position="static">
-			<Container maxWidth="xl">
-				<Toolbar disableGutters>
+			<Container maxWidth={false}>
+				<Toolbar disableGutters >
 					<AccountBalanceIcon
 						sx={{ display: { xs: "none", md: "flex" }, mr: 1 }}
 					/>
@@ -173,12 +173,26 @@ function Navbar() {
 							</Button>
 						)}
 					</Box>
-					<Button
-						onClick={() => handleNavigation("/login")}
-						sx={{ my: 2, color: "inherit" }}
-					>
-						Login
-					</Button>
+					{!user.isLoggedIn && (
+						<Button
+							onClick={() => handleNavigation("/login")}
+							sx={{ my: 2, color: "inherit" }}
+						>
+							Login
+						</Button>
+					)}
+					{user.isLoggedIn && (
+						<IconButton
+							size="large"
+							aria-label="account of current user"
+							aria-controls="menu-appbar"
+							aria-haspopup="true"
+							onClick={handleOpenNavMenu}
+							color="inherit"
+						>
+							<MenuIcon />
+						</IconButton>
+					)}
 				</Toolbar>
 			</Container>
 		</AppBar>
