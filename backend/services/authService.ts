@@ -15,11 +15,11 @@ class AuthService {
     return !(await UserDatabase.getUser(email));
   };
 
-  public static checkRegisterUser = async (email: string): Promise<UserSecret> => {
+  public static verifyTOTPQRCode = async (token: string, secret: string): Promise<boolean> => {
+    return authenticator.verify({ token, secret });
+  };
 
-    if (!await this.checkUserUniqueness(email)) {
-      throw new HttpException(422, { errors: { email: ["is already taken"] } });
-    }
+  public static generateTOTPQRCode = async (email: string): Promise<UserSecret> => {
 
     const secret = authenticator.generateSecret();
     const otpAuth = authenticator.keyuri(email, "NCMB - Nova Caixa Milenar Bancária", secret);
@@ -33,8 +33,9 @@ class AuthService {
     const name = user.name?.trim();
     const email = user.email?.trim();
     const password = user.password?.trim();
-    const secret = user.twoFASecret?.trim();
+    const secret = user.secret?.trim();
 
+    console.log("HERE1")
     // TODO COMO REGISTAR ADMINS?
     const admin = false;
 
@@ -49,27 +50,29 @@ class AuthService {
     if (!password) {
       throw new HttpException(422, { errors: { password: ["can't be blank"] } });
     }
+    console.log("HERE2")
 
-    const unique = await AuthService.checkUserUniqueness(email);
+    const unique = await this.checkUserUniqueness(email);
 
     if (!unique) {
-      throw new HttpException(422, { errors: { email: ["is already taken"] } });
+      throw new HttpException(422, { errors: { email: ["is already taken. Please remove your 2FA code from the app"] } });
     }
 
     // check https://www.npmjs.com/package/bcrypt
     // for correct use of bcrypt
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    console.log(name, email, admin, password, hashedPassword, secret);
     const success = await UserDatabase.createUser(name, email, admin, hashedPassword, secret);
 
     if (!success) {
-      throw new HttpException(500, { errors: { user: ["fail to create"] } });
+      throw new HttpException(500, { errors: { user: ["could not be created"] } });
     }
 
     return name;
   };
 
-  public static loginUser = async (input: RegisterUser): Promise<UserTokens> => {
+  public static verifyUserLogin = async (input: RegisterUser): Promise<void> => {
     const email = input.email?.trim();
     const password = input.password?.trim();
 
@@ -87,21 +90,35 @@ class AuthService {
       throw new HttpException(401, { message: { username: ["No user exists with this e-mail"] } });
     }
 
-    //const match = await bcrypt.compare(password, user.password);
-    const match = true;
+    const match = await bcrypt.compare(password, user.password);
+    //const match = true; // FOR TESTING PURPOSES
 
     if (!match) {
       throw new HttpException(401, { message: { username: ["Wrong password"] } });
     }
+  };
+
+  public static loginUser = async (email: string, token: string): Promise<UserTokens> => {
+
+    const user: User | null = await UserDatabase.getUser(email);
+
+    if (!user) {
+      throw new HttpException(401, { message: { username: ["No user exists with this e-mail"] } });
+    }
+    
+    if (!this.verifyTOTPQRCode(token, user.twoFASecret)) {
+      throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
+    }
 
     const accessToken = TokenService.generateAccessToken(user.id);
+    console.log("HERE2");
     const refreshToken = TokenService.generateRefreshToken(user.id);
+    console.log("HERE3");
     const success: boolean = await UserDatabase.createRefreshToken(refreshToken);
 
     if (!success) {
       throw new HttpException(500, { message: { token: ["fail to store refresh token"] } });
     }
-
     const userTokens = {
       isAdmin: user.admin,
       accessToken,

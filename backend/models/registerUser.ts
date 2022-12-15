@@ -2,5 +2,5 @@ export default interface RegisterUser {
     name: string;
     email: string;
     password: string;
-    twoFASecret: string;
+    secret: string;
 }
