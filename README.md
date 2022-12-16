@@ -31,7 +31,7 @@ sudo apt upgrade
 
 Copy the corresponding configuration file:
 ```bash
-cp /network-managers/<file>.yaml /etc/netplan/01-network-manager.yaml
+cp -f network-managers/<file>.yaml /etc/netplan/01-network-manager.yaml
 ```
 
 Refresh the network configuration:
@@ -145,7 +145,7 @@ CREATE DATABASE ncmb;
 ```
 ### Web server
 
-Install and configure nginx:
+Install and configure nginx (1.18.0):
 ```bash
 sudo apt install nginx
 rm /etc/nginx/sites-available/default
@@ -153,7 +153,7 @@ cp nginx_config /etc/nginx/sites-available/default
 sudo systemctl restart nginx
 ```
 
-Install nodejs and npm:
+Install node (16.18.1) and npm (8.19.2):
 ```bash
 install with nvm
 ```
@@ -163,6 +163,7 @@ Build and copy the frontend to nginx:
 cd frontend
 npm i ## NECESSARY?
 npm run build
+rm -rf /var/www/html/*
 cp -r build/* /var/www/html
 ```
 
@@ -170,6 +171,20 @@ Populate the .env for the backend:
 ```bash
 cp backend/.env.example backend/.env
 ```
+
+To generate the JWT_*_TOKEN:
+```
+node
+require('crypto').randomBytes(64).toString('hex')
+```
+PGUSER=postgres
+PGPASSWORD=postgres
+# Ip da database ou da firewall?
+PGHOST=      
+PGPORT=5432
+PGDATABASE=ncmb
+
+
 
 Setup to prisma
 ```bash

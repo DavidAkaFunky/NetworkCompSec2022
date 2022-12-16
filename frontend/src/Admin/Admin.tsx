@@ -1,8 +1,12 @@
+import { Typography } from "@mui/material";
+
 function Admin() {
 	return (
-		<div>
-			<h1>Admin</h1>
-		</div>
+		<>
+			<Typography component="h2" variant="h3" align="left">
+				Admin
+			</Typography>
+		</>
 	);
 }
 

@@ -1,4 +1,10 @@
 # Employee network settings
+# In the Oracle VM interface select:
+# Adapter 1: 
+#   - Attached to: Internal Network
+#   - Name: internaluser-firewall
+#   - Adapter Type: Intel PRO/1000 MT Desktop (82540EM)
+#   - Promiscuous Mode: Allow All
 network:
     version: 2
     renderer: NetworkManager
