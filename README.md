@@ -20,6 +20,75 @@ The system has integration with external institutions, namely, the Bank of Portu
 ## Network and system architecture
 
 
+## Generating Certificate Authority (CA)
+
+```
+mkdir openssl && cd openssl
+openssl req -x509 \          
+            -sha256 -days 356 \
+            -nodes \
+            -newkey rsa:2048 \
+            -subj "/CN=192.168.56.101/C=PT/L=Lisboa" \
+            -keyout rootCA.key -out rootCA.crt 
+```
+
+-x509 self signed certificate instead of a certificate request
+-sha256 digest to sign the request
+-nodes private key not encrypted
+-newkey creates new certificate request and private key
+-subj sets the subject name
+-keyout filename for private key
+-out filename for certificate
+
+```
+openssl genrsa -out webserver.key
+```
+
+```
+cat webserver.conf
+```
+
+```
+openssl req -new -key webserver.key -out webserver.csr -config webserver.conf
+```
+
+```
+openssl genrsa -out database.key
+```
+
+```
+cat database.conf
+```
+
+```
+openssl req -new -key database.key -out database.csr -config database.conf
+```
+
+```
+cat webserver.crt.conf
+```
+
+```
+openssl x509 -req \
+    -in webserver.csr \
+    -CA rootCA.crt -CAkey rootCA.key \
+    -CAcreateserial -out webserver.crt \
+    -days 365 \
+    -sha256 -extfile webserver.conf
+```
+
+```
+cat database.cr.tconf
+```
+
+```
+openssl x509 -req \
+    -in database.csr \
+    -CA rootCA.crt -CAkey rootCA.key \
+    -CAcreateserial -out database.crt \
+    -days 365 \
+    -sha256 -extfile database.conf
+```
 
 ## Configuration
 
@@ -211,5 +280,5 @@ cd frontend
 npm i ## NECESSARY?
 npm run build
 rm -rf /var/www/html/*
-cp -r build /var/www/html
+cp -r build/* /var/www/html
 ```
