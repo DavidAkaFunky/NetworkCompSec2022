@@ -42,7 +42,7 @@ sudo netplan apply
 
 Apply the firewall rules:
 ```bash
-#TODO
+sudo ./firewall-setup.sh <server|firewall|db> 
 ```
 
 To have persistent iptables rules:
@@ -62,7 +62,8 @@ sudo sh -c 'ip6tables-save > /etc/iptables/rules.v6'
 
 Allow IP forwarding:
 ```bash
-net.ipv4.ip_forward=1
+nano /etc/sysctl.conf
+#Uncomment net.ipv4.ip_forward=1
 ```
 
 ### Database
@@ -95,7 +96,7 @@ nano /etc/postgresql/14/main/postgresql.conf
 Change this line to listen to all addresses:
 
 ```bash
-listen_addresses = '*'(maybe just the one with the webserver)
+listen_addresses = '<Database interface->firewall IP address>'
 ```
 
 Edit `/etc/postgresql/14/main/pg_hba.conf`: 
@@ -145,31 +146,10 @@ CREATE DATABASE ncmb;
 ```
 ### Web server
 
-Install and configure nginx (1.18.0):
+Copy the example file and then populate the .env for the backend:
 ```bash
-sudo apt install nginx
-rm /etc/nginx/sites-available/default
-cp nginx_config /etc/nginx/sites-available/default
-sudo systemctl restart nginx
-```
-
-Install node (16.18.1) and npm (8.19.2):
-```bash
-install with nvm
-```
-
-Build and copy the frontend to nginx:
-```bash
-cd frontend
-npm i ## NECESSARY?
-npm run build
-rm -rf /var/www/html/*
-cp -r build/* /var/www/html
-```
-
-Populate the .env for the backend:
-```bash
-cp backend/.env.example backend/.env
+cd backend
+cp .env.example .env
 ```
 
 To generate the JWT_*_TOKEN:
@@ -179,12 +159,9 @@ require('crypto').randomBytes(64).toString('hex')
 ```
 PGUSER=postgres
 PGPASSWORD=postgres
-# Ip da database ou da firewall?
-PGHOST=      
+PGHOST=<FIREWALL IP> 
 PGPORT=5432
 PGDATABASE=ncmb
-
-
 
 Setup to prisma
 ```bash
@@ -201,4 +178,38 @@ Start the backend:
 ```bash
 npm run build
 npm start
+```
+
+Install and configure nginx (1.18.0):
+```bash
+sudo apt install nginx
+rm /etc/nginx/sites-available/default
+cp nginx_config /etc/nginx/sites-available/default
+sudo systemctl restart nginx
+```
+
+Install nvm (0.39.2):
+```bash
+wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+```
+
+Or, alternatively:
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+```
+
+Install node (16.18.1) and npm (8.19.2):
+```bash
+nvm install 16.18.1
+nvm use 16.18.1
+nvm alias default 16.18.1
+```
+
+Build and copy the frontend to nginx:
+```bash
+cd frontend
+npm i ## NECESSARY?
+npm run build
+rm -rf /var/www/html/*
+cp -r build /var/www/html
 ```

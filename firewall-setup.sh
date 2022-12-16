@@ -3,14 +3,14 @@
 # https://linux.die.net/man/8/iptables
 
 # Web server
-if [ "$1" == "vm1" ]
+if [ "$1" == "server" ]
 then
     echo "[VM1] Setting up ifconfig"
 
     cat network-managers/webserver_vm.yaml > /etc/netplan/01-network-manager-all.yaml
 
 # Router / firewall / http server
-elif [ "$1" == "vm2" ]
+elif [ "$1" == "firewall" ]
 then    
     echo "[VM2] Setting up ifconfig"
 
@@ -49,7 +49,7 @@ then
     #sh -c 'ip6tables-save > /etc/iptables/rules.v6'
 
 # Database
-elif [ "$1" == "vm3" ]
+elif [ "$1" == "db" ]
 then
     echo "[VM3] Setting up ifconfig"
 
@@ -61,7 +61,7 @@ then
     #echo "VM3 as internal user"
 
 else
-    echo "Usage: $0 <vm1|vm2>"
+    echo "Usage: $0 <server|firewall|db>"
     exit 1
 fi
 
