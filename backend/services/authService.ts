@@ -3,31 +3,14 @@ import HttpException from '../models/httpException';
 import UserRegisterData from '../models/userRegisterData';
 import UserLoginData from '../models/userLoginData';
 import UserLoggedData from '../models/userLoggedData';
-import TwoFAData from '../models/twoFAData';
-import authenticator from '../otp_authenticator/authenticator';
-import qrcode from 'qrcode';
 import { UserDatabase } from '../database/index';
-import { TokenService } from './index';
+import { TokenService, twoFAService } from './index';
 import { User } from '@prisma/client';
-import { token } from 'morgan';
 
 class AuthService {
 
   private static checkUserUniqueness = async (email: string): Promise<boolean> => {
     return !(await UserDatabase.getUser(email));
-  };
-
-  public static verifyTOTPQRCode = async (token: string, secret: string): Promise<boolean> => {
-    return authenticator.verify({ token, secret });
-  };
-
-  public static generateTOTPQRCode = async (email: string): Promise<TwoFAData> => {
-
-    const secret = authenticator.generateSecret();
-    const otpAuth = authenticator.keyuri(email, "NCMB - Nova Caixa Milenar Bancária", secret);
-    const qrCode = await qrcode.toDataURL(otpAuth);
-
-    return { secret, qrCode };
   };
 
   public static registerUser = async (user: UserRegisterData): Promise<void> => {
@@ -65,7 +48,7 @@ class AuthService {
     const hashedPassword = await bcrypt.hash(password, 10);
 
 
-    if (!this.verifyTOTPQRCode(token, secret)) {
+    if (!twoFAService.verifyTOTPQRCode(token, secret)) {
       throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
     }
 
@@ -120,7 +103,7 @@ class AuthService {
       throw new HttpException(401, { message: { username: ["Wrong password"] } });
     }
     
-    if (!this.verifyTOTPQRCode(token, user.twoFASecret)) {
+    if (!twoFAService.verifyTOTPQRCode(token, user.twoFASecret)) {
       throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
     }
 

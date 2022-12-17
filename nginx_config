@@ -5,7 +5,7 @@ server {
 	ssl_certificate /etc/ssl/certs/webserver.crt;
 	ssl_certificate_key /etc/ssl/private/webserver.key;
 
-        root /var/www/html;
+        root /home/seed/dev/SIRS2022/frontend/build;
 
         index index.html;
 
@@ -26,6 +26,6 @@ server {
         }
 
         location /api {
-                proxy_pass http://$host:3001/;
+                proxy_pass http://$host:3001;
         }
 }

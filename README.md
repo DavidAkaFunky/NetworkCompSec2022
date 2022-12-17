@@ -135,6 +135,14 @@ nano /etc/sysctl.conf
 #Uncomment net.ipv4.ip_forward=1
 ```
 
+Test connections:
+```
+ping 192.168.0.2
+ping 192.168.1.2
+ping 192.168.2.2
+telnet 192.168.1.2 5432   
+```
+
 ### Database
 
 Install postgresql:
@@ -227,8 +235,8 @@ node
 require('crypto').randomBytes(64).toString('hex')
 ```
 PGUSER=postgres
-PGPASSWORD=postgres
-PGHOST=<FIREWALL IP> 
+PGPASSWORD=dees
+PGHOST=192.168.1.2
 PGPORT=5432
 PGDATABASE=ncmb
 

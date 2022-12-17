@@ -1,6 +1,5 @@
 import express from "express";
 import morgan from "morgan";
-import cors from "cors";
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import HttpException from "./models/httpException";
@@ -8,7 +7,6 @@ import routes from "./routes/index";
 
 const app = express();
 
-//app.use(cors())
 app.use(morgan("tiny"));
 app.use(bodyParser.json());
 app.use(cookieParser())
@@ -26,8 +24,8 @@ app.use((err: any, req: any, res: any, next: any) => {
 });
 
 // Start the server
-//const host = process.env.HOST || "localhost";
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log("⚡️[server]: Server is running at http://localhost:" + port);
+const host = process.env.HOST || "localhost";
+const port = process.env.PORT || "3001";
+app.listen(parseInt(port), host, () => {
+    console.log("⚡️[server]: Server is running at http://" + host + ":" + port);
 });
