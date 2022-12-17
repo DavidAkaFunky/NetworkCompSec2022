@@ -1,13 +1,13 @@
 import { Router, Request, Response, NextFunction } from "express";
 import UserRegisterData from "../models/userRegisterData";
-import { AuthService } from "../services/index";
+import { AuthService, twoFAService } from "../services/index";
 import UserLoginData from "../models/userLoginData";
 
 const router = Router();
 
 router.post("/totp/generate", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const content = await AuthService.generateTOTPQRCode(req.body.email);
+        const content = await twoFAService.generateTOTPQRCode(req.body.email);
         res.status(200).json({
             secret: content.secret,
             qrCode: content.qrCode
