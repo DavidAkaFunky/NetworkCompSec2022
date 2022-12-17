@@ -26,6 +26,7 @@ app.use((err: any, req: any, res: any, next: any) => {
 });
 
 // Start the server
+//const host = process.env.HOST || "localhost";
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log("⚡️[server]: Server is running at http://localhost:" + port);

@@ -14,9 +14,12 @@ function Login() {
 
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+
 	const [firstTry, setFirstTry] = useState(true);
 	const [firstSending, setFirstSending] = useState(false);
 	const [secondSending, setSecondSending] = useState(false);
+	const [error, setError] = useState(false);
+
 	const [twoFA, setTwoFA] = useState(false);
 	const [twoFAToken, setTwoFAToken] = useState("");
 
@@ -49,6 +52,8 @@ function Login() {
 		if (response.status === 200) {
 			setFirstTry(true);
 			setTwoFA(true);
+		} else {
+			setError(true);
 		}
 	};
 
@@ -60,6 +65,7 @@ function Login() {
 
 		const loginData = {
 			email: email,
+			password: password,
 			token: twoFAToken
 		};
 
@@ -74,6 +80,8 @@ function Login() {
 			});
 			sessionStorage.setItem("accessToken", data.accessToken);
 			navigate("/home");
+		} else {
+			setError(true);
 		}
 		
 		setSecondSending(false);
@@ -91,9 +99,14 @@ function Login() {
 	return (
 		<>
 			<Box sx={{ mx: "auto", width: "50vh" }}>
-				<Typography variant="h5" component="h1">
+				<Typography variant="h4" component="h1">
 					<strong>Login</strong>
 				</Typography>
+				{error && (
+					<Typography fontSize={15} color="red">
+						Failed To Login. Wrong credentials.
+					</Typography>
+				)}
 				<Box component="form">
 					<TextField
 						margin="normal"

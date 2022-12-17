@@ -80,34 +80,20 @@ function Register() {
 	const handleSecondSubmit = async (e: any) => {
 		setSecondSending(true);
 
-		let url = "/api/auth/totp/verify-register";
-
-		let twoFAData = {
-			token: twoFAToken,
-			secret: secret.current,
-		};
-
-		let response = await axios.post(url, twoFAData);
-
-		if(!response.data.result){
-			// ERROR: Add to frontend!
-			setSecondSending(false);
-			return;
-		}
-
-		url = "/api/auth/register";
+		const url = "/api/auth/register";
 
 		const registerData = {
 			name: name,
 			email: email,
 			password: password,
 			secret: secret.current,
+			token: twoFAToken,
 		};
 		
-		response = await axios.post(url, registerData);
+		const response = await axios.post(url, registerData);
 		setSecondSending(false);
 		setTwoFA(false);
-		navigate("/");
+		navigate("/login");
 	};
 
 	return (

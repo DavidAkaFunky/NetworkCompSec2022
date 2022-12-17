@@ -23,6 +23,8 @@ axios.interceptors.response.use(undefined, async (error: AxiosError) => {
     // Access token expired
     if(error.response?.status === 403 && error.config) {
 
+        console.log(2);
+
         const originalRequestConfig = error.config;
         delete originalRequestConfig?.headers!['Authorization'];
         
@@ -35,8 +37,6 @@ axios.interceptors.response.use(undefined, async (error: AxiosError) => {
             return axios.request(originalRequestConfig);
         }
     }
-
-    return Promise.reject(error);
 });
 
 export default axios;

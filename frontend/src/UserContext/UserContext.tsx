@@ -9,9 +9,9 @@ interface Props {
 
 const UserProvider: React.FC<Props> = ({ children }) => {
     const [user, setUser] = useState<UserData>({
-        username: "H. Ramos",
-        isLoggedIn: true,
-        isAdmin: true,
+        username: "",
+        isLoggedIn: false,
+        isAdmin: false,
     });
 
     return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;

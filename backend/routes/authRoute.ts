@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
-import RegisterUser from "../models/registerUser";
+import UserRegisterData from "../models/userRegisterData";
 import { AuthService } from "../services/index";
+import UserLoginData from "../models/userLoginData";
 
 const router = Router();
 
@@ -16,19 +17,10 @@ router.post("/totp/generate", async (req: Request, res: Response, next: NextFunc
     }
 });
 
-router.post("/totp/verify-register", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const result = await AuthService.verifyTOTPQRCode(req.body.token, req.body.secret);
-        res.status(200).json({ result });
-    } catch (err: any) {
-        next(err);
-    }
-});
-
 router.post("/register", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const user = await AuthService.registerUser(req.body as RegisterUser);
-        res.status(200).json({ user });
+        await AuthService.registerUser(req.body as UserRegisterData);
+        res.status(200);
     } catch (err: any) {
         next(err);
     }
@@ -37,8 +29,8 @@ router.post("/register", async (req: Request, res: Response, next: NextFunction)
 
 router.post("/verify-login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const user = await AuthService.verifyUserLogin(req.body);
-        res.status(200).json({ user });
+        await AuthService.verifyUserLogin(req.body as UserLoginData);
+        res.status(200);
     } catch (err: any) {
         next(err);
     }
@@ -46,15 +38,22 @@ router.post("/verify-login", async (req: Request, res: Response, next: NextFunct
 
 router.post("/login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const userTokens = await AuthService.loginUser(req.body.email, req.body.token);
+        const loginData = 
+        {
+            email: req.body.email,
+            password: req.body.password,
+        }
+        const userLogged = await AuthService.loginUser(loginData as UserLoginData, req.body.token);
 
-        res.cookie("refreshToken", userTokens.refreshToken, {
+        res.cookie("refreshToken", userLogged.refreshToken, {
             httpOnly: true,  // can't be accessed by javascript
             secure: false,    // can only be sent over https
         });
         res.status(200).json({ 
-            isAdmin: userTokens.isAdmin,
-            accessToken: userTokens.accessToken,
+            name: userLogged.name,
+            email: userLogged.email,
+            isAdmin: userLogged.isAdmin,
+            accessToken: userLogged.accessToken,
         });
     } catch (err: any) {
         next(err);
@@ -72,7 +71,7 @@ router.get("/refresh", async (req: Request, res: Response, next: NextFunction): 
 
 router.get("/logout", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        await AuthService.logoutUser(req.body);
+        await AuthService.logoutUser(req.body.accessToken, req.body.refreshToken);
         res.status(200);
     } catch (err: any) {
         next(err);
