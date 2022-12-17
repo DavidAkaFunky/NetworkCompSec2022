@@ -19,17 +19,28 @@ The system has integration with external institutions, namely, the Bank of Portu
 
 ## Network and system architecture
 
+The system architecture is composed by 4 VMs:
+- Firewall
+- Webserver
+- Database
+- Internal user
 
-## Generating Certificate Authority (CA)
+The network is composed of 3 internal networks:
+- Firewall <-> Webserver
+- Firewall <-> Database
+- Firewall <-> Internal user
 
+Communication protection:  
+- External user <-> webserver: HTTPS  
+- webserver <-> backend: HTTP  
+- backend <-> database: TLS  
+
+## Generating Certificate Authority (CA) and necessary certificates
+
+Start by generating the CA key and certificate which will be used to sign the webserver certificate request
 ```
 mkdir openssl && cd openssl
-openssl req -x509 \          
-            -sha256 -days 356 \
-            -nodes \
-            -newkey rsa:2048 \
-            -subj "/CN=192.168.56.101/C=PT/L=Lisboa" \
-            -keyout rootCA.key -out rootCA.crt 
+openssl req -x509 -sha256 -days 356 -nodes -newkey rsa:2048 -subj "/CN=192.168.56.101/C=PT/L=Lisboa" -keyout rootCA.key -out rootCA.crt 
 ```
 
 -x509 self signed certificate instead of a certificate request
@@ -40,57 +51,28 @@ openssl req -x509 \
 -keyout filename for private key
 -out filename for certificate
 
+Generate the webserver key and create a certificate request with the pre-defined configuration
 ```
 openssl genrsa -out webserver.key
-```
-
-```
-cat webserver.conf
-```
-
-```
 openssl req -new -key webserver.key -out webserver.csr -config webserver.conf
 ```
 
+Use the CA certificate and key to sign the certificate request of the webserver which generates a webserver certificate
 ```
-openssl genrsa -out database.key
-```
-
-```
-cat database.conf
+openssl x509 -req -in webserver.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out webserver.crt -days 365 -sha256 -extfile webserver.conf
 ```
 
+The CA certificate and key should be kept in a USB pen (air-gapped)
+
+Copy the webserver certificate and key to both the webserver and the database.  
+Depending on where you generated them, you may drag-and-drop from the local machine to inside the VMs or if they 
+were locally generated, just move them to:
 ```
-openssl req -new -key database.key -out database.csr -config database.conf
+mv webserver.key /etc/ssl/private/
+mv webserver.crt /etc/ssl/certs/
 ```
 
-```
-cat webserver.crt.conf
-```
-
-```
-openssl x509 -req \
-    -in webserver.csr \
-    -CA rootCA.crt -CAkey rootCA.key \
-    -CAcreateserial -out webserver.crt \
-    -days 365 \
-    -sha256 -extfile webserver.conf
-```
-
-```
-cat database.cr.tconf
-```
-
-```
-openssl x509 -req \
-    -in database.csr \
-    -CA rootCA.crt -CAkey rootCA.key \
-    -CAcreateserial -out database.crt \
-    -days 365 \
-    -sha256 -extfile database.conf
-```
-
-## Configuration
+## How to configure VMs
 
 Update package manager on every machine:
 ```bash
@@ -109,13 +91,9 @@ sudo netplan try
 sudo netplan apply
 ```
 
-Apply the firewall rules:
+Apply the firewall rules and make them persistent
 ```bash
 sudo ./firewall-setup.sh <server|firewall|db> 
-```
-
-To have persistent iptables rules:
-```bash
 sudo apt install iptables-persistent
 # FOR IPv4
 sudo sh -c 'iptables-save > /etc/iptables/rules.v4'
@@ -123,11 +101,7 @@ sudo sh -c 'iptables-save > /etc/iptables/rules.v4'
 sudo sh -c 'ip6tables-save > /etc/iptables/rules.v6'
 ```
 
-## TODO: GERAR CERTIFICADOS
-## NGINX ASSUME CERTIFICADOS, CASO NAO TENHA
-## USAR PORTA 80 E MUDAR LINKS PARA HTTP
-
-### Firewall
+### Firewall VM
 
 Allow IP forwarding:
 ```bash
@@ -148,49 +122,33 @@ telnet 192.168.1.2 5432
 Install postgresql:
 ```bash
 sudo wget http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc
-
 sudo apt-key add ACCC4CF8.asc
-
 sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
-
 sudo apt -y update
-
 sudo apt -y install postgresql-14
 ```
-Check that postgres is working:
 
+Check that is working:
 ```bash
 systemctl status postgresql
 ```
 
-
-Edit `/etc/postgresql/14/main/postgresql.conf`: 
-
-```bash
-nano /etc/postgresql/14/main/postgresql.conf
+Edit `/etc/postgresql/14/main/postgresql.conf`:
 ```
-
-Change this line to listen to all addresses:
-
-```bash
-listen_addresses = '<Database interface->firewall IP address>'
+listen_address = *
+ssl = on
+ssl_cert_file = '/etc/ssl/certs/webserver.crt'
+ssl_key_file = '/etc/ssl/certs/webserver.key'
 ```
 
 Edit `/etc/postgresql/14/main/pg_hba.conf`: 
 
 ```bash
-nano /etc/postgresql/14/main/pg_hba.conf
-```
-
-Append at the end:
-
-```bash
-(maybe change md5 -> sha, restrict other parameters)
 [CONNECTION_TYPE][DATABASE][USER] [ADDRESS]   [METHOD]
- host             all       all    0.0.0.0/0   md5
+ hostssl             all       all    0.0.0.0/0   md5
 ```
 
-Restart postgres:
+Finally restart postgres:
 ```bash
 systemctl restart postgresql
 ```
@@ -198,12 +156,6 @@ systemctl restart postgresql
 Check that server is listening to port 5432:
 ```bash
 ss -nlt | grep 5432
-```
-
-```bash
-seed@VM:~/.../Project$ ss -nlt | grep 5432
-LISTEN  0        244              0.0.0.0:5432           0.0.0.0:*              
-LISTEN  0        244                 [::]:5432              [::]:*
 ```
 
 Run psql:
@@ -217,10 +169,23 @@ ALTER USER postgres WITH ENCRYPTED PASSWORD 'postgres';
 ```
 
 Create database with name `ncmb`:
-
 ```bash
 CREATE DATABASE ncmb;
 ```
+
+If something goes wrong check the logs:
+```bash
+tail /var/log/postgresql/postgresql-14-main.log
+```
+
+If it complains about permission do:
+```bash
+chown postgres:ssl-cert /etc/ssl/private/
+chown postgres:postgres /etc/ssl/private/webserver.key
+chown postgres:ssl-cert /etc/ssl/certs/
+chown postgres:postgres /etc/ssl/certs/webserver.crt
+```
+
 ### Web server
 
 Copy the example file and then populate the .env for the backend:
@@ -228,27 +193,25 @@ Copy the example file and then populate the .env for the backend:
 cd backend
 cp .env.example .env
 ```
-
-To generate the JWT_*_TOKEN:
-```
-node
-require('crypto').randomBytes(64).toString('hex')
+The database options should look like this:
 ```
 PGUSER=postgres
 PGPASSWORD=dees
 PGHOST=192.168.1.2
 PGPORT=5432
 PGDATABASE=ncmb
+```
 
-Setup to prisma
+To generate the JWT_*_TOKEN:
+```
+node
+require('crypto').randomBytes(64).toString('hex')
+```
+
+Run prisma to configure the database:
 ```bash
-# Nao tenho a certeza de que mais é preciso
 npm i
 npx prisma migrate dev --name init
-#IMPORTANTE
-# TESTAR SE O PRISMA FUNCIONA COM UMA
-# BASE DE DADOS REMOTA
-# QUE TIPO DE PACOTES ENVIA
 ```
 
 Start the backend:
@@ -282,11 +245,9 @@ nvm use 16.18.1
 nvm alias default 16.18.1
 ```
 
-Build and copy the frontend to nginx:
+Build the frontend:
 ```bash
 cd frontend
-npm i ## NECESSARY?
+npm i
 npm run build
-rm -rf /var/www/html/*
-cp -r build/* /var/www/html
 ```

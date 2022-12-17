@@ -20,7 +20,7 @@ router.post("/totp/generate", async (req: Request, res: Response, next: NextFunc
 router.post("/register", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         await AuthService.registerUser(req.body as UserRegisterData);
-        res.status(200);
+        res.sendStatus(200);
     } catch (err: any) {
         next(err);
     }
@@ -30,7 +30,7 @@ router.post("/register", async (req: Request, res: Response, next: NextFunction)
 router.post("/verify-login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         await AuthService.verifyUserLogin(req.body as UserLoginData);
-        res.status(200);
+        res.sendStatus(200);
     } catch (err: any) {
         next(err);
     }
@@ -72,7 +72,7 @@ router.get("/refresh", async (req: Request, res: Response, next: NextFunction): 
 router.get("/logout", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         await AuthService.logoutUser(req.body.accessToken, req.body.refreshToken);
-        res.status(200);
+        res.sendStatus(200);
     } catch (err: any) {
         next(err);
     }

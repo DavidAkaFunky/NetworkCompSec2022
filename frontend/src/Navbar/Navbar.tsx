@@ -1,6 +1,5 @@
 import {
 	AppBar,
-	Avatar,
 	Box,
 	Button,
 	Container,
@@ -13,17 +12,19 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import LogoutIcon from '@mui/icons-material/Logout';
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../UserContext/UserContext";
 import { UserContextType } from "../UserContext/UserContextType";
 import React from "react";
+import axios from "../Axios/Axios";
 
 function Navbar() {
 	const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
-	const [anchorElUserSettings, setAnchorElUserSettings] = useState<null | HTMLElement>(null);
+	const [anchorElUserSettings, setAnchorElUserSettings] =
+		useState<null | HTMLElement>(null);
 	const open = Boolean(anchorElUserSettings);
 
 	const { user } = useContext(UserContext) as UserContextType;
@@ -33,7 +34,6 @@ function Navbar() {
 	const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
 		setAnchorElNav(event.currentTarget);
 	};
-
 
 	const handleCloseNavMenu = () => {
 		setAnchorElNav(null);
@@ -50,14 +50,18 @@ function Navbar() {
 		navigate(path);
 	};
 
-	const handleLogout = () => {
-		user.isLoggedIn=false;	
+	const handleLogout = async () => {
+		await axios.post("/api/auth/logout");
+		user.isLoggedIn = false;
+		user.isAdmin = false;
+		user.username = "";
+		sessionStorage.clear();
 	};
 
 	return (
 		<AppBar position="static">
 			<Container maxWidth={false}>
-				<Toolbar disableGutters >
+				<Toolbar disableGutters>
 					<AccountBalanceIcon
 						sx={{ display: { xs: "none", md: "flex" }, mr: 1 }}
 					/>
@@ -206,9 +210,9 @@ function Navbar() {
 								onClick={handleOpenUserSettings}
 								size="small"
 								sx={{ ml: 2 }}
-								aria-controls={open ? 'account-menu' : undefined}
+								aria-controls={open ? "account-menu" : undefined}
 								aria-haspopup="true"
-								aria-expanded={open ? 'true' : undefined}
+								aria-expanded={open ? "true" : undefined}
 							>
 								<Typography sx={{ mr: 1 }}>{user.username}</Typography>
 								<AccountCircleIcon fontSize="large" />
@@ -222,31 +226,31 @@ function Navbar() {
 								PaperProps={{
 									elevation: 0,
 									sx: {
-										overflow: 'visible',
-										filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+										overflow: "visible",
+										filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
 										mt: 1.5,
-										'& .MuiAvatar-root': {
+										"& .MuiAvatar-root": {
 											width: 32,
 											height: 32,
 											ml: -0.5,
 											mr: 1,
 										},
-										'&:before': {
+										"&:before": {
 											content: '""',
-											display: 'block',
-											position: 'absolute',
+											display: "block",
+											position: "absolute",
 											top: 0,
 											right: 14,
 											width: 10,
 											height: 10,
-											bgcolor: 'background.paper',
-											transform: 'translateY(-50%) rotate(45deg)',
+											bgcolor: "background.paper",
+											transform: "translateY(-50%) rotate(45deg)",
 											zIndex: 0,
 										},
 									},
 								}}
-								transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-								anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+								transformOrigin={{ horizontal: "right", vertical: "top" }}
+								anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
 							>
 								<MenuItem>
 									<Typography sx={{ mx: 2 }}>Profile</Typography>
@@ -262,7 +266,7 @@ function Navbar() {
 										handleLogout();
 									}}
 								>
-									<LogoutIcon sx={{ mr: 1 }}/>
+									<LogoutIcon sx={{ mr: 1 }} />
 									Logout
 								</MenuItem>
 							</Menu>
