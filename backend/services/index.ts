@@ -1,11 +1,11 @@
 import AuthService from "./authService";
 import TokenService from "./tokenService";
-import ProductService from "./productService";
-import twoFAService from "./twoFAService";
+import TwoFAService from "./twoFAService";
+import StockService from "./stockService";
 
 export {
     TokenService,
-    twoFAService,
+    TwoFAService,
     AuthService,
-    ProductService,
+    StockService,
 }

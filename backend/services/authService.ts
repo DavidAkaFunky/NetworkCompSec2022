@@ -3,8 +3,8 @@ import HttpException from '../models/httpException';
 import UserRegisterData from '../models/userRegisterData';
 import UserLoginData from '../models/userLoginData';
 import UserLoggedData from '../models/userLoggedData';
-import { UserDatabase } from '../database/index';
-import { TokenService, twoFAService } from './index';
+import { UserDatabase, RefreshTokenDatabase } from '../database/index';
+import { TokenService, TwoFAService } from './index';
 import { User } from '@prisma/client';
 
 class AuthService {
@@ -48,7 +48,7 @@ class AuthService {
     const hashedPassword = await bcrypt.hash(password, 10);
 
 
-    if (!twoFAService.verifyTOTPQRCode(token, secret)) {
+    if (!TwoFAService.verifyTOTPQRCode(token, secret)) {
       throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
     }
 
@@ -103,7 +103,7 @@ class AuthService {
       throw new HttpException(401, { message: { username: ["Wrong password"] } });
     }
     
-    if (!twoFAService.verifyTOTPQRCode(token, user.twoFASecret)) {
+    if (!TwoFAService.verifyTOTPQRCode(token, user.twoFASecret)) {
       throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
     }
 
@@ -111,7 +111,7 @@ class AuthService {
 
     const refreshToken = TokenService.generateRefreshToken(user.id);
     
-    const success: boolean = await UserDatabase.createRefreshToken(refreshToken);
+    const success: boolean = await RefreshTokenDatabase.createRefreshToken(refreshToken);
 
     if (!success) {
       throw new HttpException(500, { message: { token: ["fail to store refresh token"] } });
@@ -143,7 +143,7 @@ class AuthService {
 
     } catch (err) {
 
-      const success = await UserDatabase.deleteRefreshToken(refreshToken);
+      const success = await RefreshTokenDatabase.deleteRefreshToken(refreshToken);
       
       if (!success) {
         throw new HttpException(500, { message: { token: ["fail to delete refresh token"] } });
@@ -152,8 +152,8 @@ class AuthService {
     }
   };
 
-  public static logoutUser = async (accessToken: string, refreshToken: string): Promise<void> => {
-    const success = await UserDatabase.deleteRefreshToken(refreshToken);
+  public static logoutUser = async (refreshToken: string): Promise<void> => {
+    const success = await RefreshTokenDatabase.deleteRefreshToken(refreshToken);
     if (!success) {
       throw new HttpException(500, { message: { token: ["fail to delete refresh token"] } });
     }
