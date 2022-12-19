@@ -7,7 +7,6 @@ import {
 	CardHeader,
 	Container,
 	Grid,
-	Stack,
 	Typography,
 } from "@mui/material";
 import StarIcon from "@mui/icons-material/StarBorder";
@@ -57,7 +56,6 @@ const tiers = [
 function Landing() {
 	return (
 		<>
-			{/* Hero unit */}
 			<Box
 				sx={{
 					bgcolor: "background.paper",

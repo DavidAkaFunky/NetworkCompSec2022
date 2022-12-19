@@ -1,14 +1,13 @@
 import { Box, Button, TextField, Typography, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Transition from "../Components/Components";
-import axios from "../Axios/Axios";
-import { UserContext } from "../UserContext/UserContext";
-import { UserContextType } from "../UserContext/UserContextType";
+import Transition from "../components/Transition";
+import useAuth from "../hooks/useAuth";
+import axios from "../interceptors/Axios";
 
 function Login() {
 
-	const { setUser } = useContext(UserContext) as UserContextType;
+	const { setAuth } = useAuth();
 
 	const navigate = useNavigate();
 
@@ -23,14 +22,6 @@ function Login() {
 	const [twoFA, setTwoFA] = useState(false);
 	const [twoFAToken, setTwoFAToken] = useState("");
 
-	const handleEmailChange = (e: any) => {
-		setEmail(e.target.value);
-	};
-
-	const handlePasswordChange = (e: any) => {
-		setPassword(e.target.value);
-	};
-
 	const handleFirstSubmit = async (e: any) => {
 		setFirstSending(true);
 		setFirstTry(false);
@@ -40,19 +31,16 @@ function Login() {
 			return;
 		}
 
-		const url = "/api/auth/verify-login";
+		try {
+			await axios.post("/api/auth/verify-login", {
+				email: email,
+				password: password,
+			});
 
-		const data = {
-			email: email,
-			password: password,
-		}
-
-		const response = await axios.post(url, data);
-
-		if (response.status === 200) {
 			setFirstTry(true);
 			setTwoFA(true);
-		} else {
+
+		} catch (err: any) {
 			setError(true);
 		}
 	};
@@ -61,38 +49,30 @@ function Login() {
 
 		setSecondSending(true);
 
-		const url = "/api/auth/login";
+		try {
 
-		const loginData = {
-			email: email,
-			password: password,
-			token: twoFAToken
-		};
+			const response = await axios.post("/api/auth/login", {
+				email: email,
+				password: password,
+				token: twoFAToken
+			});
 
-		const response = await axios.post(url, loginData);
-
-		if (response.status === 200) {
 			const data = await response.data;
-			setUser({
+
+			setAuth({
 				isLoggedIn: true,
 				isAdmin: data.isAdmin,
-				username: "",//change in UserContext.tsx this to data.username
+				username: "",
+				accessToken: data.accessToken,
 			});
-			sessionStorage.setItem("accessToken", data.accessToken);
+
 			navigate("/home");
-		} else {
+	
+		} catch (err: any) {
 			setError(true);
 		}
-		
+
 		setSecondSending(false);
-		setTwoFA(false);
-	};
-
-	const handleTwoFACodeChange = (e: any) => {
-		setTwoFAToken(e.target.value);
-	};
-
-	const handleClose = () => {
 		setTwoFA(false);
 	};
 
@@ -119,7 +99,7 @@ function Login() {
 						autoComplete="email"
 						autoFocus
 						value={email}
-						onChange={handleEmailChange}
+						onChange={(e) => setEmail(e.target.value)}
 						error={!firstTry && !(email.length > 1 && email.includes("@"))}
 					/>
 					<TextField
@@ -133,7 +113,7 @@ function Login() {
 						id="password"
 						autoComplete="current-password"
 						value={password}
-						onChange={handlePasswordChange}
+						onChange={(e) => setPassword(e.target.value)}
 						error={!firstTry && password.length > 0 && password.length < 4}
 					/>
 					<Box sx={{ textAlign: "right" }}>
@@ -161,7 +141,7 @@ function Login() {
 				open={twoFA}
 				TransitionComponent={Transition}
 				keepMounted
-				onClose={handleClose}
+				onClose={() => setTwoFA(false)}
 				aria-describedby="alert-dialog-slide-description"
 			>
 				<DialogTitle>{"Google Authenticator"}</DialogTitle>
@@ -177,13 +157,13 @@ function Login() {
 							id="twoFAToken"
 							autoComplete="current-password"
 							value={twoFAToken}
-							onChange={handleTwoFACodeChange}
+							onChange={(e) => setTwoFAToken(e.target.value)}
 							error={!firstTry}
 						/>
 					</Box>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={handleClose}>Close</Button>
+					<Button onClick={() => setTwoFA(false)}>Close</Button>
 					<Button
 						onClick={handleSecondSubmit}
 						variant="contained"

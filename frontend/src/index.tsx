@@ -3,7 +3,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { BrowserRouter } from "react-router-dom";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import UserProvider from "./UserContext/UserContext";
+import AuthProvider from "./context/AuthContext";
 
 const root = ReactDOM.createRoot(
 	document.getElementById("root") as HTMLElement
@@ -12,10 +12,10 @@ const root = ReactDOM.createRoot(
 root.render(
 	<BrowserRouter>
 		<React.StrictMode>
-      		<CssBaseline />
-			<UserProvider>
+			<CssBaseline />
+			<AuthProvider>
 				<App />
-			</UserProvider>
+			</AuthProvider>
 		</React.StrictMode>
 	</BrowserRouter>
 );
