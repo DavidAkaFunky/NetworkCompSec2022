@@ -52,7 +52,6 @@ class AuthService {
       throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
     }
 
-    console.log(name, email, admin, password, hashedPassword, secret);
     const success = await UserDatabase.createUser(name, email, admin, hashedPassword, secret);
 
     if (!success) {

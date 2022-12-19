@@ -1,8 +1,17 @@
-import { Box, Button, TextField, Typography, Dialog, DialogActions, DialogContent, DialogTitle,} from "@mui/material";
+import {
+	Box,
+	Button,
+	TextField,
+	Typography,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+} from "@mui/material";
 import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Transition from "../Components/Components";
-import axios from "../Axios/Axios";
+import Transition from "../components/Transition";
+import axios from "../interceptors/Axios";
 
 function Register() {
 	const navigate = useNavigate();
@@ -11,37 +20,15 @@ function Register() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [repeatPassword, setRepeatPassword] = useState("");
+
 	const [qrCode, setQrCode] = useState("");
 	const [firstTry, setFirstTry] = useState(true);
 	const [firstSending, setFirstSending] = useState(false);
 	const [secondSending, setSecondSending] = useState(false);
 	const [twoFA, setTwoFA] = useState(false);
 	const [twoFAToken, setTwoFAToken] = useState("");
+
 	const secret = useRef("");
-
-	const handleNameChange = (e: any) => {
-		setName(e.target.value);
-	};
-
-	const handleEmailChange = (e: any) => {
-		setEmail(e.target.value);
-	};
-
-	const handlePasswordChange = (e: any) => {
-		setPassword(e.target.value);
-	};
-
-	const handleRepeatPasswordChange = (e: any) => {
-		setRepeatPassword(e.target.value);
-	};
-
-	const handleTwoFACodeChange = (e: any) => {
-		setTwoFAToken(e.target.value);
-	};
-
-	const handleClose = () => {
-		setTwoFA(false);
-	};
 
 	const handleFirstSubmit = async (e: any) => {
 		setFirstSending(true);
@@ -49,51 +36,52 @@ function Register() {
 
 		if (
 			!name.length ||
-			!email.length || !email.includes("@") ||
+			!email.length ||
+			!email.includes("@") ||
 			password.length < 4 ||
-			repeatPassword != password
+			repeatPassword !== password
 		) {
 			setFirstSending(false);
 			return;
 		}
 
-		const url = "/api/auth/totp/generate";
+		try {
+			const response = await axios.post("/api/auth/totp/generate", {
+				email: email,
+			});
 
-		const data = {
-			email: email,
-		};
-
-		const response = await axios.post(url, data);
-
-		setFirstSending(false);
-
-		if (response.status === 200) {
 			const data = await response.data;
-			// maybe change component to say succesful and button to go to login
 			secret.current = data.secret;
+
 			setQrCode(data.qrCode);
 			setTwoFA(true);
 			setFirstTry(true);
+		} catch (err: any) {
+			// TODO
 		}
+
+		setFirstSending(false);
 	};
 
 	const handleSecondSubmit = async (e: any) => {
 		setSecondSending(true);
 
-		const url = "/api/auth/register";
+		try {
+			await axios.post("/api/auth/register", {
+				name: name,
+				email: email,
+				password: password,
+				secret: secret.current,
+				token: twoFAToken,
+			});
 
-		const registerData = {
-			name: name,
-			email: email,
-			password: password,
-			secret: secret.current,
-			token: twoFAToken,
-		};
-		
-		const response = await axios.post(url, registerData);
-		setSecondSending(false);
-		setTwoFA(false);
-		navigate("/login");
+			setSecondSending(false);
+			setTwoFA(false);
+
+			navigate("/login");
+		} catch (err: any) {
+			// TODO
+		}
 	};
 
 	return (
@@ -114,7 +102,7 @@ function Register() {
 						autoComplete="name"
 						autoFocus
 						value={name}
-						onChange={handleNameChange}
+						onChange={(e) => setName(e.target.value)}
 						error={!firstTry && name.length <= 0}
 					/>
 					<TextField
@@ -128,7 +116,7 @@ function Register() {
 						autoComplete="email"
 						autoFocus
 						value={email}
-						onChange={handleEmailChange}
+						onChange={(e) => setEmail(e.target.value)}
 						error={!firstTry && !(email.length > 1 && email.includes("@"))}
 					/>
 					<TextField
@@ -142,7 +130,7 @@ function Register() {
 						id="password"
 						autoComplete="current-password"
 						value={password}
-						onChange={handlePasswordChange}
+						onChange={(e) => setPassword(e.target.value)}
 						error={!firstTry && password.length > 0 && password.length < 4}
 					/>
 					<TextField
@@ -156,7 +144,7 @@ function Register() {
 						id="repeatPassword"
 						autoComplete="current-password"
 						value={repeatPassword}
-						onChange={handleRepeatPasswordChange}
+						onChange={(e) => setRepeatPassword(e.target.value)}
 						error={!firstTry && password !== repeatPassword}
 					/>
 					<Button
@@ -177,7 +165,7 @@ function Register() {
 				open={twoFA}
 				TransitionComponent={Transition}
 				keepMounted
-				onClose={handleClose}
+				onClose={() => setTwoFA(false)}
 				aria-describedby="alert-dialog-slide-description"
 			>
 				<DialogTitle>{"Google Authenticator"}</DialogTitle>
@@ -194,13 +182,13 @@ function Register() {
 							id="twoFAToken"
 							autoComplete="current-password"
 							value={twoFAToken}
-							onChange={handleTwoFACodeChange}
+							onChange={(e) => setTwoFAToken(e.target.value)}
 							error={!firstTry}
 						/>
 					</Box>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={handleClose}>Close</Button>
+					<Button onClick={() => setTwoFA(false)}>Close</Button>
 					<Button
 						onClick={handleSecondSubmit}
 						variant="contained"

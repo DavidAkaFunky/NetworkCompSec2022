@@ -1,4 +1,5 @@
 import axios, { AxiosError } from "axios";
+import useAuth from "../hooks/useAuth";
 
 axios.interceptors.request.use(
     config => {
@@ -23,18 +24,26 @@ axios.interceptors.response.use(undefined, async (error: AxiosError) => {
     // Access token expired
     if(error.response?.status === 403 && error.config) {
 
-        console.log(2);
-
         const originalRequestConfig = error.config;
         delete originalRequestConfig?.headers!['Authorization'];
         
-        const response = await axios.get('/api/auth/refresh', {
-            withCredentials: true,
-        });
+        try {
+            const response = await axios.get('/api/auth/refresh', {
+                withCredentials: true,
+            });
 
-        if(response.status === 200) {
-            sessionStorage.setItem("accessToken", response.data.accessToken);
+            const { auth, setAuth } = useAuth();
+            setAuth({
+                isLoggedIn: true,
+                isAdmin: auth.isAdmin,
+                username: auth.username,
+                accessToken: response.data.accessToken,
+            });
+
             return axios.request(originalRequestConfig);
+
+        } catch (error) {
+            console.log(error);
         }
     }
 });

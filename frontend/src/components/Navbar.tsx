@@ -14,49 +14,22 @@ import MenuIcon from "@mui/icons-material/Menu";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { useState, useContext } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../UserContext/UserContext";
-import { UserContextType } from "../UserContext/UserContextType";
 import React from "react";
-import axios from "../Axios/Axios";
+import useAuth from "../hooks/useAuth";
+import useLogout from "../hooks/useLogout";
 
 function Navbar() {
+
+	const { auth } = useAuth();
+	const logout = useLogout();
+	const navigate = useNavigate();
+
 	const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
 	const [anchorElUserSettings, setAnchorElUserSettings] =
 		useState<null | HTMLElement>(null);
 	const open = Boolean(anchorElUserSettings);
-
-	const { user } = useContext(UserContext) as UserContextType;
-
-	const navigate = useNavigate();
-
-	const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-		setAnchorElNav(event.currentTarget);
-	};
-
-	const handleCloseNavMenu = () => {
-		setAnchorElNav(null);
-	};
-
-	const handleOpenUserSettings = (event: React.MouseEvent<HTMLElement>) => {
-		setAnchorElUserSettings(event.currentTarget);
-	};
-	const handleCloseUserSettings = () => {
-		setAnchorElUserSettings(null);
-	};
-
-	const handleNavigation = (path: string) => {
-		navigate(path);
-	};
-
-	const handleLogout = async () => {
-		await axios.post("/api/auth/logout");
-		user.isLoggedIn = false;
-		user.isAdmin = false;
-		user.username = "";
-		sessionStorage.clear();
-	};
 
 	return (
 		<AppBar position="static">
@@ -89,7 +62,7 @@ function Navbar() {
 							aria-label="menu"
 							aria-controls="menu-appbar"
 							aria-haspopup="true"
-							onClick={handleOpenNavMenu}
+							onClick={(e) => setAnchorElNav(e.currentTarget)}
 							color="inherit"
 						>
 							<MenuIcon />
@@ -107,34 +80,34 @@ function Navbar() {
 								horizontal: "left",
 							}}
 							open={Boolean(anchorElNav)}
-							onClose={handleCloseNavMenu}
+							onClose={() => setAnchorElNav(null)}
 							sx={{
 								display: { xs: "block", md: "none" },
 							}}
 						>
 							<MenuItem
 								onClick={() => {
-									handleCloseNavMenu();
-									handleNavigation("/");
+									setAnchorElNav(null);
+									navigate("/");
 								}}
 							>
 								<Typography textAlign="center">Landing</Typography>
 							</MenuItem>
-							{user.isLoggedIn && (
+							{auth.isLoggedIn && (
 								<MenuItem
 									onClick={() => {
-										handleCloseNavMenu();
-										handleNavigation("/home");
+										setAnchorElNav(null);
+										navigate("/home");
 									}}
 								>
 									<Typography textAlign="center">Home</Typography>
 								</MenuItem>
 							)}
-							{user.isAdmin && (
+							{auth.isAdmin && (
 								<MenuItem
 									onClick={() => {
-										handleCloseNavMenu();
-										handleNavigation("/admin");
+										setAnchorElNav(null);
+										navigate("/admin");
 									}}
 								>
 									<Typography textAlign="center">Admin</Typography>
@@ -166,29 +139,29 @@ function Navbar() {
 					<Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
 						<Button
 							onClick={() => {
-								handleCloseNavMenu();
-								handleNavigation("/");
+								setAnchorElNav(null);
+								navigate("/");
 							}}
 							sx={{ my: 2, color: "inherit" }}
 						>
 							Landing
 						</Button>
-						{user.isLoggedIn && (
+						{auth.isLoggedIn && (
 							<Button
 								onClick={() => {
-									handleCloseNavMenu();
-									handleNavigation("/home");
+									setAnchorElNav(null);
+									navigate("/home");
 								}}
 								sx={{ my: 2, color: "inherit" }}
 							>
 								Home
 							</Button>
 						)}
-						{user.isAdmin && (
+						{auth.isAdmin && (
 							<Button
 								onClick={() => {
-									handleCloseNavMenu();
-									handleNavigation("/admin");
+									setAnchorElNav(null);
+									navigate("/admin");
 								}}
 								sx={{ my: 2, color: "inherit" }}
 							>
@@ -196,33 +169,33 @@ function Navbar() {
 							</Button>
 						)}
 					</Box>
-					{!user.isLoggedIn && (
+					{!auth.isLoggedIn && (
 						<Button
-							onClick={() => handleNavigation("/login")}
+							onClick={() => navigate("/login")}
 							sx={{ my: 2, color: "inherit" }}
 						>
 							Login
 						</Button>
 					)}
-					{user.isLoggedIn && (
+					{auth.isLoggedIn && (
 						<React.Fragment>
 							<IconButton
-								onClick={handleOpenUserSettings}
+								onClick={(e) => setAnchorElUserSettings(e.currentTarget)}
 								size="small"
 								sx={{ ml: 2 }}
 								aria-controls={open ? "account-menu" : undefined}
 								aria-haspopup="true"
 								aria-expanded={open ? "true" : undefined}
 							>
-								<Typography sx={{ mr: 1 }}>{user.username}</Typography>
+								<Typography sx={{ mr: 1 }}>{auth.username}</Typography>
 								<AccountCircleIcon fontSize="large" />
 							</IconButton>
 							<Menu
 								anchorEl={anchorElUserSettings}
 								id="account-menu"
 								open={open}
-								onClose={handleCloseUserSettings}
-								onClick={handleCloseUserSettings}
+								onClose={(e) => setAnchorElUserSettings(null)}
+								onClick={(e) => setAnchorElUserSettings(null)}
 								PaperProps={{
 									elevation: 0,
 									sx: {
@@ -256,14 +229,10 @@ function Navbar() {
 									<Typography sx={{ mx: 2 }}>Profile</Typography>
 								</MenuItem>
 								<Divider />
-								{/*<MenuItem>
-									<SettingsIcon />
-									Settings
-								</MenuItem>*/}
 								<MenuItem
 									onClick={() => {
-										handleCloseUserSettings();
-										handleLogout();
+										setAnchorElUserSettings(null);
+										logout();
 									}}
 								>
 									<LogoutIcon sx={{ mr: 1 }} />
