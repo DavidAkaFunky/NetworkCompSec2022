@@ -171,7 +171,7 @@ function Register() {
 				<DialogTitle>{"Google Authenticator"}</DialogTitle>
 				<DialogContent>
 					<Box sx={{ mx: "auto", maxWidth: "50vh", maxHeight: "100vw" }}>
-						<img src={qrCode} width="100%" />
+						<img src={qrCode} alt="" width="100%" />
 						<TextField
 							fullWidth
 							variant="filled"

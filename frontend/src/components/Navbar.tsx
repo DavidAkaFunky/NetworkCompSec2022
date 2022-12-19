@@ -170,12 +170,22 @@ function Navbar() {
 						)}
 					</Box>
 					{!auth.isLoggedIn && (
-						<Button
-							onClick={() => navigate("/login")}
-							sx={{ my: 2, color: "inherit" }}
-						>
-							Login
-						</Button>
+						<>
+							<Button
+								onClick={() => navigate("/login")}
+								sx={{ my: 2, color: "inherit" }}
+							>
+								Login
+							</Button>
+							<Button
+								onClick={() => navigate("/register")}
+								sx={{ my: 2, color: "inherit" }}
+							>
+								<b>Register</b>
+							</Button>
+						</>
+						
+							
 					)}
 					{auth.isLoggedIn && (
 						<React.Fragment>
