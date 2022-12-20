@@ -44,7 +44,7 @@ router.post("/login", async (req: Request, res: Response, next: NextFunction): P
             password: req.body.password,
         }
         const userLogged = await AuthService.loginUser(loginData as UserLoginData, req.body.token);
-
+        res.setHeader("Cache-Control", "no-cache=set-cookie");
         res.cookie("refreshToken", userLogged.refreshToken, {
             httpOnly: true,   // can't be accessed by javascript
             secure: false,    // can only be sent over https

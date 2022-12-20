@@ -11,19 +11,18 @@ import Landing from "./pages/Landing";
 import Register from "./pages/Register";
 
 function App() {
-
 	return (
 		<>
 			<Navbar />
 			<Box component="main" sx={{ flex: 1, py: 6, px: 4 }}>
 				<Routes>
-					{/* Public routes */}
-					<Route path="/" element={<Landing />} />
-					<Route path="/register" element={<Register />} />
-					<Route path="/login" element={<Login />} />
-
-					{/* Protected routes */}
 					<Route element={<PersistLogin />}>
+						{/* Public routes */}
+						<Route path="/" element={<Landing />} />
+						<Route path="/register" element={<Register />} />
+						<Route path="/login" element={<Login />} />
+					
+						{/* Protected routes */}
 						<Route element={<RequireAuth adminPrivileges={false} />}>
 							<Route path="/home" element={<Home />} />
 						</Route>
