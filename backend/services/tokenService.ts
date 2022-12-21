@@ -12,7 +12,7 @@ class TokenService {
     }
 
     public static generateRefreshToken = (id: number): string => {
-        return jwt.sign({ id: id }, this.refreshSecret, { expiresIn: '30m' });
+        return jwt.sign({ id: id }, this.refreshSecret, { expiresIn: '5m' });
     }
 
     public static verifyRefreshToken = (refreshToken: string): void => {

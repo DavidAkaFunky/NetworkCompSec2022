@@ -1,13 +1,22 @@
-import { Box, Button, TextField, Typography, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
-import { useState } from "react";
+import {
+	Box,
+	Button,
+	TextField,
+	Typography,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+} from "@mui/material";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Transition from "../components/Transition";
 import useAuth from "../hooks/useAuth";
+import useRefreshToken from "../hooks/useRefreshToken";
 import axios from "../interceptors/Axios";
 
 function Login() {
-
-	const { setAuth } = useAuth();
+	const { auth, setAuth } = useAuth();
 
 	const navigate = useNavigate();
 
@@ -26,7 +35,7 @@ function Login() {
 		setFirstSending(true);
 		setFirstTry(false);
 
-		if (!email.length || !email.includes("@") || password.length < 4){
+		if (!email.length || !email.includes("@") || password.length < 4) {
 			setFirstSending(false);
 			return;
 		}
@@ -39,22 +48,19 @@ function Login() {
 
 			setFirstTry(true);
 			setTwoFA(true);
-
 		} catch (err: any) {
 			setError(true);
 		}
 	};
 
 	const handleSecondSubmit = async (e: any) => {
-
 		setSecondSending(true);
 
 		try {
-
 			const response = await axios.post("/api/auth/login", {
 				email: email,
 				password: password,
-				token: twoFAToken
+				token: twoFAToken,
 			});
 
 			const data = await response.data;
@@ -67,7 +73,6 @@ function Login() {
 			});
 
 			navigate("/home");
-	
 		} catch (err: any) {
 			setError(true);
 		}
@@ -117,9 +122,7 @@ function Login() {
 						error={!firstTry && password.length > 0 && password.length < 4}
 					/>
 					<Box sx={{ textAlign: "right" }}>
-						<Link to={"/forgot-password"}>
-							Forgot password
-						</Link>
+						<Link to={"/forgot-password"}>Forgot password</Link>
 					</Box>
 					<Button
 						fullWidth
@@ -131,9 +134,7 @@ function Login() {
 						{firstSending ? "Sending..." : "Submit"}
 					</Button>
 					<Button color="primary" fullWidth sx={{ mt: 2 }}>
-						<Link to={"/register"}>
-							New Account
-						</Link>
+						<Link to={"/register"}>New Account</Link>
 					</Button>
 				</Box>
 			</Box>

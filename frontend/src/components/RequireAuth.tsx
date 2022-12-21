@@ -6,16 +6,16 @@ export type RequireAuthProps = {
 };
 
 const RequireAuth = ({ adminPrivileges }: RequireAuthProps) => {
-    const { auth } = useAuth();
+	const { auth } = useAuth();
 
-    if (
-        (adminPrivileges && auth.isAdmin) ||
-        (!adminPrivileges && auth.isLoggedIn)
-    ) {
-        return <Outlet/>;
-    } else {
-        return <Navigate to="/login" />;
-    }
-}
+	if (
+		(adminPrivileges && auth.isAdmin) ||
+		(!adminPrivileges && auth.isLoggedIn)
+	) {
+		return <Outlet />;
+	} else {
+		return <Navigate to="/login" />;
+	}
+};
 
 export default RequireAuth;

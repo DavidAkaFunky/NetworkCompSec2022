@@ -10,7 +10,7 @@ const useRefreshToken = () => {
 				withCredentials: true,
 			});
 
-            // TODO: isAdmin and username should come in the request
+			// TODO: isAdmin and username should come in the request
 			setAuth({
 				isLoggedIn: true,
 				isAdmin: auth.isAdmin, // this doesnt work bc its reseted
@@ -18,10 +18,9 @@ const useRefreshToken = () => {
 				accessToken: response.data.accessToken,
 			});
 
-            return response.data.accessToken;
+			return response.data.accessToken;
 		} catch (err) {
-			
-            setAuth({
+			setAuth({
 				isLoggedIn: false,
 				isAdmin: false,
 				username: "",
@@ -29,7 +28,7 @@ const useRefreshToken = () => {
 			});
 		}
 
-        return null;
+		return null;
 	};
 
 	return refresh;

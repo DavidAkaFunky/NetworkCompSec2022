@@ -21,7 +21,6 @@ function App() {
 						<Route path="/" element={<Landing />} />
 						<Route path="/register" element={<Register />} />
 						<Route path="/login" element={<Login />} />
-					
 						{/* Protected routes */}
 						<Route element={<RequireAuth adminPrivileges={false} />}>
 							<Route path="/home" element={<Home />} />
@@ -29,10 +28,9 @@ function App() {
 						<Route element={<RequireAuth adminPrivileges={true} />}>
 							<Route path="/admin" element={<Admin />} />
 						</Route>
+						{/* Fallback route */}
+						<Route path="/*" element={<Navigate to="/" />} />
 					</Route>
-
-					{/* Fallback route */}
-					<Route path="/*" element={<Navigate to="/" />} />
 				</Routes>
 			</Box>
 			<Footer />

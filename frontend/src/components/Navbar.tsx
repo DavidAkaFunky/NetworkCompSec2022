@@ -21,7 +21,6 @@ import useAuth from "../hooks/useAuth";
 import useLogout from "../hooks/useLogout";
 
 function Navbar() {
-
 	const { auth } = useAuth();
 	const logout = useLogout();
 	const navigate = useNavigate();
@@ -181,11 +180,9 @@ function Navbar() {
 								onClick={() => navigate("/register")}
 								sx={{ my: 2, color: "inherit" }}
 							>
-								<b>Register</b>
+								Register
 							</Button>
 						</>
-						
-							
 					)}
 					{auth.isLoggedIn && (
 						<React.Fragment>

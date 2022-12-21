@@ -43,10 +43,7 @@ class AuthService {
       throw new HttpException(422, { errors: { email: ["is already taken. Please remove your 2FA code from the app"] } });
     }
 
-    // check https://www.npmjs.com/package/bcrypt
-    // for correct use of bcrypt
     const hashedPassword = await bcrypt.hash(password, 10);
-
 
     if (!TwoFAService.verifyTOTPQRCode(token, secret)) {
       throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
@@ -78,7 +75,6 @@ class AuthService {
     }
 
     const match = await bcrypt.compare(password, user.password);
-    //const match = true; // FOR TESTING PURPOSES
 
     if (!match) {
       throw new HttpException(401, { message: { username: ["Wrong password"] } });
@@ -96,12 +92,11 @@ class AuthService {
     }
 
     const match = await bcrypt.compare(password, user.password);
-    //const match = true; // FOR TESTING PURPOSES
 
     if (!match) {
       throw new HttpException(401, { message: { username: ["Wrong password"] } });
     }
-    
+
     if (!TwoFAService.verifyTOTPQRCode(token, user.twoFASecret)) {
       throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
     }
@@ -109,12 +104,13 @@ class AuthService {
     const accessToken = TokenService.generateAccessToken(user.id);
 
     const refreshToken = TokenService.generateRefreshToken(user.id);
-    
+
     const success: boolean = await RefreshTokenDatabase.createRefreshToken(refreshToken);
 
     if (!success) {
       throw new HttpException(500, { message: { token: ["fail to store refresh token"] } });
     }
+
     const userTokens = {
       name: user.name,
       email: user.email,
@@ -122,7 +118,7 @@ class AuthService {
       accessToken,
       refreshToken
     }
-    
+
     return userTokens;
   };
 
@@ -143,18 +139,23 @@ class AuthService {
     } catch (err) {
 
       const success = await RefreshTokenDatabase.deleteRefreshToken(refreshToken);
-      
+
       if (!success) {
-        throw new HttpException(500, { message: { token: ["fail to delete refresh token"] } });
+        // TODO: if the token doesnt exist, it shouldnt throw an error
+        //throw new HttpException(500, { message: { token: ["fail to delete refresh token"] } });
       }
+
       throw new HttpException(401, { message: { token: ["Refresh token expired"] } })
     }
   };
 
   public static logoutUser = async (refreshToken: string): Promise<void> => {
+
     const success = await RefreshTokenDatabase.deleteRefreshToken(refreshToken);
+
     if (!success) {
-      throw new HttpException(500, { message: { token: ["fail to delete refresh token"] } });
+      // TODO: if the token doesnt exist, it shouldnt throw an error
+      //throw new HttpException(500, { message: { token: ["fail to delete refresh token"] } });
     }
   };
 }

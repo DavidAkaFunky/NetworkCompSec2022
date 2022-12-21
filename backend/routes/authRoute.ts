@@ -38,7 +38,7 @@ router.post("/verify-login", async (req: Request, res: Response, next: NextFunct
 
 router.post("/login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const loginData = 
+        const loginData =
         {
             email: req.body.email,
             password: req.body.password,
@@ -48,8 +48,9 @@ router.post("/login", async (req: Request, res: Response, next: NextFunction): P
         res.cookie("refreshToken", userLogged.refreshToken, {
             httpOnly: true,   // can't be accessed by javascript
             secure: false,    // can only be sent over https
+            expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // expires in 1 day
         });
-        res.status(200).json({ 
+        res.status(200).json({
             name: userLogged.name,
             email: userLogged.email,
             isAdmin: userLogged.isAdmin,
@@ -61,20 +62,47 @@ router.post("/login", async (req: Request, res: Response, next: NextFunction): P
 });
 
 router.get("/refresh", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    
     try {
+
         const accessToken = await AuthService.refreshToken(req.cookies);
         res.status(200).json({ accessToken });
+
     } catch (err: any) {
-        next(err)
+
+        // Refresh token expired
+        if (err.status === 401) {
+            res.cookie("refreshToken", "", {
+                httpOnly: true,
+                expires: new Date(0),
+            });
+            res.status(err.errorCode).json(err.message);
+        } else {
+            next(err)
+        }
     }
 });
 
 router.get("/logout", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         await AuthService.logoutUser(req.body.refreshToken);
+        res.cookie("refreshToken", "", {
+            httpOnly: true,
+            expires: new Date(0),
+        });
         res.sendStatus(200);
     } catch (err: any) {
-        next(err);
+
+        // Refresh token expired
+        if (err.status === 401) {
+            res.cookie("refreshToken", "", {
+                httpOnly: true,
+                expires: new Date(0),
+            });
+            res.status(err.errorCode).json(err.message);
+        } else {
+            next(err)
+        }
     }
 });
 

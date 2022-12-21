@@ -22,11 +22,11 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(undefined, async (error: AxiosError) => {
 
     // Access token expired
-    if(error.response?.status === 403 && error.config) {
+    if (error.response?.status === 403 && error.config) {
 
         const originalRequestConfig = error.config;
         delete originalRequestConfig?.headers!['Authorization'];
-        
+
         try {
             const response = await axios.get('/api/auth/refresh', {
                 withCredentials: true,

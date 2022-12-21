@@ -5,30 +5,28 @@ const footers = [
 	{
 		title: "Company",
 		description: [
-			{name: "Team", "href": "/"},
-			{name: "Contact us", "href": "/"},
-			{name: "Locations", "href": "/"},
+			{ name: "Team", href: "/" },
+			{ name: "Contact us", href: "/" },
+			{ name: "Locations", href: "/" },
 		],
 	},
 	{
 		title: "Services",
 		description: [
-			{name: "Credit Cards", "href": "/services/credit-cards"},
-			{name: "Mortgages", "href": "/services/mortgages"},
-			{name: "Loans", "href": "/services/loans"},
+			{ name: "Credit Cards", href: "/services/credit-cards" },
+			{ name: "Mortgages", href: "/services/mortgages" },
+			{ name: "Loans", href: "/services/loans" },
 		],
 	},
 	{
 		title: "Products",
-		description: [
-			{name: "Stocks", "href": "/products/stocks"},
-		],
+		description: [{ name: "Stocks", href: "/products/stocks" }],
 	},
 	{
 		title: "Legal",
 		description: [
-			{name: "Privacy policy", "href": "/"},
-			{name: "Terms of use", "href": "/"},
+			{ name: "Privacy policy", href: "/" },
+			{ name: "Terms of use", href: "/" },
 		],
 	},
 ];

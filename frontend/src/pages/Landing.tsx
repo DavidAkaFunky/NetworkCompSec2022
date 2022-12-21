@@ -79,12 +79,12 @@ function Landing() {
 						color="text.secondary"
 						paragraph
 					>
-						NCMB is a bank that operates in Portugal since 1900. 
-						It has a large portfolio of clients, from individuals to small businesses, 
-						and large multi-national organizations.
+						NCMB is a bank that operates in Portugal since 1900. It has a large
+						portfolio of clients, from individuals to small businesses, and
+						large multi-national organizations.
 					</Typography>
 				</Container>
-				<Container maxWidth="md" component="main" sx={{mt: 5}}>
+				<Container maxWidth="md" component="main" sx={{ mt: 5 }}>
 					<Grid container spacing={5} alignItems="flex-end">
 						{tiers.map((tier) => (
 							// Enterprise card is full width at sm breakpoint

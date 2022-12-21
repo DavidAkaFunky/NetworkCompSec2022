@@ -17,17 +17,18 @@ const PersistLogin = () => {
 			} catch (err) {
 				console.log(err);
 			} finally {
+				// Only set state if it's still mounted
 				isMounted && setIsLoading(false);
 			}
 		};
 
 		!auth?.accessToken ? verifyRefreshToken() : setIsLoading(false);
 
+		// Cleanup function, runs when component is unmounted
 		return () => {
 			isMounted = false;
 		};
-		
-	}, [auth?.accessToken, refresh]);
+	}, []);
 
 	return <>{isLoading ? <p>Loading...</p> : <Outlet />}</>;
 };

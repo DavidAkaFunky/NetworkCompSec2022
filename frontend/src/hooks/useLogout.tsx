@@ -2,23 +2,22 @@ import axios from "../interceptors/Axios";
 import useAuth from "./useAuth";
 
 const useLogout = () => {
-    const { setAuth } = useAuth();
+	const { setAuth } = useAuth();
 
-    const logout = async () => {
+	const logout = async () => {
+		await axios.get("/api/auth/logout", {
+			withCredentials: true,
+		});
 
-        await axios.get('/api/auth/logout', {
-            withCredentials: true
-        });
+		setAuth({
+			isAdmin: false,
+			isLoggedIn: false,
+			username: "",
+			accessToken: "",
+		});
+	};
 
-        setAuth({
-            isAdmin: false,
-            isLoggedIn: false,
-            username: "",
-            accessToken: ""
-        });
-    }
-
-    return logout;
-}
+	return logout;
+};
 
 export default useLogout;
