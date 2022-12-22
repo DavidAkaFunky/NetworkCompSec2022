@@ -103,14 +103,24 @@ function Navbar() {
 								</MenuItem>
 							)}
 							{auth.isAdmin && (
-								<MenuItem
-									onClick={() => {
-										setAnchorElNav(null);
-										navigate("/admin");
-									}}
-								>
-									<Typography textAlign="center">Admin</Typography>
-								</MenuItem>
+								<>
+									<MenuItem
+										onClick={() => {
+											setAnchorElNav(null);
+											navigate("/admin");
+										}}
+									>
+										<Typography textAlign="center">Admin</Typography>
+									</MenuItem>
+									<MenuItem
+										onClick={() => {
+											setAnchorElNav(null);
+											navigate("/register-admin");
+										}}
+									>
+										<Typography textAlign="center">Register admin</Typography>
+									</MenuItem>
+								</>
 							)}
 						</Menu>
 					</Box>

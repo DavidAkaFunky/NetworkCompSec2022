@@ -3,14 +3,10 @@ import {
 	Button,
 	TextField,
 	Typography,
-	Dialog,
-	DialogActions,
-	DialogContent,
-	DialogTitle,
 } from "@mui/material";
 import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Transition from "../components/Transition";
+import TwoFADialog from "../components/TwoFADialog";
 import axios from "../interceptors/Axios";
 
 function Register() {
@@ -20,19 +16,20 @@ function Register() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [repeatPassword, setRepeatPassword] = useState("");
-
 	const [qrCode, setQrCode] = useState("");
-	const [firstTry, setFirstTry] = useState(true);
+	const [firstTryForm, setFirstTryForm] = useState(true);
+	const [firstTryTwoFA, setFirstTryTwoFA] = useState(true);
 	const [firstSending, setFirstSending] = useState(false);
 	const [secondSending, setSecondSending] = useState(false);
 	const [twoFA, setTwoFA] = useState(false);
 	const [twoFAToken, setTwoFAToken] = useState("");
+	const [error, setError] = useState(false);
 
 	const secret = useRef("");
 
 	const handleFirstSubmit = async (e: any) => {
 		setFirstSending(true);
-		setFirstTry(false);
+		setFirstTryForm(false);
 
 		if (
 			!name.length ||
@@ -55,9 +52,9 @@ function Register() {
 
 			setQrCode(data.qrCode);
 			setTwoFA(true);
-			setFirstTry(true);
+			setFirstTryForm(true);
 		} catch (err: any) {
-			// TODO
+			setError(true);
 		}
 
 		setFirstSending(false);
@@ -67,7 +64,13 @@ function Register() {
 		setSecondSending(true);
 
 		try {
-			await axios.post("/api/auth/register", {
+            if(!(Number(twoFAToken) && twoFAToken.length !== 6)){
+			    setFirstTryTwoFA(false);
+                setSecondSending(false);
+                return;
+            }
+            
+			await axios.post("/api/auth/register-client", {
 				name: name,
 				email: email,
 				password: password,
@@ -75,13 +78,13 @@ function Register() {
 				token: twoFAToken,
 			});
 
-			setSecondSending(false);
-			setTwoFA(false);
-
 			navigate("/login");
 		} catch (err: any) {
-			// TODO
-		}
+			setFirstTryTwoFA(false);
+		} finally {
+            setSecondSending(false);
+            setTwoFA(false);
+        }
 	};
 
 	return (
@@ -90,6 +93,11 @@ function Register() {
 				<Typography variant="h4" component="h1">
 					<strong>Register</strong>
 				</Typography>
+                {error && (
+					<Typography fontSize={15} color="red">
+						Failed to register. Please try another email and try again.
+					</Typography>
+				)}
 				<Box component="form">
 					<TextField
 						margin="normal"
@@ -103,7 +111,7 @@ function Register() {
 						autoFocus
 						value={name}
 						onChange={(e) => setName(e.target.value)}
-						error={!firstTry && name.length <= 0}
+						error={!firstTryForm && name.length <= 0}
 					/>
 					<TextField
 						margin="normal"
@@ -117,7 +125,7 @@ function Register() {
 						autoFocus
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
-						error={!firstTry && !(email.length > 1 && email.includes("@"))}
+						error={!firstTryForm && !(email.length > 1 && email.includes("@"))}
 					/>
 					<TextField
 						margin="normal"
@@ -131,7 +139,7 @@ function Register() {
 						autoComplete="current-password"
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
-						error={!firstTry && password.length > 0 && password.length < 4}
+						error={!firstTryForm && password.length > 0 && password.length < 4}
 					/>
 					<TextField
 						margin="normal"
@@ -145,7 +153,7 @@ function Register() {
 						autoComplete="current-password"
 						value={repeatPassword}
 						onChange={(e) => setRepeatPassword(e.target.value)}
-						error={!firstTry && password !== repeatPassword}
+						error={!firstTryForm && password !== repeatPassword}
 					/>
 					<Button
 						fullWidth
@@ -161,43 +169,7 @@ function Register() {
 					</Button>
 				</Box>
 			</Box>
-			<Dialog
-				open={twoFA}
-				TransitionComponent={Transition}
-				keepMounted
-				onClose={() => setTwoFA(false)}
-				aria-describedby="alert-dialog-slide-description"
-			>
-				<DialogTitle>{"Google Authenticator"}</DialogTitle>
-				<DialogContent>
-					<Box sx={{ mx: "auto", maxWidth: "50vh", maxHeight: "100vw" }}>
-						<img src={qrCode} alt="" width="100%" />
-						<TextField
-							fullWidth
-							variant="filled"
-							required
-							name="twoFAToken"
-							label={"Insert Code"}
-							type="password"
-							id="twoFAToken"
-							autoComplete="current-password"
-							value={twoFAToken}
-							onChange={(e) => setTwoFAToken(e.target.value)}
-							error={!firstTry}
-						/>
-					</Box>
-				</DialogContent>
-				<DialogActions>
-					<Button onClick={() => setTwoFA(false)}>Close</Button>
-					<Button
-						onClick={handleSecondSubmit}
-						variant="contained"
-						disabled={secondSending}
-					>
-						{secondSending ? "Sending..." : "Submit"}
-					</Button>
-				</DialogActions>
-			</Dialog>
+			<TwoFADialog qrCode={qrCode} twoFA={twoFA} setTwoFA={setTwoFA} twoFAToken={twoFAToken} setTwoFAToken={setTwoFAToken} sending={secondSending} setSending={setSecondSending} firstTry={firstTryTwoFA} handleSubmit={handleSecondSubmit} />
 		</>
 	);
 }

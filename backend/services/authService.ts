@@ -13,16 +13,13 @@ class AuthService {
     return !(await UserDatabase.getUser(email));
   };
 
-  public static registerUser = async (user: UserRegisterData): Promise<void> => {
+  public static registerUser = async (user: UserRegisterData, admin: boolean): Promise<void> => {
 
     const name = user.name?.trim();
     const email = user.email?.trim();
     const password = user.password?.trim();
     const secret = user.secret?.trim();
     const token = user.token?.trim();
-
-    // TODO COMO REGISTAR ADMINS?
-    const admin = false;
 
     //adicionar regex
     if (!email) {
@@ -45,8 +42,17 @@ class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    if (!TwoFAService.verifyTOTPQRCode(token, secret)) {
-      throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
+    if (secret && !token) {
+      throw new HttpException(422, { errors: { secret: ["does not exist"] } });
+    }
+
+    if (secret){
+      if (!token) {
+        throw new HttpException(422, { errors: { token: ["does not exist"] } });
+      }
+      if (!TwoFAService.verifyTOTPQRCode(token, secret)) {
+        throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
+      }
     }
 
     const success = await UserDatabase.createUser(name, email, admin, hashedPassword, secret);
@@ -56,7 +62,7 @@ class AuthService {
     }
   };
 
-  public static verifyUserLogin = async (loginData: UserLoginData): Promise<void> => {
+  public static verifyUserLogin = async (loginData: UserLoginData): Promise<boolean> => {
     const email = loginData.email?.trim();
     const password = loginData.password?.trim();
 
@@ -79,16 +85,38 @@ class AuthService {
     if (!match) {
       throw new HttpException(401, { message: { username: ["Wrong password"] } });
     }
+
+    return user.twoFASecret == null;
   };
 
-  public static loginUser = async (loginData: UserLoginData, token: string): Promise<UserLoggedData> => {
-    const email = loginData.email?.trim();
-    const password = loginData.password?.trim();
+  public static loginUser = async (loginData: UserLoginData): Promise<UserLoggedData> => {
+    const email = loginData.email.trim();
+    const password = loginData.password.trim();
+    const secret = loginData.secret?.trim();
+    const token = loginData.token.trim();
 
     const user: User | null = await UserDatabase.getUser(email);
 
     if (!user) {
       throw new HttpException(401, { message: { username: ["No user exists with this e-mail"] } });
+    }
+
+    if (user.twoFASecret) {
+      if (secret) {
+        throw new HttpException(401, { message: { secret: ["Duplicate secret"] } });
+      }
+    }
+
+    else {
+      if (!secret) {
+        throw new HttpException(401, { message: { secret: ["Secret does not exist"] } });
+      }
+
+      const success: boolean = await UserDatabase.addUserTwoFASecret(email, secret);
+
+      if (!success) {
+        throw new HttpException(500, { message: { token: ["fail to store secret in user details"] } });
+      }
     }
 
     const match = await bcrypt.compare(password, user.password);
@@ -97,7 +125,7 @@ class AuthService {
       throw new HttpException(401, { message: { username: ["Wrong password"] } });
     }
 
-    if (!TwoFAService.verifyTOTPQRCode(token, user.twoFASecret)) {
+    if (!TwoFAService.verifyTOTPQRCode(token, user.twoFASecret!)) {
       throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
     }
 

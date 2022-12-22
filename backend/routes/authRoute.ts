@@ -17,20 +17,35 @@ router.post("/totp/generate", async (req: Request, res: Response, next: NextFunc
     }
 });
 
-router.post("/register", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.post("/register-client", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        await AuthService.registerUser(req.body as UserRegisterData);
+        await AuthService.registerUser(req.body as UserRegisterData, false);
         res.sendStatus(200);
     } catch (err: any) {
         next(err);
     }
 });
 
+router.post("/register-admin", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        await AuthService.registerUser(req.body as UserRegisterData, true);
+        res.sendStatus(200);
+    } catch (err: any) {
+        next(err);
+    }
+});
 
 router.post("/verify-login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        await AuthService.verifyUserLogin(req.body as UserLoginData);
-        res.sendStatus(200);
+        const hasToken = await AuthService.verifyUserLogin(req.body as UserLoginData);
+        let content;
+        if (!hasToken){
+            content = await TwoFAService.generateTOTPQRCode(req.body.email);
+        }
+        res.sendStatus(200).json({
+            secret: content?.secret,
+            qrCode: content?.qrCode
+        });
     } catch (err: any) {
         next(err);
     }
@@ -42,8 +57,10 @@ router.post("/login", async (req: Request, res: Response, next: NextFunction): P
         {
             email: req.body.email,
             password: req.body.password,
+            secret: req.body.secret,
+            token: req.body.token
         }
-        const userLogged = await AuthService.loginUser(loginData as UserLoginData, req.body.token);
+        const userLogged = await AuthService.loginUser(loginData as UserLoginData);
         res.setHeader("Cache-Control", "no-cache=set-cookie");
         res.cookie("refreshToken", userLogged.refreshToken, {
             httpOnly: true,   // can't be accessed by javascript
@@ -62,14 +79,10 @@ router.post("/login", async (req: Request, res: Response, next: NextFunction): P
 });
 
 router.get("/refresh", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    
     try {
-
         const accessToken = await AuthService.refreshToken(req.cookies);
         res.status(200).json({ accessToken });
-
     } catch (err: any) {
-
         // Refresh token expired
         if (err.status === 401) {
             res.cookie("refreshToken", "", {

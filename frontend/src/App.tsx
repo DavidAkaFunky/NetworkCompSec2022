@@ -9,6 +9,7 @@ import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import Landing from "./pages/Landing";
 import Register from "./pages/Register";
+import RegisterAdmin from "./pages/RegisterAdmin";
 
 function App() {
 	return (
@@ -26,6 +27,7 @@ function App() {
 							<Route path="/home" element={<Home />} />
 						</Route>
 						<Route element={<RequireAuth adminPrivileges={true} />}>
+							<Route path="/register-admin" element={<RegisterAdmin />} />
 							<Route path="/admin" element={<Admin />} />
 						</Route>
 						{/* Fallback route */}

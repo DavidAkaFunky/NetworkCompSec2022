@@ -3,7 +3,7 @@ import prisma from "../prisma/client"
 
 class UserDatabase {
 
-  public static createUser = async (name: string, email: string, admin: boolean, pwd: string, twoFASecret: string): Promise<boolean> => {
+  public static createUser = async (name: string, email: string, admin: boolean, pwd: string, twoFASecret?: string): Promise<boolean> => {
     try {
       await prisma.user.create({
         data: {
@@ -11,7 +11,24 @@ class UserDatabase {
           email: email,
           admin: admin,
           password: pwd,
-          twoFASecret: twoFASecret,
+          twoFASecret: twoFASecret || undefined,
+        }
+      });
+      return true;
+
+    } catch (err) {
+      return false;
+    }
+  }
+
+  public static addUserTwoFASecret = async (email: string, twoFASecret: string): Promise<boolean> => {
+    try {
+      await prisma.user.update({
+        where: {
+          email: email
+        },
+        data: {
+          twoFASecret: twoFASecret
         }
       });
       return true;
