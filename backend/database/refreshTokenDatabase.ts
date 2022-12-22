@@ -18,22 +18,22 @@ class RefreshTokenDatabase {
     public static deleteRefreshToken = async (refreshToken: string): Promise<boolean> => {
 
         try {
-            await prisma.refreshToken.findFirst({
+            const token = await prisma.refreshToken.findUnique({
                 where: {
                     id: refreshToken
                 }
             });
 
-        } catch (err) {
-            return true;
-        }
+            if (!token) {
+                return true;
+            }
 
-        try {
             await prisma.refreshToken.delete({
                 where: {
-                    id: refreshToken
+                    id: token.id
                 }
             });
+
             return true;
 
         } catch (err) {

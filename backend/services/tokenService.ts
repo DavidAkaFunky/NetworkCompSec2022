@@ -8,11 +8,11 @@ class TokenService {
     // Nota podemos implementar com chave publica/chave privada
 
     public static generateAccessToken = (id: number): string => {
-        return jwt.sign({ id: id }, this.accessSecret, { expiresIn: '30s' });
+        return jwt.sign({ id: id }, this.accessSecret, { expiresIn: '10m' });
     }
 
     public static generateRefreshToken = (id: number): string => {
-        return jwt.sign({ id: id }, this.refreshSecret, { expiresIn: '1m' });
+        return jwt.sign({ id: id }, this.refreshSecret, { expiresIn: '2h' });
     }
 
     public static verifyRefreshToken = (refreshToken: string): void => {

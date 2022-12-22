@@ -247,8 +247,9 @@ function Navbar() {
 								<Divider />
 								<MenuItem
 									onClick={() => {
-										setAnchorElUserSettings(null);
-										logout();
+										logout().then(() => {
+											setAnchorElUserSettings(null);
+										})
 									}}
 								>
 									<LogoutIcon sx={{ mr: 1 }} />
