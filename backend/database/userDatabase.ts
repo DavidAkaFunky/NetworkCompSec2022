@@ -40,7 +40,7 @@ class UserDatabase {
 
   public static getUser = async (email: string): Promise<User | null> => {
     try {
-      const user = await prisma.user.findUniqueOrThrow({
+      const user = await prisma.user.findUnique({
         where: {
           email: email
         }

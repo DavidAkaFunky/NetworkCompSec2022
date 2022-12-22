@@ -11,7 +11,7 @@ import TwoFADialog from "../components/TwoFADialog";
 import axios from "../interceptors/Axios";
 
 function Login() {
-	const { auth, setAuth } = useAuth();
+	const { setAuth } = useAuth();
 
 	const navigate = useNavigate();
 

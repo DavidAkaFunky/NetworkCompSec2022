@@ -155,6 +155,15 @@ function Navbar() {
 						>
 							Landing
 						</Button>
+						<Button
+							onClick={() => {
+								setAnchorElNav(null);
+								navigate("/ca");
+							}}
+							sx={{ my: 2, color: "inherit" }}
+						>
+							Certification Authority
+						</Button>
 						{auth.isLoggedIn && (
 							<Button
 								onClick={() => {
@@ -248,8 +257,9 @@ function Navbar() {
 								<Divider />
 								<MenuItem
 									onClick={() => {
-										setAnchorElUserSettings(null);
-										logout();
+										logout().then(() => {
+											setAnchorElUserSettings(null);
+										})
 									}}
 								>
 									<LogoutIcon sx={{ mr: 1 }} />

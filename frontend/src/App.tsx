@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Landing from "./pages/Landing";
 import Register from "./pages/Register";
 import RegisterAdmin from "./pages/RegisterAdmin";
+import CertificationAuthority from "./pages/CertificationAuthority";
 
 function App() {
 	return (
@@ -20,6 +21,7 @@ function App() {
 					<Route element={<PersistLogin />}>
 						{/* Public routes */}
 						<Route path="/" element={<Landing />} />
+						<Route path="/ca" element={<CertificationAuthority />} />
 						<Route path="/register" element={<Register />} />
 						<Route path="/login" element={<Login />} />
 						{/* Protected routes */}
