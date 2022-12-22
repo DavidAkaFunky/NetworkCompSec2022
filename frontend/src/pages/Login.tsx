@@ -8,15 +8,14 @@ import {
 	DialogContent,
 	DialogTitle,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Transition from "../components/Transition";
 import useAuth from "../hooks/useAuth";
-import useRefreshToken from "../hooks/useRefreshToken";
 import axios from "../interceptors/Axios";
 
 function Login() {
-	const { auth, setAuth } = useAuth();
+	const { setAuth } = useAuth();
 
 	const navigate = useNavigate();
 

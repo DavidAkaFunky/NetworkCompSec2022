@@ -43,6 +43,12 @@ mkdir openssl && cd openssl
 openssl req -x509 -sha256 -days 356 -nodes -newkey rsa:2048 -subj "/CN=192.168.56.101/C=PT/L=Lisboa" -keyout rootCA.key -out rootCA.crt 
 ```
 
+Compute the SHA1 and MD5 to make available to the client
+```
+sha1sum rootCA.crt
+md5sum rootCA.crt
+```
+
 -x509 self signed certificate instead of a certificate request
 -sha256 digest to sign the request
 -nodes private key not encrypted
