@@ -37,17 +37,8 @@ router.post("/register-admin", async (req: Request, res: Response, next: NextFun
 
 router.post("/verify-login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const hasToken = await AuthService.verifyUserLogin(req.body);
-        let content;
-
-        if (!hasToken){
-            content = await TwoFAService.generateTOTPQRCode(req.body.email);
-        }
-        
-        res.status(200).json({
-            secret: content?.secret,
-            qrCode: content?.qrCode
-        });
+        await AuthService.verifyUserLogin(req.body as UserLoginData);
+        res.sendStatus(200);
     } catch (err: any) {
         next(err);
     }
@@ -55,14 +46,11 @@ router.post("/verify-login", async (req: Request, res: Response, next: NextFunct
 
 router.post("/login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const loginData =
-        {
+        const loginData =  {
             email: req.body.email,
             password: req.body.password,
-            secret: req.body.secret,
-            token: req.body.token
         }
-        const userLogged = await AuthService.loginUser(loginData as UserLoginData);
+        const userLogged = await AuthService.loginUser(loginData as UserLoginData, req.body.token);
         res.setHeader("Cache-Control", "no-cache=set-cookie");
         res.cookie("refreshToken", userLogged.refreshToken, {
             httpOnly: true,   // can't be accessed by javascript

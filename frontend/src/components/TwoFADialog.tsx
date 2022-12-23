@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import Transition from "../components/Transition";
 
-type TwoFADialogProps = {
+interface TwoFADialogProps {
     qrCode?: string,
     twoFA: boolean,
     setTwoFA: React.Dispatch<React.SetStateAction<boolean>> 
@@ -18,7 +18,7 @@ type TwoFADialogProps = {
     sending: boolean,
     setSending: React.Dispatch<React.SetStateAction<boolean>>,
     firstTry: boolean,
-    handleSubmit: (e: any) => Promise<void>
+    handleSubmit: (e: any) => any
 }
 
 const TwoFADialog = ({ qrCode, twoFA, setTwoFA, twoFAToken, setTwoFAToken, sending, setSending, firstTry, handleSubmit }: TwoFADialogProps) => {

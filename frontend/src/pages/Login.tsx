@@ -17,16 +17,19 @@ function Login() {
 
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const [qrCode, setQrCode] = useState("");
+	//const [qrCode, setQrCode] = useState("");
 	const [firstTryForm, setFirstTryForm] = useState(true);
 	const [firstTryTwoFA, setFirstTryTwoFA] = useState(true);
+
 	const [firstSending, setFirstSending] = useState(false);
 	const [secondSending, setSecondSending] = useState(false);
+
 	const [error, setError] = useState(false);
+
 	const [twoFA, setTwoFA] = useState(false);
 	const [twoFAToken, setTwoFAToken] = useState("");
 
-	const secret = useRef("");
+	//const secret = useRef("");
 
 	const handleFirstSubmit = async (e: any) => {
 		setFirstSending(true);
@@ -43,24 +46,24 @@ function Login() {
 				password: password,
 			});
 
-			const data = await response.data;
-			secret.current = data.secret;
-
-			setQrCode(data.qrCode);
-			setTwoFA(true);
-			setFirstTryForm(true);
+			if(response.status != 200){
+				setError(true);
+			} else {
+				setTwoFA(true);
+				setFirstTryForm(true);
+			}
 		} catch (err: any) {
 			setError(true);
+		} finally {
+			setFirstSending(false);
 		}
-		
-		setFirstSending(false);
 	};
 
 	const handleSecondSubmit = async (e: any) => {
 		setSecondSending(true);
 
 		try {
-			if(!(Number(twoFAToken) && twoFAToken.length !== 6)){
+			if(!(Number(twoFAToken) && twoFAToken.length === 6)){
 				setFirstTryTwoFA(false);
                 setSecondSending(false);
                 return;
@@ -69,20 +72,21 @@ function Login() {
 			const response = await axios.post("/api/auth/login", {
 				email: email,
 				password: password,
-				secret: secret.current,
 				token: twoFAToken
 			});
 
-			const data = await response.data;
-
-			setAuth({
-				isLoggedIn: true,
-				isAdmin: data.isAdmin,
-				username: "",
-				accessToken: data.accessToken,
-			});
-
-			navigate("/home");
+			if(response.status != 200){
+				setError(true);
+			} else {
+				setAuth({
+					isLoggedIn: true,
+					isAdmin: response.data.isAdmin,
+					username: response.data.name,
+					accessToken: response.data.accessToken,
+				});
+	
+				navigate("/home");
+			}
 		} catch (err: any) {
 			console.log(err);
 			setError(true);
@@ -149,7 +153,7 @@ function Login() {
 					</Button>
 				</Box>
 			</Box>
-			<TwoFADialog qrCode={qrCode} twoFA={twoFA} setTwoFA={setTwoFA} twoFAToken={twoFAToken} setTwoFAToken={setTwoFAToken} sending={secondSending} setSending= {setSecondSending} firstTry={firstTryTwoFA} handleSubmit={handleSecondSubmit} />
+			<TwoFADialog qrCode={""} twoFA={twoFA} setTwoFA={setTwoFA} twoFAToken={twoFAToken} setTwoFAToken={setTwoFAToken} sending={secondSending} setSending= {setSecondSending} firstTry={firstTryTwoFA} handleSubmit={handleSecondSubmit} />
 		</>
 	);
 }

@@ -44,22 +44,11 @@ class AuthService {
       throw new HttpException(422, { errors: { secret: ["does not exist"] } });
     }
 
-    if (!TwoFAService.verifyTOTPQRCode(token, secret)) {
+    const match = await TwoFAService.verifyTOTPQRCode(token, secret);
+
+    if (!match) {
       throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
     }
-
-    //if (secret && !token) {
-    //  throw new HttpException(422, { errors: { secret: ["does not exist"] } });
-    //}
-    
-    //if (secret){
-    //  if (!token) {
-    //    throw new HttpException(422, { errors: { token: ["does not exist"] } });
-    //  }
-    //  if (!TwoFAService.verifyTOTPQRCode(token, secret)) {
-    //    throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
-    //  }
-    //}
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -70,7 +59,7 @@ class AuthService {
     }
   };
 
-  public static verifyUserLogin = async (loginData: UserLoginData): Promise<boolean> => {
+  public static verifyUserLogin = async (loginData: UserLoginData): Promise<User> => {
     const email = loginData.email?.trim();
     const password = loginData.password?.trim();
 
@@ -94,46 +83,26 @@ class AuthService {
       throw new HttpException(401, { message: { username: ["Wrong password"] } });
     }
 
-    return user.twoFASecret == null;
+    return user;
   };
 
-  public static loginUser = async (loginData: UserLoginData): Promise<UserLoggedData> => {
-    const email = loginData.email.trim();
-    const password = loginData.password.trim();
-    const secret = loginData.secret?.trim();
-    const token = loginData.token.trim();
+  public static loginUser = async (loginData: UserLoginData, token: string): Promise<UserLoggedData> => {
+    //const email = loginData.email.trim();
+    //const password = loginData.password.trim();
+    //const user: User | null = await UserDatabase.getUser(email);
+    //if (!user) {
+    //  throw new HttpException(401, { message: { username: ["No user exists with this e-mail"] } });
+    //}
+    //const match = await bcrypt.compare(password, user.password);
+    //if (!match) {
+    //  throw new HttpException(401, { message: { username: ["Wrong password"] } });
+    //}
 
-    const user: User | null = await UserDatabase.getUser(email);
+    const user = await this.verifyUserLogin(loginData);
 
-    if (!user) {
-      throw new HttpException(401, { message: { username: ["No user exists with this e-mail"] } });
-    }
-
-    if (user.twoFASecret) {
-      if (secret) {
-        throw new HttpException(401, { message: { secret: ["Duplicate secret"] } });
-      }
-    }
-
-    else {
-      if (!secret) {
-        throw new HttpException(401, { message: { secret: ["Secret does not exist"] } });
-      }
-
-      const success: boolean = await UserDatabase.addUserTwoFASecret(email, secret);
-
-      if (!success) {
-        throw new HttpException(500, { message: { token: ["fail to store secret in user details"] } });
-      }
-    }
-
-    const match = await bcrypt.compare(password, user.password);
+    const match = await TwoFAService.verifyTOTPQRCode(token, user.twoFASecret!);
 
     if (!match) {
-      throw new HttpException(401, { message: { username: ["Wrong password"] } });
-    }
-
-    if (!TwoFAService.verifyTOTPQRCode(token, user.twoFASecret!)) {
       throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
     }
 
