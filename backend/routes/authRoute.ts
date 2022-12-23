@@ -37,12 +37,14 @@ router.post("/register-admin", async (req: Request, res: Response, next: NextFun
 
 router.post("/verify-login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const hasToken = await AuthService.verifyUserLogin(req.body as UserLoginData);
+        const hasToken = await AuthService.verifyUserLogin(req.body);
         let content;
+
         if (!hasToken){
             content = await TwoFAService.generateTOTPQRCode(req.body.email);
         }
-        res.sendStatus(200).json({
+        
+        res.status(200).json({
             secret: content?.secret,
             qrCode: content?.qrCode
         });

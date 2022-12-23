@@ -40,20 +40,28 @@ class AuthService {
       throw new HttpException(422, { errors: { email: ["is already taken. Please remove your 2FA code from the app"] } });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    if (secret && !token) {
+    if (!secret || !token) {
       throw new HttpException(422, { errors: { secret: ["does not exist"] } });
     }
 
-    if (secret){
-      if (!token) {
-        throw new HttpException(422, { errors: { token: ["does not exist"] } });
-      }
-      if (!TwoFAService.verifyTOTPQRCode(token, secret)) {
-        throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
-      }
+    if (!TwoFAService.verifyTOTPQRCode(token, secret)) {
+      throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
     }
+
+    //if (secret && !token) {
+    //  throw new HttpException(422, { errors: { secret: ["does not exist"] } });
+    //}
+    
+    //if (secret){
+    //  if (!token) {
+    //    throw new HttpException(422, { errors: { token: ["does not exist"] } });
+    //  }
+    //  if (!TwoFAService.verifyTOTPQRCode(token, secret)) {
+    //    throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });
+    //  }
+    //}
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const success = await UserDatabase.createUser(name, email, admin, hashedPassword, secret);
 

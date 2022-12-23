@@ -34,7 +34,7 @@ class twoFAService {
         // code = code % Math.pow(10, digits);
         // token = leftPad(code, digits);
         // An explanation of the algorithm can be found here: https://www.ietf.org/rfc/rfc4226.txt
-        console.log(authenticator.verify({ token, secret }));
+        //console.log(authenticator.verify({ token, secret }));
         return authenticator.verify({ token, secret });
     };
 }
