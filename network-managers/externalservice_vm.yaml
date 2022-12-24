@@ -1,0 +1,23 @@
+# External service network settings
+# In the Oracle VM interface select:
+# Adapter 1: 
+#   - Attached to: Host-only Adapter
+#   - Name: VirtualBox Host-Only Ethernet Adapter
+#   - Adapter Type: Intel PRO/1000 MT Desktop (82540EM)
+#   - Promiscuous Mode: Allow All
+network:
+    version: 2
+    renderer: NetworkManager
+    ethernets:
+        # Host-only network
+        enp0s3:
+            dhcp4: no
+            addresses:
+                - 192.168.56.102/24
+            nameservers:
+                addresses: [8.8.8.8, 8.8.4.4]
+        # NAT network
+        enp0s8:
+            dhcp4: yes
+            nameservers:
+                addresses: [8.8.8.8, 8.8.4.4]

@@ -9,35 +9,42 @@ A back-office is used by the bank employees to contact the clients, propose new 
 
 The system has integration with external institutions, namely, the Bank of Portugal (to communicate the financial details of the customers) and insurance companies (to promote insurance services that are associated with the loans).
 
-## Security challenges
+## Security challenge
 
 (i) There are some concerns with the access to the financial information of the clients. The authenticity of the information and the privacy of the clients needs to be assured. It is necessary to provide a Two-Factor Authentication (2FA) mechanism that requires the bank customers to use an alternative device when logging in the bank app.
 
-(ii) The bank allows its clients to subscribe to any product and service remotely. However, there are concerns that both the bank employees and the clients can be impersonated. Also, financial information should be kept private.
-
-(iii) The bank needs to gather and store sensitive information about its clients in different layers. The information systems should allow fine-grained access to the records to the relevant staff (account managers) for some layers. Other users (clerks), can see some other fields of information. There should also be mechanisms in place to allow access in special circumstances, for example, during an audit process.
-
 ## Network and system architecture
 
-The system architecture is composed by 4 VMs:
+The system architecture is composed by 5 VMs:
 - Firewall
-- Webserver
+- Web server
 - Database
 - Internal user
+- External service
 
-The network is composed of 3 internal networks:
-- Firewall <-> Webserver
-- Firewall <-> Database
-- Firewall <-> Internal user
+The network is composed of 3 internal networks and 1 host-only network:
 
-Communication protection:  
-- External user <-> webserver: HTTPS  
-- webserver <-> backend: HTTP  
-- backend <-> database: TLS  
+|  Internal Network 1   | Internal Network 2 | Internal Network 3 | Host-only       |
+|-----------------------|--------------------|--------------------|-----------------|
+| Firewall              | Firewall           | Firewall           | Firewall        |
+| Web server            | Database           | Internal user      | External user   |
+|                       |                    |                    | External service|
+
+Who's communicating<sup>1</sup> ? 
+
+|  Entity 1     | Entity 2          | Security protocol |
+|---------------|-------------------|-------------------|
+| External user | Web server        | HTTPS             |   
+| Web server    | Backend           | HTTP              |
+| Backend       | Database          | TLS               |
+| Web server    | External server   | HTTPS             |
+
+1: All request go through the firewall before reaching their destination
+
 
 ## Generating Certificate Authority (CA) and necessary certificates
 
-Start by generating the CA key and certificate which will be used to sign the webserver certificate request
+Start by generating the CA key and certificate which will be used to sign the web server certificate request
 ```
 mkdir openssl && cd openssl
 openssl req -x509 -sha256 -days 356 -nodes -newkey rsa:2048 -subj "/CN=192.168.56.101/C=PT/L=Lisboa" -keyout rootCA.key -out rootCA.crt 
@@ -49,21 +56,13 @@ sha1sum rootCA.crt
 md5sum rootCA.crt
 ```
 
--x509 self signed certificate instead of a certificate request
--sha256 digest to sign the request
--nodes private key not encrypted
--newkey creates new certificate request and private key
--subj sets the subject name
--keyout filename for private key
--out filename for certificate
-
-Generate the webserver key and create a certificate request with the pre-defined configuration
+Generate the web server key and create a certificate request with the pre-defined configuration
 ```
 openssl genrsa -out webserver.key
 openssl req -new -key webserver.key -out webserver.csr -config webserver.conf
 ```
 
-Use the CA certificate and key to sign the certificate request of the webserver which generates a webserver certificate
+Use the CA certificate and key to sign the certificate request of the web server which generates a certificate
 ```
 openssl x509 -req -in webserver.csr -CA rootCA.crt -CAkey rootCA.key -CAcreateserial -out webserver.crt -days 365 -sha256 -extfile webserver.conf
 ```
@@ -77,6 +76,33 @@ were locally generated, just move them to:
 mv webserver.key /etc/ssl/private/
 mv webserver.crt /etc/ssl/certs/
 ```
+
+## Generating Certificate Authority (CA) and necessary certificates for the external service
+
+Start by generating the CA key and certificate which will be used to sign the web server certificate request
+```
+openssl req -x509 -sha256 -days 356 -nodes -newkey rsa:2048 -subj "/CN=192.168.56.102/C=PT/L=Lisboa" -keyout externalCA.key -out externalCA.crt 
+```
+
+Generate the web server key and create a certificate request with the pre-defined configuration
+```
+openssl genrsa -out externalwebserver.key
+openssl req -new -key externalwebserver.key -out externalwebserver.csr -config externalwebserver.conf
+```
+
+Use the CA certificate and key to sign the certificate request of the external web server which generates a certificate
+```
+openssl x509 -req -in externalwebserver.csr -CA externalCA.crt -CAkey externalCA.key -CAcreateserial -out externalwebserver.crt -days 365 -sha256 -extfile externalwebserver.conf
+```
+
+Copy the external web server certificate and key to the external web server.  
+Depending on where you generated them, you may drag-and-drop from the local machine to inside the VMs or if they 
+were locally generated, just move them to:
+```
+mv externalwebserver.key /etc/ssl/private/
+mv externalwebserver.crt /etc/ssl/certs/
+```
+
 
 ## How to configure VMs
 
@@ -121,6 +147,7 @@ ping 192.168.0.2
 ping 192.168.1.2
 ping 192.168.2.2
 telnet 192.168.1.2 5432   
+ping 192.168.56.102
 ```
 
 ### Database
@@ -214,23 +241,11 @@ node
 require('crypto').randomBytes(64).toString('hex')
 ```
 
-Run prisma to configure the database:
-```bash
-npm i
-npx prisma migrate dev --name init
-```
-
-Start the backend:
-```bash
-npm run build
-npm start
-```
-
 Install and configure nginx (1.18.0):
 ```bash
 sudo apt install nginx
 rm /etc/nginx/sites-available/default
-cp nginx_config /etc/nginx/sites-available/default
+cp webserver_config /etc/nginx/sites-available/default
 sudo systemctl restart nginx
 ```
 
@@ -251,9 +266,60 @@ nvm use 16.18.1
 nvm alias default 16.18.1
 ```
 
+Run prisma to configure the database:
+```bash
+npm i
+npx prisma migrate dev --name init
+```
+
+Start the backend:
+```bash
+npm run build
+npm start
+```
+
 Build the frontend:
 ```bash
 cd frontend
 npm i
 npm run build
+```
+
+### External service
+
+Copy the example file and then populate the .env for the external service:
+```bash
+cd external-service
+cp .env.example .env
+```
+
+Install and configure nginx (1.18.0):
+```bash
+sudo apt install nginx
+rm /etc/nginx/sites-available/default
+cp externalservice_config /etc/nginx/sites-available/default
+sudo systemctl restart nginx
+```
+
+Install nvm (0.39.2):
+```bash
+wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+```
+
+Or, alternatively:
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+```
+
+Install node (16.18.1) and npm (8.19.2):
+```bash
+nvm install 16.18.1
+nvm use 16.18.1
+nvm alias default 16.18.1
+```
+
+Start the backend:
+```bash
+npm run build
+npm start
 ```

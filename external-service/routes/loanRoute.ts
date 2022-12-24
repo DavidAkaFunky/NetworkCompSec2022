@@ -2,6 +2,8 @@ import { Router, Request, Response, NextFunction } from "express";
 
 const router = Router();
 
+// insurance companies (to promote insurance services that are associated with the loans).
+
 router.get("/loansInfo", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const loansInfo = {
