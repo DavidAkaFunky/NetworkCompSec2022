@@ -7,14 +7,14 @@ if [ "$1" == "webserver" ]
 then
     echo "[VM1] Setting up ifconfig"
 
-    cp -f network-managers/webserver_vm.yaml > /etc/netplan/01-network-manager-all.yaml
+    cp -f network-managers/webserver_vm.yaml /etc/netplan/01-network-manager-all.yaml
 
 # Firewall
 elif [ "$1" == "firewall" ]
 then    
     echo "[VM2] Setting up ifconfig"
 
-    cp -f network-managers/firewall_vm.yaml > /etc/netplan/01-network-manager-all.yaml
+    cp -f network-managers/firewall_vm.yaml /etc/netplan/01-network-manager-all.yaml
 
     echo "[VM2] Setting up Firewall"
 
@@ -67,14 +67,14 @@ elif [ "$1" == "database" ]
 then
     echo "[Database] Setting up ifconfig"
 
-    cp -f network-managers/database_vm.yaml > /etc/netplan/01-network-manager-all.yaml
+    cp -f network-managers/database_vm.yaml /etc/netplan/01-network-manager-all.yaml
 
 # Internal user
 elif [ "$1" == "internaluser" ]
 then
     echo "[Internal User] Setting up ifconfig"
 
-    cp -f network-managers/internaluser_vm.yaml > /etc/netplan/01-network-manager-all.yaml
+    cp -f network-managers/internaluser_vm.yaml /etc/netplan/01-network-manager-all.yaml
 
 else
     echo "Usage: $0 <webserver|firewall|database|internaluser>"
