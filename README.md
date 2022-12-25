@@ -104,44 +104,28 @@ mv externalwebserver.crt /etc/ssl/certs/
 ```
 
 
-## How to configure VMs
+## How to configure VMs (common steps)
 
-Update package manager on every machine:
+Update package manager:
 ```bash
 sudo apt update
 sudo apt upgrade
 ```
 
-Copy the corresponding configuration file:
+Run the script to configure and install dependencies:
 ```bash
-cp -f network-managers/<file>.yaml /etc/netplan/01-network-manager.yaml
+sudo ./firewall-setup.sh <webserver|firewall|database|externalservice> 
 ```
 
-Refresh the network configuration:
-```bash
-sudo netplan try
-sudo netplan apply
-```
-
-Apply the firewall rules and make them persistent
-```bash
-sudo ./firewall-setup.sh <server|firewall|db> 
-sudo apt install iptables-persistent
-# FOR IPv4
-sudo sh -c 'iptables-save > /etc/iptables/rules.v4'
-# FOR IPv6
-sudo sh -c 'ip6tables-save > /etc/iptables/rules.v6'
-```
-
-### Firewall VM
+### Firewall
 
 Allow IP forwarding:
 ```bash
-nano /etc/sysctl.conf
+vi /etc/sysctl.conf
 #Uncomment net.ipv4.ip_forward=1
 ```
 
-Test connections:
+Later test connections with:
 ```
 ping 192.168.0.2
 ping 192.168.1.2
@@ -152,16 +136,7 @@ ping 192.168.56.102
 
 ### Database
 
-Install postgresql:
-```bash
-sudo wget http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc
-sudo apt-key add ACCC4CF8.asc
-sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
-sudo apt -y update
-sudo apt -y install postgresql-14
-```
-
-Check that is working:
+Check that postgresql is working:
 ```bash
 systemctl status postgresql
 ```
@@ -206,17 +181,11 @@ Create database with name `ncmb`:
 CREATE DATABASE ncmb;
 ```
 
+# TODO: Create user with non super admin privileges
+
 If something goes wrong check the logs:
 ```bash
 tail /var/log/postgresql/postgresql-14-main.log
-```
-
-If it complains about permission do:
-```bash
-chown postgres:ssl-cert /etc/ssl/private/
-chown postgres:postgres /etc/ssl/private/webserver.key
-chown postgres:ssl-cert /etc/ssl/certs/
-chown postgres:postgres /etc/ssl/certs/webserver.crt
 ```
 
 ### Web server
@@ -239,14 +208,6 @@ To generate the JWT_*_TOKEN:
 ```
 node
 require('crypto').randomBytes(64).toString('hex')
-```
-
-Install and configure nginx (1.18.0):
-```bash
-sudo apt install nginx
-rm /etc/nginx/sites-available/default
-cp webserver_config /etc/nginx/sites-available/default
-sudo systemctl restart nginx
 ```
 
 Install nvm (0.39.2):

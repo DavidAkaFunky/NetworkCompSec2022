@@ -1,24 +1,29 @@
 #!/bin/bash
 
-# https://linux.die.net/man/8/iptables
-
 # Web server
 if [ "$1" == "webserver" ]
 then
-    echo "[VM1] Setting up ifconfig"
+    echo "Configuring ifconfig"
 
-    cp -f network-managers/webserver_vm.yaml > /etc/netplan/01-network-manager-all.yaml
+    cp -f network-managers/webserver_vm.yaml /etc/netplan/01-network-manager-all.yaml
+
+    echo "Configuring NGINX"
+
+    sudo apt install nginx -y
+    rm /etc/nginx/sites-available/default
+    cp nginx-config/webserver_config /etc/nginx/sites-available/default
+    sudo systemctl restart nginx
 
 # Firewall
 elif [ "$1" == "firewall" ]
 then    
-    echo "[VM2] Setting up ifconfig"
+    echo "Configuring netplan"
 
-    cp -f network-managers/firewall_vm.yaml > /etc/netplan/01-network-manager-all.yaml
+    cp -f network-managers/firewall_vm.yaml /etc/netplan/01-network-manager-all.yaml
 
-    echo "[VM2] Setting up Firewall"
+    echo "Configuring iptable policies and rules"
 
-    echo "[VM2] Setting default policy: DROP all traffic"
+    echo "Setting default policy: DROP all traffic"
     iptables -P INPUT DROP
     iptables -P OUTPUT DROP
     iptables -P FORWARD DROP
@@ -59,24 +64,57 @@ then
     iptables -A POSTROUTING -t nat -p tcp -s 192.168.0.2 --sport 80 -j MASQUERADE
     iptables -A POSTROUTING -t nat -p tcp -s 192.168.0.2 --sport 443 -j MASQUERADE
 
-    #sh -c 'iptables-save > /etc/iptables/rules.v4'
-    #sh -c 'ip6tables-save > /etc/iptables/rules.v6'
+    sudo apt install iptables-persistent -y
+    # FOR IPv4
+    sudo sh -c 'iptables-save > /etc/iptables/rules.v4'
+    # FOR IPv6
+    sudo sh -c 'ip6tables-save > /etc/iptables/rules.v6'
 
 # Database
 elif [ "$1" == "database" ]
 then
-    echo "[Database] Setting up ifconfig"
+    echo "Configuring netplan"
 
-    cp -f network-managers/database_vm.yaml > /etc/netplan/01-network-manager-all.yaml
+    cp -f network-managers/database_vm.yaml /etc/netplan/01-network-manager-all.yaml
+
+    echo "Installing PostgreSQL"
+
+    sudo wget http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc
+    sudo apt-key add ACCC4CF8.asc
+    sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+    sudo apt -y update
+    sudo apt -y install postgresql-14
+
+    echo "Configuring postgres permissions for ssl"
+
+    chown postgres:ssl-cert /etc/ssl/private/
+    chown postgres:postgres /etc/ssl/private/webserver.key
+    chown postgres:ssl-cert /etc/ssl/certs/
+    chown postgres:postgres /etc/ssl/certs/webserver.crt
 
 # Internal user
 elif [ "$1" == "internaluser" ]
-    echo "[Internal User] Setting up ifconfig"
+then
+    echo "Configuring netplan"
 
-    cp -f network-managers/internaluser_vm.yaml > /etc/netplan/01-network-manager-all.yaml
+    cp -f network-managers/internaluser_vm.yaml /etc/netplan/01-network-manager-all.yaml
+
+# External service
+elif [ "$1" == "externalservice" ]
+then
+    echo "Configuring netplan"
+
+    cp -f network-managers/externalservice_vm.yaml /etc/netplan/01-network-manager-all.yaml
+
+    echo "Configuring NGINX"
+
+    sudo apt install nginx -y
+    rm /etc/nginx/sites-available/default
+    cp nginx-config/externalservice_config /etc/nginx/sites-available/default
+    sudo systemctl restart nginx
 
 else
-    echo "Usage: $0 <webserver|firewall|database|internaluser>"
+    echo "Usage: $0 <webserver|firewall|database|internaluser|externalservice>"
     exit 1
 fi
 
