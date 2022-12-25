@@ -1,6 +1,8 @@
 import { Router, Request, Response, NextFunction } from "express";
-import UserLoginData from "../models/userLoginData";
+import LoginData from "../models/loginData";
 import UserRegisterData from "../models/userRegisterData";
+import AdminRegisterData from "../models/adminRegisterData";
+import AdminValidationData from "../models/adminValidationData";
 import { AuthService, TwoFAService } from "../services/index";
 
 const router = Router();
@@ -19,7 +21,7 @@ router.post("/totp/generate", async (req: Request, res: Response, next: NextFunc
 
 router.post("/register-client", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        await AuthService.registerUser(req.body as UserRegisterData, false);
+        await AuthService.registerUser(req.body as UserRegisterData);
         res.sendStatus(200);
     } catch (err: any) {
         next(err);
@@ -28,43 +30,44 @@ router.post("/register-client", async (req: Request, res: Response, next: NextFu
 
 router.post("/register-admin", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const data = req.body;
-        data.password = require('crypto').randomBytes(16).toString('hex');
-        await AuthService.registerUser(data as UserRegisterData, true);
+        await AuthService.registerAdmin(req.body as AdminRegisterData);
         res.sendStatus(200);
     } catch (err: any) {
         next(err);
     }
 });
 
-router.post("/verify-login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.post("/validate-admin", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const hasToken = await AuthService.verifyUserLogin(req.body);
-        let content;
-
-        if (!hasToken){
-            content = await TwoFAService.generateTOTPQRCode(req.body.email);
-        }
-        
-        res.status(200).json({
-            secret: content?.secret,
-            qrCode: content?.qrCode
-        });
+        await AuthService.validateAdmin(req.body as AdminValidationData);
+        res.sendStatus(200);
     } catch (err: any) {
         next(err);
     }
 });
 
-router.post("/login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.post("/first-fase-login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const loginData =
-        {
+        const status = await AuthService.firstFaseLogin(req.body as LoginData);
+        if(status) {
+            res.sendStatus(302);
+        } else {
+            res.sendStatus(200);
+        }
+    } catch (err: any) {
+        next(err);
+    }
+});
+
+router.post("/second-fase-login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const loginData = {
             email: req.body.email,
             password: req.body.password,
-            secret: req.body.secret,
-            token: req.body.token
         }
-        const userLogged = await AuthService.loginUser(loginData as UserLoginData);
+
+        const userLogged = await AuthService.secondFaseLogin(loginData as LoginData, req.body.token);
+
         res.setHeader("Cache-Control", "no-cache=set-cookie");
         res.cookie("refreshToken", userLogged.refreshToken, {
             httpOnly: true,   // can't be accessed by javascript
@@ -77,6 +80,7 @@ router.post("/login", async (req: Request, res: Response, next: NextFunction): P
             isAdmin: userLogged.isAdmin,
             accessToken: userLogged.accessToken,
         });
+
     } catch (err: any) {
         next(err);
     }

@@ -3,15 +3,14 @@ import prisma from "../prisma/client"
 
 class UserDatabase {
 
-  public static createUser = async (name: string, email: string, admin: boolean, pwd: string, twoFASecret?: string): Promise<boolean> => {
+  public static createUser = async (name: string, email: string, pwd: string, twoFASecret: string): Promise<boolean> => {
     try {
       await prisma.user.create({
         data: {
           name: name,
           email: email,
-          admin: admin,
           password: pwd,
-          twoFASecret: twoFASecret || undefined,
+          twoFASecret: twoFASecret,
         }
       });
       return true;
@@ -61,14 +60,15 @@ class UserDatabase {
     }
   }
 
-  public static changeUserPassword = async(email: string, password: string): Promise<boolean> => {
+  public static changeUserPassword = async(email: string, oldPassword: string, newPassword: string): Promise<boolean> => {
     try {
-      await prisma.user.update({
-        where: {
-          email: email
+      await prisma.user.updateMany({//should only allow changing the password if the old one match.
+        where: { 
+          email: email,
+          password: oldPassword,
         },
         data: {
-          password: password
+          password: newPassword
         }
       });
       return true;

@@ -11,7 +11,6 @@ datasource db {
 }
 
 enum Role {
-  CLIENT
   ADMIN
   SUPERADMIN
 }
@@ -21,9 +20,18 @@ model User {
   name         String             @db.VarChar(255)
   email        String             @unique @db.VarChar(255)
   password     String             @db.VarChar(255)
+  twoFASecret  String             @map("two_fa_secret") @db.VarChar(255)
+  transactions StockTransaction[] @relation("UserTransaction")
+}
+
+model Admin {
+  id           Int                @id @default(autoincrement())
+  name         String             @db.VarChar(255)
+  email        String             @unique @db.VarChar(255)
+  password     String             @db.VarChar(255)
   role         Role
   twoFASecret  String?            @map("two_fa_secret") @db.VarChar(255)
-  transactions StockTransaction[] @relation("UserTransaction")
+  valDate      Int?
 }
 
 model RefreshToken {
