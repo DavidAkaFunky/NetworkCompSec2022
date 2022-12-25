@@ -71,6 +71,7 @@ then
 
 # Internal user
 elif [ "$1" == "internaluser" ]
+then
     echo "[Internal User] Setting up ifconfig"
 
     cp -f network-managers/internaluser_vm.yaml > /etc/netplan/01-network-manager-all.yaml
