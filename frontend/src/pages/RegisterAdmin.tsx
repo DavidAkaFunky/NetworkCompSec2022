@@ -13,22 +13,18 @@ function RegisterAdmin() {
 
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
-	const [repeatPassword, setRepeatPassword] = useState("");
 	const [firstTry, setFirstTry] = useState(true);
 	const [sending, setSending] = useState(false);
 	const [error, setError] = useState(false);
 
-	const handleFirstSubmit = async (e: any) => {
+	const handleSubmit = async (e: any) => {
 		setSending(true);
 		setFirstTry(false);
 
 		if (
 			!name.length ||
 			!email.length ||
-			!email.includes("@") ||
-			password.length < 4 ||
-			repeatPassword !== password
+			!email.includes("@")
 		) {
 			setSending(false);
 			return;
@@ -38,8 +34,7 @@ function RegisterAdmin() {
 			setFirstTry(true);
 			await axios.post("/api/auth/register-admin", {
 				name: name,
-				email: email,
-				password: password
+				email: email + "@ncmb.com"
 			});
 
 			navigate("/login");
@@ -53,7 +48,7 @@ function RegisterAdmin() {
 	return (
 		<Box sx={{ mx: "auto", width: "80vw", maxWidth: 500 }}>
 			<Typography variant="h4" component="h1">
-				<strong>Register</strong>
+				<strong>Register New Admin</strong>
 			</Typography>
 			{error && (
 				<Typography fontSize={15} color="red">
@@ -89,37 +84,9 @@ function RegisterAdmin() {
 					onChange={(e) => setEmail(e.target.value)}
 					error={!firstTry && !(email.length > 1 && email.includes("@"))}
 				/>
-				<TextField
-					margin="normal"
-					variant="filled"
-					required
-					fullWidth
-					name="password"
-					label={"Password"}
-					type="password"
-					id="password"
-					autoComplete="current-password"
-					value={password}
-					onChange={(e) => setPassword(e.target.value)}
-					error={!firstTry && password.length > 0 && password.length < 4}
-				/>
-				<TextField
-					margin="normal"
-					variant="filled"
-					required
-					fullWidth
-					name="repeatPassword"
-					label={"Repeat Password"}
-					type="password"
-					id="repeatPassword"
-					autoComplete="current-password"
-					value={repeatPassword}
-					onChange={(e) => setRepeatPassword(e.target.value)}
-					error={!firstTry && password !== repeatPassword}
-				/>
 				<Button
 					fullWidth
-					onClick={handleFirstSubmit}
+					onClick={handleSubmit}
 					variant="contained"
 					sx={{ mt: 3 }}
 					disabled={sending}
@@ -127,7 +94,7 @@ function RegisterAdmin() {
 					{sending ? "Sending..." : "Submit"}
 				</Button>
 				<Button color="primary" fullWidth sx={{ mt: 2 }}>
-					<Link to="/login">Already have an account?</Link>
+					<Link to="/login">Looking to log in?</Link>
 				</Button>
 			</Box>
 		</Box>

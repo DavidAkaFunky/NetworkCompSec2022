@@ -60,6 +60,23 @@ class UserDatabase {
       return [];
     }
   }
+
+  public static changeUserPassword = async(email: string, password: string): Promise<boolean> => {
+    try {
+      await prisma.user.update({
+        where: {
+          email: email
+        },
+        data: {
+          password: password
+        }
+      });
+      return true;
+
+    } catch (err) {
+      return false;
+    }
+  }
 }
 
 

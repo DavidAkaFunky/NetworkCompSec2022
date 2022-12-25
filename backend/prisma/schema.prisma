@@ -10,18 +10,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  CLIENT
+  ADMIN
+  SUPERADMIN
+}
+
 model User {
   id           Int                @id @default(autoincrement())
   name         String             @db.VarChar(255)
   email        String             @unique @db.VarChar(255)
-  admin        Boolean            
   password     String             @db.VarChar(255)
+  role         Role
   twoFASecret  String?            @map("two_fa_secret") @db.VarChar(255)
   transactions StockTransaction[] @relation("UserTransaction")
 }
 
 model RefreshToken {
-  id String @id @db.VarChar(255)
+  id           String             @id @db.VarChar(255)
 }
 
 model Stock {

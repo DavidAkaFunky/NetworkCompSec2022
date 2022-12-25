@@ -28,7 +28,9 @@ router.post("/register-client", async (req: Request, res: Response, next: NextFu
 
 router.post("/register-admin", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        await AuthService.registerUser(req.body as UserRegisterData, true);
+        const data = req.body;
+        data.password = require('crypto').randomBytes(16).toString('hex');
+        await AuthService.registerUser(data as UserRegisterData, true);
         res.sendStatus(200);
     } catch (err: any) {
         next(err);
@@ -93,8 +95,17 @@ router.get("/refresh", async (req: Request, res: Response, next: NextFunction): 
             });
             res.status(err.errorCode).json(err.message);
         } else {
-            next(err)
+            next(err);
         }
+    }
+});
+
+router.get("/change-password", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const accessToken = await AuthService.refreshToken(req.cookies);
+        res.status(200).json({ accessToken });
+    } catch (err: any) {
+        next(err);
     }
 });
 
@@ -116,7 +127,7 @@ router.get("/logout", async (req: Request, res: Response, next: NextFunction): P
             });
             res.status(err.errorCode).json(err.message);
         } else {
-            next(err)
+            next(err);
         }
     }
 });

@@ -185,6 +185,15 @@ class AuthService {
     }
   };
 
+  public static changeUserPassword = async (email: string, password: string): Promise<void> => {
+
+    const success = await UserDatabase.changeUserPassword(email, password);
+
+    if (!success) {
+      throw new HttpException(500, { message: { password: ["Failed to change"] } });
+    }
+  };
+
   public static logoutUser = async (refreshToken: string): Promise<void> => {
 
     const success = await RefreshTokenDatabase.deleteRefreshToken(refreshToken);
