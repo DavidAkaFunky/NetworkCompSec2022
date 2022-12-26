@@ -16,13 +16,17 @@ function Register() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [repeatPassword, setRepeatPassword] = useState("");
-	const [qrCode, setQrCode] = useState("");
+	
 	const [firstTryForm, setFirstTryForm] = useState(true);
 	const [firstTryTwoFA, setFirstTryTwoFA] = useState(true);
+	
 	const [firstSending, setFirstSending] = useState(false);
 	const [secondSending, setSecondSending] = useState(false);
+	
+	const [qrCode, setQrCode] = useState("");
 	const [twoFA, setTwoFA] = useState(false);
 	const [twoFAToken, setTwoFAToken] = useState("");
+	
 	const [error, setError] = useState(false);
 
 	const secret = useRef("");
@@ -31,12 +35,8 @@ function Register() {
 		setFirstSending(true);
 		setFirstTryForm(false);
 
-		if (
-			!name.length ||
-			!email.length ||
-			!email.includes("@") ||
-			password.length < 4 ||
-			repeatPassword !== password
+		if ( !name.length || !email.length || !email.includes("@") ||
+				password.length < 4 || repeatPassword !== password
 		) {
 			setFirstSending(false);
 			return;
@@ -47,30 +47,35 @@ function Register() {
 				email: email,
 			});
 
-			const data = await response.data;
-			secret.current = data.secret;
+			if(response.status != 200){
+				setError(true);
+			} else {
+				secret.current = response.data.secret;
 
-			setQrCode(data.qrCode);
-			setTwoFA(true);
-			setFirstTryForm(true);
+				setQrCode(response.data.qrCode);
+				setTwoFA(true);
+				setFirstTryForm(true);
+			}
+
 		} catch (err: any) {
 			setError(true);
+		} finally {
+			setFirstSending(false);
 		}
 
-		setFirstSending(false);
 	};
 
 	const handleSecondSubmit = async (e: any) => {
 		setSecondSending(true);
 
 		try {
-            if(!(Number(twoFAToken) && twoFAToken.length !== 6)){
+            if(!(Number(twoFAToken) && twoFAToken.length === 6)){
 			    setFirstTryTwoFA(false);
                 setSecondSending(false);
                 return;
             }
             
-			await axios.post("/api/auth/register-client", {
+			const response = await axios.post("/api/auth/register-client", {
 				name: name,
 				email: email,
 				password: password,
@@ -78,9 +83,14 @@ function Register() {
 				token: twoFAToken,
 			});
 
-			navigate("/login");
+			if(response.status != 200){
+				setError(true);
+			} else {
+				navigate("/login");
+			}
 		} catch (err: any) {
-			setFirstTryTwoFA(false);
+			//setFirstTryTwoFA(false);
+			setError(true);
 		} finally {
             setSecondSending(false);
             setTwoFA(false);
@@ -169,7 +179,17 @@ function Register() {
 					</Button>
 				</Box>
 			</Box>
-			<TwoFADialog qrCode={qrCode} twoFA={twoFA} setTwoFA={setTwoFA} twoFAToken={twoFAToken} setTwoFAToken={setTwoFAToken} sending={secondSending} setSending={setSecondSending} firstTry={firstTryTwoFA} handleSubmit={handleSecondSubmit} />
+			<TwoFADialog 
+				qrCode={qrCode} 
+				twoFA={twoFA} 
+				setTwoFA={setTwoFA} 
+				twoFAToken={twoFAToken} 
+				setTwoFAToken={setTwoFAToken} 
+				sending={secondSending} 
+				setSending={setSecondSending} 
+				firstTry={firstTryTwoFA} 
+				handleSubmit={handleSecondSubmit} 
+			/>
 		</>
 	);
 }

@@ -28,7 +28,7 @@ function App() {
 						<Route element={<RequireAuth adminPrivileges={false} />}>
 							<Route path="/home" element={<Home />} />
 						</Route>
-						<Route element={<RequireAuth adminPrivileges={true} />}>
+						<Route element={<RequireAuth adminPrivileges={false} />}>
 							<Route path="/register-admin" element={<RegisterAdmin />} />
 							<Route path="/admin" element={<Admin />} />
 						</Route>

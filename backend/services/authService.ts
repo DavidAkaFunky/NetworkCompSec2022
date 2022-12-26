@@ -48,7 +48,7 @@ class AuthService {
       throw new HttpException(422, { errors: { secret: ["does not exist"] } });
     }
 
-    const adminEmailRegex = /^([a-zA-Z0-9\.]){4,30}$/g;
+    const adminEmailRegex = /^([a-zA-Z0-9\.]){4,30}(@ncmb.pt)$/g;
     const emailRegex = /^([a-zA-Z0-9\.]){4,30}@([a-zA-Z\.]){4,10}$/g;
 
     if (adminEmailRegex.test(email) || !emailRegex.test(email)){
@@ -80,7 +80,7 @@ class AuthService {
   //-------------------------------------REGISTER ADMIN-------------------------------------
   //========================================================================================
 
-  public static registerAdmin = async (registerData: AdminRegisterData): Promise<void> => {
+  public static registerAdmin = async (registerData: AdminRegisterData): Promise<LoginData> => {
 
     const name = registerData.name?.trim();
     const partial_email = registerData.partial_email?.trim();
@@ -115,11 +115,18 @@ class AuthService {
 
     validationDate.setDate(validationDate.getDate() + 1);
 
-    const success = await AdminDatabase.createAdmin(name, email, hashedPassword, null, validationDate.getTime());
+    const success = await AdminDatabase.createAdmin(name, email, hashedPassword, null, Number(validationDate.getTime()));
 
     if (!success) {
       throw new HttpException(500, { errors: { admin: ["could not be created"] } });
     }
+
+    const result = {
+      email: email,
+      password: password,
+    }
+
+    return result as LoginData;
   }
 
 
@@ -166,6 +173,11 @@ class AuthService {
     if (!admin) {
       throw new HttpException(401, { message: { username: ["No user exists with this e-mail"] } });
     }
+
+    if (!this.adminNeedValidation(admin)) {
+      throw new HttpException(401, { message: { username: ["Admin account already validated"] } });
+    }
+
 
     match = await bcrypt.compare(oldPassword, admin.password);
 
@@ -230,7 +242,7 @@ class AuthService {
       return false;
     }
 
-    if(admin.valDate == null || admin.valDate < currentDate.getTime()){
+    if(admin.valDate == null || admin.valDate < Number(currentDate.getTime())){
       throw new HttpException(401, { message: { username: ["This account has expired"] } });
     }
 

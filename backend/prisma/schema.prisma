@@ -31,7 +31,7 @@ model Admin {
   password     String             @db.VarChar(255)
   role         Role
   twoFASecret  String?            @map("two_fa_secret") @db.VarChar(255)
-  valDate      Int?
+  valDate      BigInt?
 }
 
 model RefreshToken {

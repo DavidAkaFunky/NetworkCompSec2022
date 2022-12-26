@@ -30,8 +30,8 @@ router.post("/register-client", async (req: Request, res: Response, next: NextFu
 
 router.post("/register-admin", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        await AuthService.registerAdmin(req.body as AdminRegisterData);
-        res.sendStatus(200);
+        const result = await AuthService.registerAdmin(req.body as AdminRegisterData);
+        res.status(200).json(result);
     } catch (err: any) {
         next(err);
     }
