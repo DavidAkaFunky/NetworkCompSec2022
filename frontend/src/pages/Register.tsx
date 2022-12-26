@@ -47,11 +47,10 @@ function Register() {
 				email: email,
 			});
 
-			if(response.status != 200){
+			if(response.status !== 200){
 				setError(true);
 			} else {
 				secret.current = response.data.secret;
-
 				setQrCode(response.data.qrCode);
 				setTwoFA(true);
 				setFirstTryForm(true);
@@ -83,7 +82,7 @@ function Register() {
 				token: twoFAToken,
 			});
 
-			if(response.status != 200){
+			if(response.status !== 200){
 				setError(true);
 			} else {
 				navigate("/login");

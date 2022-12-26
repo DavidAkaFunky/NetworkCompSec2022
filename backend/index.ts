@@ -43,6 +43,7 @@ app.use("/api", routes);
 
 // Error handling middleware
 app.use((err: any, req: any, res: any, next: any) => {
+    console.error(err);
     if (err instanceof HttpException) {
         res.status(err.errorCode).json(err.message);
     } else if (err instanceof Error) {

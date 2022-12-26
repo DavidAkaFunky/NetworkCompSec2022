@@ -37,15 +37,13 @@ class AdminDatabase {
         }
     }
 
-    public static validateAdmin = async (email: string, oldPassword: string, newPassword: string, twoFASecret: string): Promise<boolean> => {
+    public static addAdminTwoFASecret = async (email: string, twoFASecret: string): Promise<boolean> => {
         try {
             await prisma.admin.updateMany({//should only allow validation if the old password match.
                 where: {
                     email: email,
-                    password: oldPassword
                 },
                 data: {
-                    password: newPassword,
                     twoFASecret: twoFASecret,
                 }
             });

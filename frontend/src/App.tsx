@@ -11,6 +11,7 @@ import Landing from "./pages/Landing";
 import Register from "./pages/Register";
 import RegisterAdmin from "./pages/RegisterAdmin";
 import CertificationAuthority from "./pages/CertificationAuthority";
+import ChangePassword from "./pages/ChangePassword";
 
 function App() {
 	return (
@@ -27,8 +28,9 @@ function App() {
 						{/* Protected routes */}
 						<Route element={<RequireAuth adminPrivileges={false} />}>
 							<Route path="/home" element={<Home />} />
+							<Route path="/change-password" element={<ChangePassword />} />
 						</Route>
-						<Route element={<RequireAuth adminPrivileges={false} />}>
+						<Route element={<RequireAuth adminPrivileges={true} />}>
 							<Route path="/register-admin" element={<RegisterAdmin />} />
 							<Route path="/admin" element={<Admin />} />
 						</Route>

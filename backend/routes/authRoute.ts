@@ -37,36 +37,23 @@ router.post("/register-admin", async (req: Request, res: Response, next: NextFun
     }
 });
 
-router.post("/validate-admin", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.post("/first-stage-login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        await AuthService.validateAdmin(req.body as AdminValidationData);
-        res.sendStatus(200);
+        const content = await AuthService.firstStageLogin(req.body as LoginData);
+        res.status(200).json(content);
     } catch (err: any) {
         next(err);
     }
 });
 
-router.post("/first-fase-login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const status = await AuthService.firstFaseLogin(req.body as LoginData);
-        if(status) {
-            res.sendStatus(302);
-        } else {
-            res.sendStatus(200);
-        }
-    } catch (err: any) {
-        next(err);
-    }
-});
-
-router.post("/second-fase-login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.post("/second-stage-login", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const loginData = {
             email: req.body.email,
             password: req.body.password,
         }
 
-        const userLogged = await AuthService.secondFaseLogin(loginData as LoginData, req.body.token);
+        const userLogged = await AuthService.secondStageLogin(loginData as LoginData, req.body.token, req.body.secret);
 
         res.setHeader("Cache-Control", "no-cache=set-cookie");
         res.cookie("refreshToken", userLogged.refreshToken, {

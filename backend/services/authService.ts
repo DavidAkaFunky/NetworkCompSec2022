@@ -8,6 +8,7 @@ import UserLoggedData from '../models/userLoggedData';
 import { AdminDatabase, UserDatabase, RefreshTokenDatabase } from '../database/index';
 import { TokenService, TwoFAService } from './index';
 import { User, Admin } from '@prisma/client';
+import TwoFAData from '../models/twoFAData';
 
 class AuthService {
 
@@ -83,9 +84,9 @@ class AuthService {
   public static registerAdmin = async (registerData: AdminRegisterData): Promise<LoginData> => {
 
     const name = registerData.name?.trim();
-    const partial_email = registerData.partial_email?.trim();
+    const partialEmail = registerData.partialEmail?.trim();
 
-    if (!partial_email) {
+    if (!partialEmail) {
       throw new HttpException(422, { errors: { email: ["can't be blank"] } });
     }
 
@@ -95,11 +96,11 @@ class AuthService {
 
     const emailRegex = /^([a-zA-Z0-9\.]){4,30}$/g;
 
-    if (!emailRegex.test(partial_email)){
+    if (!emailRegex.test(partialEmail)){
       throw new HttpException(422, { errors: { email: ["is invalid"] } });
     }
 
-    const email = partial_email + "@ncmb.pt";
+    const email = partialEmail + "@ncmb.pt";
 
     const unique = await this.checkAdminUniqueness(email);
 
@@ -127,71 +128,6 @@ class AuthService {
     }
 
     return result as LoginData;
-  }
-
-
-
-  public static validateAdmin = async (validationData: AdminValidationData) => {
-
-    const email = validationData.email?.trim();
-    const oldPassword = validationData.oldPassword?.trim();
-    const newPassword = validationData.newPassword?.trim();
-    const secret = validationData.secret?.trim();
-    const token = validationData.token?.trim();
-
-    if (!email) {
-      throw new HttpException(422, { errors: { email: ["can't be blank"] } });
-    }
-
-    if (!oldPassword) {
-      throw new HttpException(422, { errors: { oldPassword: ["can't be blank"] } });
-    }
-
-    if (!newPassword || newPassword.length < 4) {
-      throw new HttpException(422, { errors: { newPassword: ["can't be blank"] } });
-    }
-
-    if (!secret || !token) {
-      throw new HttpException(422, { errors: { secret: ["does not exist"] } });
-    }
-
-    let match = await TwoFAService.verifyTOTPQRCode(token, secret);
-
-    if (!match) {
-      throw new HttpException(401, { message: { secret: ["Wrong 2FA token"] } });
-    }
-
-    const emailRegex = /^([a-zA-Z0-9\.]){4,30}(@ncmb.pt)$/g;
-
-    //Check if is admin or client
-    if (!emailRegex.test(email)){
-      throw new HttpException(401, { message: { username: ["No user exists with this e-mail"] } });
-    }
-
-    const admin = await AdminDatabase.getAdmin(email);
-
-    if (!admin) {
-      throw new HttpException(401, { message: { username: ["No user exists with this e-mail"] } });
-    }
-
-    if (!this.adminNeedValidation(admin)) {
-      throw new HttpException(401, { message: { username: ["Admin account already validated"] } });
-    }
-
-
-    match = await bcrypt.compare(oldPassword, admin.password);
-
-    if (!match) {
-      throw new HttpException(401, { message: { username: ["Wrong password"] } });
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    const success = await AdminDatabase.validateAdmin(email, oldPassword, hashedPassword, secret);
-
-    if (!success) {
-      throw new HttpException(500, { errors: { admin: ["could not be validated"] } });
-    }
   }
 
   //========================================================================================
@@ -244,42 +180,48 @@ class AuthService {
 
     if(admin.valDate == null || admin.valDate < Number(currentDate.getTime())){
       throw new HttpException(401, { message: { username: ["This account has expired"] } });
+      // MAYBE DELETE EXISTING ACCOUNT FROM DATABASE?
     }
 
     return true;
   }
 
-
-  public static firstFaseLogin = async (loginData: LoginData): Promise<boolean> => {
+  public static firstStageLogin = async (loginData: LoginData): Promise<TwoFAData | null> => {
     const user = await this.loginVerification(loginData);
 
     const emailRegex = /^([a-zA-Z0-9\.]){4,30}(@ncmb.pt)$/g;
 
     //Check if is admin or client
-    if (emailRegex.test(user.email)){
-      return this.adminNeedValidation(user as Admin); 
-    }
-
-    return false;
+    if (emailRegex.test(user.email) && this.adminNeedValidation(user as Admin))
+      return await TwoFAService.generateTOTPQRCode(user.email);
+    
+    return null;
   };
 
-  public static secondFaseLogin = async (loginData: LoginData, token: string): Promise<UserLoggedData> => {
-
-    let isAdmin: boolean = false;
+  public static secondStageLogin = async (loginData: LoginData, token: string, secret?: string): Promise<UserLoggedData> => {
 
     const user = await this.loginVerification(loginData);
 
     const emailRegex = /^([a-zA-Z0-9\.]){4,30}(@ncmb.pt)$/g;
 
-    if (emailRegex.test(user.email)) {
-      if (this.adminNeedValidation(user as Admin)){
-        throw new HttpException(401, { message: { username: ["Please validate admin account first"] } });
+    const isAdmin: boolean = emailRegex.test(user.email);
+
+    let match: boolean
+
+    if (isAdmin && this.adminNeedValidation(user as Admin)) {
+      if (!secret){
+        throw new HttpException(401, "2FA Secret missing");
       }
 
-      isAdmin = true;
-    }
+      match = await TwoFAService.verifyTOTPQRCode(token, secret);
 
-    const match = await TwoFAService.verifyTOTPQRCode(token, user.twoFASecret!);
+      if (match && !await AdminDatabase.addAdminTwoFASecret(user.email, secret)){
+        throw new HttpException(401, "Failed to add 2FA secret");
+      }
+    }
+    else {
+      match = await TwoFAService.verifyTOTPQRCode(token, user.twoFASecret!);
+    }
 
     if (!match) {
       throw new HttpException(401, { message: { username: ["Wrong 2FA token"] } });

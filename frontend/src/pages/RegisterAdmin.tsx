@@ -41,10 +41,10 @@ function RegisterAdmin() {
 			setFirstTry(true);
 			const response = await axios.post("/api/auth/register-admin", {
 				name: name,
-				partial_email: partialEmail
+				partialEmail: partialEmail
 			});
 
-			if(response.status == 200){
+			if(response.status === 200){
 				setEmail(response.data.email)
 				setPassword(response.data.password);
 				setShowCredentials(true);

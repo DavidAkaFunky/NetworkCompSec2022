@@ -26,32 +26,34 @@ function Login() {
 	
 	const [error, setError] = useState(false);
 	
-	//const [qrCode, setQrCode] = useState("");
+	const [qrCode, setQrCode] = useState("");
 	const [twoFA, setTwoFA] = useState(false);
 	const [twoFAToken, setTwoFAToken] = useState("");
 
-	//const secret = useRef("");
+	const secret = useRef("");
 
 	const handleFirstSubmit = async (e: any) => {
 		setFirstSending(true);
 		setFirstTryForm(false);
+		setQrCode("");
+		secret.current = "";
 
 		if (!email.length || !email.includes("@") || password.length < 4) {
 			setFirstSending(false);
 			return;
 		}
-
 		try {
-			const response = await axios.post("/api/auth/first-fase-login", {
+			const response = await axios.post("/api/auth/first-stage-login", {
 				email: email,
 				password: password,
 			});
-
-			if(response.status == 200){
+			if (response.status === 200){
+				if (response.data){
+					secret.current = response.data.secret;
+					setQrCode(response.data.qrCode);
+				}
 				setTwoFA(true);
 				setFirstTryForm(true);
-			} else if (response.status == 302) {
-				console.log("navigate");
 			} else {
 				setError(true);
 			} 
@@ -73,13 +75,14 @@ function Login() {
                 return;
             }
 
-			const response = await axios.post("/api/auth/second-fase-login", {
+			const response = await axios.post("/api/auth/second-stage-login", {
 				email: email,
 				password: password,
+				secret: secret.current,
 				token: twoFAToken
 			});
 
-			if(response.status != 200){
+			if(response.status !== 200){
 				setError(true);
 			} else {
 				setAuth({
@@ -88,7 +91,6 @@ function Login() {
 					username: response.data.name,
 					accessToken: response.data.accessToken,
 				});
-
 				navigate("/home");
 			}
 
@@ -158,7 +160,17 @@ function Login() {
 					</Button>
 				</Box>
 			</Box>
-			<TwoFADialog qrCode={""} twoFA={twoFA} setTwoFA={setTwoFA} twoFAToken={twoFAToken} setTwoFAToken={setTwoFAToken} sending={secondSending} setSending= {setSecondSending} firstTry={firstTryTwoFA} handleSubmit={handleSecondSubmit} />
+			<TwoFADialog
+				qrCode={qrCode}
+				twoFA={twoFA}
+				setTwoFA={setTwoFA}
+				twoFAToken={twoFAToken}
+				setTwoFAToken={setTwoFAToken}
+				sending={secondSending}
+				setSending={setSecondSending}
+				firstTry={firstTryTwoFA}
+				handleSubmit={handleSecondSubmit}
+			/>
 		</>
 	);
 }

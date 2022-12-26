@@ -29,7 +29,7 @@ function Navbar() {
 	const [anchorElUserSettings, setAnchorElUserSettings] =
 		useState<null | HTMLElement>(null);
 	const open = Boolean(anchorElUserSettings);
-
+	console.log(auth);
 	return (
 		<AppBar position="static">
 			<Container maxWidth={false}>

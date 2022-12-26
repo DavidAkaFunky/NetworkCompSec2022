@@ -11,7 +11,8 @@ import axios from "../interceptors/Axios";
 function ChangePassword() {
 	const navigate = useNavigate();
 
-	const [password, setPassword] = useState("");
+	const [currentPassword, setCurrentPassword] = useState("");
+	const [newPassword, setNewPassword] = useState("");
 	const [repeatPassword, setRepeatPassword] = useState("");
 	const [firstTry, setFirstTry] = useState(true);
 	const [sending, setSending] = useState(false);
@@ -21,8 +22,8 @@ function ChangePassword() {
 		setSending(true);
 		setFirstTry(false);
 
-		if (password.length < 4 ||
-			repeatPassword !== password
+		if (newPassword.length < 4 ||
+			repeatPassword !== newPassword
 		) {
 			setSending(false);
 			return;
@@ -30,8 +31,7 @@ function ChangePassword() {
 
 		try {
 			await axios.post("/api/auth/change-password", {
-				email: "placeholder@ncmb.com", // CHANGE TO GET E-MAIL FROM SESSION FOR EXAMPLE?
-                password: password
+                password: newPassword
 			});
 
 			setFirstTry(true);
@@ -61,13 +61,27 @@ function ChangePassword() {
                     required
                     fullWidth
                     name="password"
-                    label={"Password"}
+                    label={"Current Password"}
                     type="password"
                     id="password"
                     autoComplete="current-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    error={!firstTry && password.length > 0 && password.length < 4}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    error={!firstTry && currentPassword.length > 0 && currentPassword.length < 4}
+                />
+                <TextField
+                    margin="normal"
+                    variant="filled"
+                    required
+                    fullWidth
+                    name="password"
+                    label={"New Password"}
+                    type="password"
+                    id="password"
+                    autoComplete="current-password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    error={!firstTry && newPassword.length > 0 && newPassword.length < 4}
                 />
                 <TextField
                     margin="normal"
@@ -81,7 +95,7 @@ function ChangePassword() {
                     autoComplete="current-password"
                     value={repeatPassword}
                     onChange={(e) => setRepeatPassword(e.target.value)}
-                    error={!firstTry && password !== repeatPassword}
+                    error={!firstTry && newPassword !== repeatPassword}
                 />
                 <Button
                     fullWidth

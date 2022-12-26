@@ -138,7 +138,7 @@ function Home() {
 											<TableCell>{row.name}</TableCell>
 											<TableCell>{row.ISIN}</TableCell>
 											<TableCell>{row.exchange}</TableCell>
-											<TableCell>{`€${row.lastPrice}`}</TableCell>
+											<TableCell>{`${row.lastPrice} €`}</TableCell>
 											<TableCell>{row.volume}</TableCell>
 											<TableCell align="right">{row.date}</TableCell>
 										</TableRow>
