@@ -2,7 +2,6 @@ import bcrypt from 'bcryptjs';
 import HttpException from '../models/httpException';
 import UserRegisterData from '../models/userRegisterData';
 import AdminRegisterData from '../models/adminRegisterData';
-import AdminValidationData from "../models/adminValidationData";
 import LoginData from '../models/loginData';
 import UserLoggedData from '../models/userLoggedData';
 import { AdminDatabase, UserDatabase, RefreshTokenDatabase } from '../database/index';
@@ -112,11 +111,7 @@ class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const validationDate = new Date();
-
-    validationDate.setDate(validationDate.getDate() + 1);
-
-    const success = await AdminDatabase.createAdmin(name, email, hashedPassword, null, Number(validationDate.getTime()));
+    const success = await AdminDatabase.createAdmin(name, email, hashedPassword, null);
 
     if (!success) {
       throw new HttpException(500, { errors: { admin: ["could not be created"] } });
@@ -172,15 +167,8 @@ class AuthService {
 
   private static adminNeedValidation = (admin: Admin): boolean => {
 
-    const currentDate = new Date();
-
     if(admin.twoFASecret != null) {
       return false;
-    }
-
-    if(admin.valDate == null || admin.valDate < Number(currentDate.getTime())){
-      throw new HttpException(401, { message: { username: ["This account has expired"] } });
-      // MAYBE DELETE EXISTING ACCOUNT FROM DATABASE?
     }
 
     return true;

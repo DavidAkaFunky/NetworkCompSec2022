@@ -2,7 +2,6 @@ import { Router, Request, Response, NextFunction } from "express";
 import LoginData from "../models/loginData";
 import UserRegisterData from "../models/userRegisterData";
 import AdminRegisterData from "../models/adminRegisterData";
-import AdminValidationData from "../models/adminValidationData";
 import { AuthService, TwoFAService } from "../services/index";
 
 const router = Router();

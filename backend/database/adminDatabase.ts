@@ -3,7 +3,7 @@ import prisma from "../prisma/client"
 
 class AdminDatabase {
 
-    public static createAdmin = async (name: string, email: string, pwd: string, twoFASecret: string | null, validationDate: number): Promise<boolean> => {
+    public static createAdmin = async (name: string, email: string, pwd: string, twoFASecret: string | null): Promise<boolean> => {
         try {
             await prisma.admin.create({
                 data: {
@@ -12,7 +12,6 @@ class AdminDatabase {
                     password: pwd,
                     role: Role.ADMIN,
                     twoFASecret: twoFASecret,
-                    valDate: validationDate,
                 }
             });
             return true;
