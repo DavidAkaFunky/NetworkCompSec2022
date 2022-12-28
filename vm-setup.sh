@@ -17,6 +17,9 @@ then
 # Firewall
 elif [ "$1" == "firewall" ]
 then    
+
+    sudo apt install iptables-persistent -y
+
     echo "Configuring netplan"
 
     cp -f network-managers/firewall_vm.yaml /etc/netplan/01-network-manager-all.yaml
@@ -64,7 +67,6 @@ then
     iptables -A POSTROUTING -t nat -p tcp -s 192.168.0.2 --sport 80 -j MASQUERADE
     iptables -A POSTROUTING -t nat -p tcp -s 192.168.0.2 --sport 443 -j MASQUERADE
 
-    sudo apt install iptables-persistent -y
     # FOR IPv4
     sudo sh -c 'iptables-save > /etc/iptables/rules.v4'
     # FOR IPv6

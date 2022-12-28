@@ -24,25 +24,27 @@ The system architecture is composed by 5 VMs:
 
 The network is composed of 3 internal networks and 1 host-only network:
 
-|  Internal Network 1   | Internal Network 2 | Internal Network 3 | Host-only       |
-|-----------------------|--------------------|--------------------|-----------------|
-| Firewall              | Firewall           | Firewall           | Firewall        |
-| Web server            | Database           | Internal user      | External user   |
-|                       |                    |                    | External service|
+|  Internal Network 1 (sw1)  | Internal Network 2 (sw2)| Internal Network 3 (sw3) | Host-only       |
+|----------------------------|-------------------------|--------------------------|-----------------|
+| Firewall (ad. 1)           | Firewall (ad. 2)        | Firewall (ad. 3)         | Firewall (ad. 4)|
+| Web server (ad. 1)         | Database (ad. 1)        | Internal user (ad. 1)    | External user   |
+|                            |                         |                          | External service|
+
+
 
 Who's communicating<sup>1</sup> ? 
 
-|  Entity 1     | Entity 2          | Security protocol |
-|---------------|-------------------|-------------------|
-| External user | Web server        | HTTPS             |   
-| Web server    | Backend           | HTTP              |
-| Backend       | Database          | TLS               |
-| Web server    | External server   | HTTPS             |
+|  Entity 1            | Entity 2          | Security protocol |
+|----------------------|-------------------|-------------------|
+| External user        | Web server(nginx) | HTTPS             |   
+| Web server(nginx)    | Backend           | HTTP              |
+| Backend              | Database          | TLS               |
+| Web server(nginx)    | External server   | HTTPS             |
 
-1: All request go through the firewall before reaching their destination
+1: All requests go through the firewall before reaching their destination
 
 
-## Generating Certificate Authority (CA) and necessary certificates
+## Generating Certificate Authority (CA) and necessary certificates for the webserver (WebServer VM)
 
 Start by generating the CA key and certificate which will be used to sign the web server certificate request
 ```
