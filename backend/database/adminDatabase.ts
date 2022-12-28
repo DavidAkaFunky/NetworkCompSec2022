@@ -3,13 +3,13 @@ import prisma from "../prisma/client"
 
 class AdminDatabase {
 
-    public static createAdmin = async (name: string, email: string, pwd: string, twoFASecret: string | null): Promise<boolean> => {
+    public static createAdmin = async (name: string, email: string, password: string, twoFASecret: string | null): Promise<boolean> => {
         try {
             await prisma.admin.create({
                 data: {
                     name: name,
                     email: email,
-                    password: pwd,
+                    password: password,
                     role: Role.ADMIN,
                     twoFASecret: twoFASecret,
                 }
@@ -21,12 +21,26 @@ class AdminDatabase {
         }
     }
 
-
     public static getAdmin = async (email: string): Promise<Admin | null> => {
         try {
             const admin = await prisma.admin.findUnique({
                 where: {
                     email: email
+                }
+            });
+            return admin;
+
+        } catch (err) {
+            return null;
+        }
+    }
+
+    public static getAdminWithPassword = async (email: string, password: string): Promise<Admin | null> => {
+        try {
+            const admin = await prisma.admin.findFirst({
+                where: {
+                    email: email,
+                    password: password
                 }
             });
             return admin;

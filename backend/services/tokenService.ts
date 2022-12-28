@@ -18,7 +18,7 @@ class TokenService {
     public static verifyRefreshToken = (refreshToken: string): void => {
         jwt.verify(refreshToken, this.refreshSecret, (err: any) => {
             if (err) {
-                throw new HttpException(403, { message: { token: ["invalid token"] } });
+                throw new HttpException(403, "Invalid refresh token.");
             }
         })
     }
@@ -30,12 +30,12 @@ class TokenService {
         const token = authHeader && authHeader.split(' ')[1];
 
         if (!token) {
-            throw new HttpException(401, { message: { token: ["missing token"] } });
+            throw new HttpException(400, "The refresh token does not exist.");
         }
 
         jwt.verify(token, this.accessSecret, (err: any, id: any) => {
             if (err) {
-                throw new HttpException(403, { message: { token: ["invalid token"] } });
+                throw new HttpException(403, "Invalid refresh token");
             }
             req.body.id = id;
             next();

@@ -30,7 +30,7 @@ const TwoFADialog = ({ qrCode, twoFA, setTwoFA, twoFAToken, setTwoFAToken, sendi
         onClose={() => { setSending(false); setTwoFA(false) }}
         aria-describedby="alert-dialog-slide-description"
     >
-        <DialogTitle>{"Google Authenticator"}</DialogTitle>
+        <DialogTitle>{"Two-Factor Authentication"}</DialogTitle>
         <DialogContent>
             <Box sx={{ mx: "auto", maxWidth: "50vh", maxHeight: "100vw" }}>
                 {qrCode && <img src={qrCode} alt="" width="100%" />}
