@@ -4,7 +4,7 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import TwoFADialog from "../components/TwoFADialog";
 import axios from "../interceptors/Axios";
@@ -12,32 +12,60 @@ import axios from "../interceptors/Axios";
 function Register() {
 	const navigate = useNavigate();
 
+	const nameRegex = /^[a-zA-Z]([a-zA-Z ]){3,}$/g;
 	const [name, setName] = useState("");
+	const [nameError, setNameError] = useState("");
+	const isValidName = nameRegex.test(name.trim());
+
+	const emailRegex = /^([a-zA-Z0-9\.\-_]){4,60}@([a-zA-Z\.\-_]){1,30}.([a-zA-Z]){1,4}$/g;
 	const [email, setEmail] = useState("");
+	const [emailError, setEmailError] = useState("");
+	const isValidEmail = emailRegex.test(email.trim());
+
+	const passwordRegex = /^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-_+.]){1,}).{8,32}$/g;
 	const [password, setPassword] = useState("");
+	const [passwordError, setPasswordError] = useState("");
+	const isValidPassword = passwordRegex.test(password);
+
 	const [repeatPassword, setRepeatPassword] = useState("");
-	
-	const [firstTryForm, setFirstTryForm] = useState(true);
-	const [firstTryTwoFA, setFirstTryTwoFA] = useState(true);
+	const [repeatPasswordError, setRepeatPasswordError] = useState("");
+	const isValidRepeatPassword = repeatPassword === password;
 	
 	const [firstSending, setFirstSending] = useState(false);
 	const [secondSending, setSecondSending] = useState(false);
 	
 	const [qrCode, setQrCode] = useState("");
+
+	const tokenRegex = /^[0-9]{6}$/g;
 	const [twoFA, setTwoFA] = useState(false);
 	const [twoFAToken, setTwoFAToken] = useState("");
+	const isValidToken = tokenRegex.test(twoFAToken);
 	
-	const [error, setError] = useState(false);
+	const [generalError, setGeneralError] = useState("");
 
 	const secret = useRef("");
 
+	useEffect(() => {
+		setNameError(name && !isValidName ? "The name must be at least 4 characters long." : "");
+	}, [name]);
+
+	useEffect(() => {
+		setEmailError(email && !isValidEmail ? "The email is invalid." : "");
+	}, [email]);
+
+	useEffect(() => {
+		setPasswordError(password && !isValidPassword ? "The password is invalid. It must be 8-32 characters long and have at least: an uppercase letter, a lowercase letter, a digit and one of these symbols: !@#$%^&*()\-_+." : "");
+	}, [password]);
+
+	useEffect(() => {
+		setRepeatPasswordError(repeatPassword && !isValidRepeatPassword ? "The passwords do not match." : "");
+	}, [repeatPassword, password]);
+
 	const handleFirstSubmit = async (e: any) => {
 		setFirstSending(true);
-		setFirstTryForm(false);
 
-		if ( !name.length || !email.length || !email.includes("@") ||
-				password.length < 4 || repeatPassword !== password
-		) {
+		if (!name || !email || !password || !repeatPassword ||
+			!isValidName || !isValidEmail || !isValidPassword || !isValidRepeatPassword) {
 			setFirstSending(false);
 			return;
 		}
@@ -47,17 +75,16 @@ function Register() {
 				email: email,
 			});
 
-			if(response.status !== 200){
-				setError(true);
-			} else {
+			if (response.status === 200) {
 				secret.current = response.data.secret;
 				setQrCode(response.data.qrCode);
 				setTwoFA(true);
-				setFirstTryForm(true);
+			} else {
+				setGeneralError(response.data);
 			}
 
 		} catch (err: any) {
-			setError(true);
+			setGeneralError(err.message);
 		} finally {
 			setFirstSending(false);
 		}
@@ -68,8 +95,7 @@ function Register() {
 		setSecondSending(true);
 
 		try {
-            if(!(Number(twoFAToken) && twoFAToken.length === 6)){
-			    setFirstTryTwoFA(false);
+            if (!isValidToken){
                 setSecondSending(false);
                 return;
             }
@@ -82,14 +108,13 @@ function Register() {
 				token: twoFAToken,
 			});
 
-			if(response.status !== 200){
-				setError(true);
-			} else {
+			if (response.status === 200){
 				navigate("/login");
+			} else {
+				setGeneralError(response.data);
 			}
 		} catch (err: any) {
-			//setFirstTryTwoFA(false);
-			setError(true);
+			setGeneralError(err.message);
 		} finally {
             setSecondSending(false);
             setTwoFA(false);
@@ -102,9 +127,9 @@ function Register() {
 				<Typography variant="h4" component="h1">
 					<strong>Register</strong>
 				</Typography>
-                {error && (
+                {generalError && (
 					<Typography fontSize={15} color="red">
-						Failed to register. Please try another email and try again.
+						There was an error with your register: {generalError}
 					</Typography>
 				)}
 				<Box component="form">
@@ -120,7 +145,8 @@ function Register() {
 						autoFocus
 						value={name}
 						onChange={(e) => setName(e.target.value)}
-						error={!firstTryForm && name.length <= 0}
+						error={name.length > 0 && !isValidName}
+						helperText={nameError}
 					/>
 					<TextField
 						margin="normal"
@@ -134,7 +160,8 @@ function Register() {
 						autoFocus
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
-						error={!firstTryForm && !(email.length > 1 && email.includes("@"))}
+						error={email.length > 0 && !isValidEmail}
+						helperText={emailError}
 					/>
 					<TextField
 						margin="normal"
@@ -148,7 +175,8 @@ function Register() {
 						autoComplete="current-password"
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
-						error={!firstTryForm && password.length > 0 && password.length < 4}
+						error={password.length > 0 && !isValidPassword}
+						helperText={passwordError}
 					/>
 					<TextField
 						margin="normal"
@@ -162,18 +190,23 @@ function Register() {
 						autoComplete="current-password"
 						value={repeatPassword}
 						onChange={(e) => setRepeatPassword(e.target.value)}
-						error={!firstTryForm && password !== repeatPassword}
+						error={repeatPassword.length > 0 && !isValidRepeatPassword}
+						helperText={repeatPasswordError}
 					/>
 					<Button
 						fullWidth
 						onClick={handleFirstSubmit}
 						variant="contained"
 						sx={{ mt: 3 }}
-						disabled={firstSending}
+						disabled={!name || !email || !password || !repeatPassword ||
+								  !isValidName || !isValidEmail || !isValidPassword || !isValidRepeatPassword || firstSending}
 					>
 						{firstSending ? "Sending..." : "Submit"}
 					</Button>
-					<Button color="primary" fullWidth sx={{ mt: 2 }}>
+					<Button
+						color="primary"
+						fullWidth sx={{ mt: 2 }}
+					>
 						<Link to="/login">Already have an account?</Link>
 					</Button>
 				</Box>
@@ -182,11 +215,10 @@ function Register() {
 				qrCode={qrCode} 
 				twoFA={twoFA} 
 				setTwoFA={setTwoFA} 
-				twoFAToken={twoFAToken} 
-				setTwoFAToken={setTwoFAToken} 
+				token={twoFAToken} 
+				setToken={setTwoFAToken} 
 				sending={secondSending} 
 				setSending={setSecondSending} 
-				firstTry={firstTryTwoFA} 
 				handleSubmit={handleSecondSubmit} 
 			/>
 		</>

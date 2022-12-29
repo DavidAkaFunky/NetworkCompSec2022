@@ -9,54 +9,64 @@ import {
 	DialogActions,
 	DialogContent,
 } from "@mui/material";
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import Transition from "../components/Transition";
 
 import axios from "../interceptors/Axios";
 
 function RegisterAdmin() {
 
+	const nameRegex = /^[a-zA-Z]([a-zA-Z ]){3,}$/g;
 	const [name, setName] = useState("");
-	const [partialEmail, setPartialEmail] = useState("");
+	const [nameError, setNameError] = useState("");
+	const isValidName = nameRegex.test(name.trim());
 
-	const [email, setEmail] = useState("");
+	const partialEmailRegex = /^([a-zA-Z0-9\.\-_]){4,60}$/g;
+	const [partialEmail, setPartialEmail] = useState("");
+	const [partialEmailError, setPartialEmailError] = useState("");
+	const isValidPartialEmail = partialEmailRegex.test(partialEmail.trim());
+
 	const [password, setPassword] = useState("");
 
 	const [showCredentials, setShowCredentials] = useState(false);
 
-	const [firstTry, setFirstTry] = useState(true);
 	const [sending, setSending] = useState(false);
-	const [error, setError] = useState(false);
+	const [generalError, setGeneralError] = useState("");
+
+	useEffect(() => {
+		setNameError(name && !isValidName ? "The name must be at least 4 characters long." : "");
+	}, [name]);
+
+	useEffect(() => {
+		setPartialEmailError(partialEmail && !isValidPartialEmail ? "The email is invalid." : "");
+	}, [partialEmail]);
 
 	const handleSubmit = async (e: any) => {
 		setSending(true);
-		setFirstTry(false);
 
-		if ( !name.length || !partialEmail.length) {
+		if (!name || !partialEmail || !isValidName || !isValidPartialEmail) {
 			setSending(false);
 			return;
 		}
 
 		try {
-			setFirstTry(true);
 			const response = await axios.post("/api/auth/register-admin", {
 				name: name,
 				partialEmail: partialEmail
 			});
 
-			if(response.status === 200){
-				setEmail(response.data.email)
+			if (response.status === 200) {
 				setPassword(response.data.password);
 				setShowCredentials(true);
 			} else {
-				setError(true);
+				setGeneralError(response.data);
 			}
 
 		} catch (err: any) {
-			setError(true);
+			setGeneralError(err.message);
+		} finally {
+			setSending(false);
 		}
-
-		setSending(false);
 	};
 
 	return (
@@ -65,9 +75,9 @@ function RegisterAdmin() {
 				<Typography variant="h4" component="h1">
 					<strong>Register New Admin</strong>
 				</Typography>
-				{error && (
+				{generalError && (
 					<Typography fontSize={15} color="red">
-						Failed to register. Please try another email and try again.
+						There was an error with your register: {generalError}
 					</Typography>
 				)}
 				<Box component="form">
@@ -82,7 +92,8 @@ function RegisterAdmin() {
 						autoFocus
 						value={name}
 						onChange={(e) => setName(e.target.value)}
-						error={!firstTry && name.length <= 0}
+						error={name.length > 0 && !isValidName}
+						helperText={nameError}
 					/>
 					<Stack sx={{width: "100%"}} direction="row" spacing={1}  alignItems="center">
 						<TextField
@@ -96,7 +107,8 @@ function RegisterAdmin() {
 							autoFocus
 							value={partialEmail}
 							onChange={(e) => setPartialEmail(e.target.value)}
-							error={!firstTry && partialEmail.length <= 0 }
+							error={partialEmail.length > 0 && !isValidPartialEmail}
+							helperText={partialEmailError}
 						/>
 						<Typography variant="h6" >
 							@ncmb.pt
@@ -108,7 +120,7 @@ function RegisterAdmin() {
 						onClick={handleSubmit}
 						variant="contained"
 						sx={{ mt: 3 }}
-						disabled={sending}
+						disabled={!name || !partialEmail || !isValidName || !isValidPartialEmail || sending}
 					>
 						{sending ? "Sending..." : "Submit"}
 					</Button>
@@ -124,10 +136,10 @@ function RegisterAdmin() {
 				<DialogTitle fontSize={30}>{"New User Credentials"}</DialogTitle>
 				<DialogContent>
 					<Typography fontSize={15} color="red">
-						This credentials are valid for 1 day. Please validate the account.
+						Give these credentials to your new administrator.
 					</Typography>
 					<Typography fontSize={15}>
-						Email:   {email}
+						Email:    {partialEmail + "@ncmb.pt"}
 					</Typography>
 					<Typography fontSize={15}>
 						Password: {password}

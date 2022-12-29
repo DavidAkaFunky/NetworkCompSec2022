@@ -18,13 +18,10 @@ function Login() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	
-	const [firstTryForm, setFirstTryForm] = useState(true);
-	const [firstTryTwoFA, setFirstTryTwoFA] = useState(true);
-	
 	const [firstSending, setFirstSending] = useState(false);
 	const [secondSending, setSecondSending] = useState(false);
 	
-	const [error, setError] = useState(false);
+	const [error, setError] = useState("");
 	
 	const [qrCode, setQrCode] = useState("");
 	const [twoFA, setTwoFA] = useState(false);
@@ -34,11 +31,10 @@ function Login() {
 
 	const handleFirstSubmit = async (e: any) => {
 		setFirstSending(true);
-		setFirstTryForm(false);
 		setQrCode("");
 		secret.current = "";
 
-		if (!email.length || !email.includes("@") || password.length < 4) {
+		if (!email || !password) {
 			setFirstSending(false);
 			return;
 		}
@@ -53,13 +49,12 @@ function Login() {
 					setQrCode(response.data.qrCode);
 				}
 				setTwoFA(true);
-				setFirstTryForm(true);
 			} else {
-				setError(true);
+				setError(response.data);
 			} 
 
 		} catch (err: any) {
-			setError(true);
+			setError(err.message);
 		} finally {
 			setFirstSending(false);
 		}
@@ -69,8 +64,7 @@ function Login() {
 		setSecondSending(true);
 
 		try {
-			if(!(Number(twoFAToken) && twoFAToken.length === 6)){
-				setFirstTryTwoFA(false);
+			if (!(Number(twoFAToken) && twoFAToken.length === 6)){
                 setSecondSending(false);
                 return;
             }
@@ -82,8 +76,8 @@ function Login() {
 				token: twoFAToken
 			});
 
-			if(response.status !== 200){
-				setError(true);
+			if (response.status !== 200){
+				setError(response.data);
 			} else {
 				setAuth({
 					isLoggedIn: true,
@@ -95,8 +89,7 @@ function Login() {
 			}
 
 		} catch (err: any) {
-			console.log(err);
-			setError(true);
+			setError(err.message);
 		} finally {
 			setSecondSending(false);
 			setTwoFA(false);
@@ -111,7 +104,7 @@ function Login() {
 				</Typography>
 				{error && (
 					<Typography fontSize={15} color="red">
-						Failed to login. Please check your credentials and try again.
+						There was an error with your login: {error}
 					</Typography>
 				)}
 				<Box component="form">
@@ -127,7 +120,6 @@ function Login() {
 						autoFocus
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
-						error={!firstTryForm && !(email.length > 1 && email.includes("@"))}
 					/>
 					<TextField
 						margin="normal"
@@ -141,7 +133,6 @@ function Login() {
 						autoComplete="current-password"
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
-						error={!firstTryForm && password.length > 0 && password.length < 4}
 					/>
 					<Box sx={{ textAlign: "right" }}>
 						<Link to={"/forgot-password"}>Forgot password</Link>
@@ -151,7 +142,7 @@ function Login() {
 						onClick={handleFirstSubmit}
 						variant="contained"
 						sx={{ mt: 3 }}
-						disabled={firstSending}
+						disabled={!email || !password || firstSending}
 					>
 						{firstSending ? "Sending..." : "Submit"}
 					</Button>
@@ -164,11 +155,10 @@ function Login() {
 				qrCode={qrCode}
 				twoFA={twoFA}
 				setTwoFA={setTwoFA}
-				twoFAToken={twoFAToken}
-				setTwoFAToken={setTwoFAToken}
+				token={twoFAToken}
+				setToken={setTwoFAToken}
 				sending={secondSending}
 				setSending={setSecondSending}
-				firstTry={firstTryTwoFA}
 				handleSubmit={handleSecondSubmit}
 			/>
 		</>

@@ -11,6 +11,7 @@ import TwoFAData from '../models/twoFAData';
 
 class AuthService {
 
+	private static nameRegex = /^[a-zA-Z]([a-zA-Z ]){3,}$/g;
 	private static adminEmailRegex = /^([a-zA-Z0-9\.\-_]){4,60}(@ncmb.pt)$/g;
 	private static emailRegex = /^([a-zA-Z0-9\.\-_]){4,60}@([a-zA-Z\.\-_]){1,30}.([a-zA-Z]){1,4}$/g;
 	private static passwordRegex = /^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-_+.]){1,}).{8,32}$/g;
@@ -36,7 +37,7 @@ class AuthService {
 		const secret = user.secret?.trim();
 		const token = user.token?.trim();
 
-		if (!email || !name || !password || !this.passwordRegex.test(password) || !secret || !token || this.adminEmailRegex.test(email) || !this.emailRegex.test(email)) {
+		if (!email || !name || !this.nameRegex.test(name) || !password || !this.passwordRegex.test(password) || !secret || !token || this.adminEmailRegex.test(email) || !this.emailRegex.test(email)) {
 			throw new HttpException(400, "Invalid or missing credentials. Please try again.");
 		}
 
@@ -71,7 +72,7 @@ class AuthService {
 		const partialEmail = registerData.partialEmail?.trim();
 		const partialEmailRegex = /^([a-zA-Z0-9\.-_]){4,60}$/g;
 
-		if (!partialEmail || !name || !partialEmailRegex.test(partialEmail)) {
+		if (!partialEmail || !name || !this.nameRegex.test(name) || !partialEmailRegex.test(partialEmail)) {
 			throw new HttpException(400, "Invalid or missing credentials. Please try again.");
 		}
 

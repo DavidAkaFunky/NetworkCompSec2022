@@ -4,7 +4,7 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../interceptors/Axios";
 
@@ -12,35 +12,52 @@ function ChangePassword() {
 	const navigate = useNavigate();
 
 	const [currentPassword, setCurrentPassword] = useState("");
-	const [newPassword, setNewPassword] = useState("");
-	const [repeatPassword, setRepeatPassword] = useState("");
-	const [firstTry, setFirstTry] = useState(true);
+
+	const passwordRegex = /^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-_+.]){1,}).{8,32}$/g;
+    const [newPassword, setNewPassword] = useState("");
+	const [newPasswordError, setNewPasswordError] = useState("");
+	const isValidNewPassword = passwordRegex.test(newPassword) && newPassword !== currentPassword;
+
+	const [repeatNewPassword, setRepeatNewPassword] = useState("");
+	const [repeatNewPasswordError, setRepeatNewPasswordError] = useState("");
+	const isValidRepeatNewPassword = repeatNewPassword === newPassword;
+
 	const [sending, setSending] = useState(false);
-	const [error, setError] = useState(false);
+	const [generalError, setGeneralError] = useState("");
+
+    useEffect(() => {
+		setNewPasswordError(newPassword && !isValidNewPassword ? "The new password is invalid. It must not match your current password, be 8-32 characters long and have at least: an uppercase letter, a lowercase letter, a digit and one of these symbols: !@#$%^&*()\-_+." : "");
+	}, [currentPassword, newPassword]);
+
+	useEffect(() => {
+		setRepeatNewPasswordError(repeatNewPassword && !isValidRepeatNewPassword ? "The passwords do not match." : "");
+	}, [repeatNewPassword, newPassword]);
 
 	const handleSubmit = async (e: any) => {
 		setSending(true);
-		setFirstTry(false);
 
-		if (newPassword.length < 4 ||
-			repeatPassword !== newPassword
-		) {
+		if (!currentPassword || !newPassword || !repeatNewPassword || !isValidNewPassword || !isValidRepeatNewPassword ) {
 			setSending(false);
 			return;
 		}
 
 		try {
-			await axios.post("/api/auth/change-password", {
+            const response = await axios.post("/api/auth/change-password", {
                 password: newPassword
 			});
 
-			setFirstTry(true);
+			if (response.status === 200) {
+                navigate("/login");
+			} else {
+				setGeneralError(response.data);
+			}
+
             navigate("/login");
 		} catch (err: any) {
-			setError(true);
+			setGeneralError(err.message);
+		} finally {
+			setSending(false);
 		}
-
-		setSending(false);
 	};
 
 
@@ -49,9 +66,9 @@ function ChangePassword() {
             <Typography variant="h4" component="h1">
                 <strong>Register</strong>
             </Typography>
-            {error && (
+            {generalError && (
                 <Typography fontSize={15} color="red">
-                    Failed to change password.
+                    Failed to change password: {generalError}
                 </Typography>
             )}
             <Box component="form">
@@ -67,7 +84,6 @@ function ChangePassword() {
                     autoComplete="current-password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    error={!firstTry && currentPassword.length > 0 && currentPassword.length < 4}
                 />
                 <TextField
                     margin="normal"
@@ -81,28 +97,31 @@ function ChangePassword() {
                     autoComplete="current-password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    error={!firstTry && newPassword.length > 0 && newPassword.length < 4}
+                    error={newPassword.length > 0 && !isValidNewPassword}
+					helperText={newPasswordError}
                 />
                 <TextField
                     margin="normal"
                     variant="filled"
                     required
                     fullWidth
-                    name="repeatPassword"
+                    name="repeatNewPassword"
                     label={"Repeat Password"}
                     type="password"
-                    id="repeatPassword"
+                    id="repeatNewPassword"
                     autoComplete="current-password"
-                    value={repeatPassword}
-                    onChange={(e) => setRepeatPassword(e.target.value)}
-                    error={!firstTry && newPassword !== repeatPassword}
+                    value={repeatNewPassword}
+                    onChange={(e) => setRepeatNewPassword(e.target.value)}
+                    error={repeatNewPassword.length > 0 && !isValidRepeatNewPassword}
+					helperText={repeatNewPasswordError}
                 />
                 <Button
                     fullWidth
                     onClick={handleSubmit}
                     variant="contained"
                     sx={{ mt: 3 }}
-                    disabled={sending}
+                    disabled={!currentPassword || !newPassword || !repeatNewPassword ||
+                              !isValidNewPassword || !isValidRepeatNewPassword || sending}
                 >
                     {sending ? "Sending..." : "Submit"}
                 </Button>

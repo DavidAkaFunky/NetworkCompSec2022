@@ -47,7 +47,7 @@ app.use((err: any, req: any, res: any, next: any) => {
     if (err instanceof HttpException) {
         res.status(err.errorCode).json(err.message);
     } else if (err instanceof Error) {
-        res.status(500).json({ errors: { global: "Something went wrong" } });
+        res.status(500).json("Something went wrong.");
     }
 });
 
