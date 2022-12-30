@@ -101,7 +101,7 @@ function Navbar() {
 									<Typography textAlign="center">Home</Typography>
 								</MenuItem>
 							)}
-							{auth.isAdmin && (
+							{(auth.role === "ADMIN" || auth.role === "SUPERADMIN") && (
 								<>
 									<MenuItem
 										onClick={() => {
@@ -174,7 +174,7 @@ function Navbar() {
 								Home
 							</Button>
 						)}
-						{auth.isAdmin && (
+						{(auth.role === "ADMIN" || auth.role === "SUPERADMIN") && (
 							<Button
 								onClick={() => {
 									setAnchorElNav(null);

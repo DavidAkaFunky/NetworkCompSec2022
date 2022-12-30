@@ -11,7 +11,7 @@ const AuthProvider: React.FC<Props> = ({ children }) => {
 	const [auth, setAuth] = useState<AuthData>({
 		username: "",
 		isLoggedIn: false,
-		isAdmin: false,
+		role: "",
 		accessToken: "",
 	});
 

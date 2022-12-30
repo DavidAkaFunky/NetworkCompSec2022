@@ -1,11 +1,12 @@
 import prisma from "../prisma/client"
 
 class RefreshTokenDatabase {
-    public static createRefreshToken = async (refreshToken: string): Promise<boolean> => {
+    public static createRefreshToken = async (refreshToken: string, email: string): Promise<boolean> => {
         try {
             await prisma.refreshToken.create({
                 data: {
-                    id: refreshToken,
+                    token: refreshToken,
+                    email: email
                 }
             });
             return true;
@@ -20,7 +21,7 @@ class RefreshTokenDatabase {
         try {
             const token = await prisma.refreshToken.findUnique({
                 where: {
-                    id: refreshToken
+                    token: refreshToken
                 }
             });
 
@@ -38,6 +39,25 @@ class RefreshTokenDatabase {
 
         } catch (err) {
             return false;
+        }
+    }
+
+    public static getRefreshToken = async (refreshToken: string): Promise<string | null> => {
+        try {
+            const token = await prisma.refreshToken.findUnique({
+                where: {
+                    token: refreshToken
+                }
+            });
+
+            if (!token) {
+                return null;
+            }
+
+            return token.email;
+
+        } catch (err) {
+            return null;
         }
     }
 }

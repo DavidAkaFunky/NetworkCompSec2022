@@ -63,7 +63,7 @@ router.post("/second-stage-login", async (req: Request, res: Response, next: Nex
         res.status(200).json({
             name: userLogged.name,
             email: userLogged.email,
-            isAdmin: userLogged.isAdmin,
+            role: userLogged.role,
             accessToken: userLogged.accessToken,
         });
 
@@ -74,8 +74,8 @@ router.post("/second-stage-login", async (req: Request, res: Response, next: Nex
 
 router.get("/refresh", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const accessToken = await AuthService.refreshToken(req.cookies);
-        res.status(200).json({ accessToken });
+        const refreshData = await AuthService.refreshToken(req.cookies);
+        res.status(200).json(refreshData);
     } catch (err: any) {
         // Refresh token expired
         if (err.status === 401) {

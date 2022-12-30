@@ -2,7 +2,7 @@ import axios from "../interceptors/Axios";
 import useAuth from "./useAuth";
 
 const useRefreshToken = () => {
-	const { auth, setAuth } = useAuth();
+	const { setAuth } = useAuth();
 
 	const refresh = async () => {
 		try {
@@ -10,11 +10,12 @@ const useRefreshToken = () => {
 				withCredentials: true,
 			});
 
-			// TODO: isAdmin and username should come in the request
+			console.log(response.data.role)
+
 			setAuth({
 				isLoggedIn: true,
-				isAdmin: auth.isAdmin, // this doesnt work bc its reseted
-				username: auth.username, // same here
+				role: response.data.role,
+				username: response.data.name,
 				accessToken: response.data.accessToken,
 			});
 
@@ -22,7 +23,7 @@ const useRefreshToken = () => {
 		} catch (err) {
 			setAuth({
 				isLoggedIn: false,
-				isAdmin: false,
+				role: "",
 				username: "",
 				accessToken: "",
 			});

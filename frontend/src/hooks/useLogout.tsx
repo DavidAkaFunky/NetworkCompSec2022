@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import axios from "../interceptors/Axios";
 import useAuth from "./useAuth";
 
@@ -8,7 +7,7 @@ const useLogout = () => {
 	const logout = async () => {
 		
 		setAuth({
-			isAdmin: false,
+			role: "",
 			isLoggedIn: false,
 			username: "",
 			accessToken: "",

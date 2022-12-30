@@ -34,7 +34,9 @@ model Admin {
 }
 
 model RefreshToken {
-  id           String             @id @db.VarChar(255)
+  id           Int                @id @default(autoincrement())
+  token        String             @unique @db.VarChar(255) 
+  email        String             @unique @db.VarChar(255)
 }
 
 model Stock {

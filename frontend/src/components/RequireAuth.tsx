@@ -9,7 +9,7 @@ const RequireAuth = ({ adminPrivileges }: RequireAuthProps) => {
 	const { auth } = useAuth();
 
 	if (
-		(adminPrivileges && auth.isAdmin) ||
+		(adminPrivileges && (auth.role === "ADMIN" || auth.role === "SUPERADMIN")) ||
 		(!adminPrivileges && auth.isLoggedIn)
 	) {
 		return <Outlet />;

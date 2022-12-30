@@ -46,7 +46,7 @@ axios.interceptors.response.use(undefined, async (error: AxiosError) => {
 			const { auth, setAuth } = useAuth();
 			setAuth({
 				isLoggedIn: true,
-				isAdmin: auth.isAdmin,
+				role: auth.role,
 				username: auth.username,
 				accessToken: response.data.accessToken,
 			});

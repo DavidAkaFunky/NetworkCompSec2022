@@ -4,17 +4,19 @@ import UserRegisterData from '../models/userRegisterData';
 import AdminRegisterData from '../models/adminRegisterData';
 import LoginData from '../models/loginData';
 import UserLoggedData from '../models/userLoggedData';
+import { UserRoles } from '../models/userRoles';
 import { AdminDatabase, UserDatabase, RefreshTokenDatabase } from '../database/index';
 import { TokenService, TwoFAService } from './index';
-import { User, Admin } from '@prisma/client';
+import { User, Admin, Role } from '@prisma/client';
 import TwoFAData from '../models/twoFAData';
+import RefreshData from '../models/refreshData';
 
 class AuthService {
 
-	private static nameRegex = /^[a-zA-Z]([a-zA-Z ]){3,}$/g;
-	private static adminEmailRegex = /^([a-zA-Z0-9\.\-_]){4,60}(@ncmb.pt)$/g;
-	private static emailRegex = /^([a-zA-Z0-9\.\-_]){4,60}@([a-zA-Z\.\-_]){1,30}.([a-zA-Z]){1,4}$/g;
-	private static passwordRegex = /^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-_+.]){1,}).{8,32}$/g;
+	private static nameRegex = /^[a-zA-Z]([a-zA-Z ]){3,}$/;
+	private static adminEmailRegex = /^([a-zA-Z0-9\.\-_]){4,60}(@ncmb.pt)$/;
+	private static emailRegex = /^([a-zA-Z0-9\.\-_]){4,60}@([a-zA-Z\.\-_]){1,30}.([a-zA-Z]){1,4}$/;
+	private static passwordRegex = /^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-_+.]){1,}).{8,32}$/;
 	// Minimum of: 1 lowercase, 1 uppercase, 1 number, 1 special character. Total: 8 to 32 chars -> ADD TO FRONTEND!
 
 	private static checkUserUniqueness = async (email: string): Promise<boolean> => {
@@ -70,7 +72,7 @@ class AuthService {
 
 		const name = registerData.name?.trim();
 		const partialEmail = registerData.partialEmail?.trim();
-		const partialEmailRegex = /^([a-zA-Z0-9\.-_]){4,60}$/g;
+		const partialEmailRegex = /^([a-zA-Z0-9\.-_]){4,60}$/;
 
 		if (!partialEmail || !name || !this.nameRegex.test(name) || !partialEmailRegex.test(partialEmail)) {
 			throw new HttpException(400, "Invalid or missing credentials. Please try again.");
@@ -116,16 +118,20 @@ class AuthService {
 
 		let user: User | Admin | null;
 
-		const hashedPassword = await bcrypt.hash(password, 10);
-
 		//Check if is admin or client
 		if (this.adminEmailRegex.test(email)) {
-			user = await AdminDatabase.getAdminWithPassword(email, hashedPassword);
+			user = await AdminDatabase.getAdmin(email);
 		} else {
-			user = await UserDatabase.getUserWithPassword(email, hashedPassword);
+			user = await UserDatabase.getUser(email);
 		}
 
 		if (!user) {
+			throw new HttpException(401, "Login failed; invalid email or password.");
+		}
+
+		const isPasswordMatching = await bcrypt.compare(password, user.password);
+
+		if (!isPasswordMatching) {
 			throw new HttpException(401, "Login failed; invalid email or password.");
 		}
 
@@ -136,8 +142,18 @@ class AuthService {
 		
 		const user = await this.loginVerification(loginData);
 
+		console.log(user)
+		console.log(user.twoFASecret)
+		console.log(user.email)
+		console.log(this.adminEmailRegex.test(user.email))
+		console.log(this.adminEmailRegex.test(user.email))
+		console.log(this.adminEmailRegex.test(user.email))
+		console.log(this.adminEmailRegex.test(user.email))
+
+
 		//Check if is admin or client
 		if (this.adminEmailRegex.test(user.email) && !user.twoFASecret){
+			console.log("HERE")
 			return await TwoFAService.generateTOTPQRCode(user.email);
 		}
 
@@ -148,6 +164,7 @@ class AuthService {
 
 		const user = await this.loginVerification(loginData);
 		const isAdmin: boolean = this.adminEmailRegex.test(user.email);
+		const isSuperAdmin: boolean = isAdmin && (user as Admin).role == Role.SUPERADMIN;
 
 		let match: boolean
 
@@ -176,7 +193,7 @@ class AuthService {
 
 		const refreshToken = TokenService.generateRefreshToken(user.id);
 
-		const success: boolean = await RefreshTokenDatabase.createRefreshToken(refreshToken);
+		const success: boolean = await RefreshTokenDatabase.createRefreshToken(refreshToken, user.email);
 
 		if (!success) {
 			throw new HttpException(500, "There was a problem storing the 2FA token. Please try again!");
@@ -185,7 +202,7 @@ class AuthService {
 		const userTokens = {
 			name: user.name,
 			email: user.email,
-			isAdmin: isAdmin,
+			role: isAdmin ? (isSuperAdmin ? UserRoles.SUPERADMIN : UserRoles.ADMIN) : UserRoles.USER,
 			accessToken,
 			refreshToken
 		}
@@ -193,7 +210,7 @@ class AuthService {
 		return userTokens;
 	};
 
-	public static refreshToken = async (cookies: any): Promise<string> => {
+	public static refreshToken = async (cookies: any): Promise<RefreshData> => {
 
 		if (!cookies || !cookies.refreshToken) {
 			throw new HttpException(400, "No refresh token was provided!");
@@ -203,9 +220,28 @@ class AuthService {
 
 		try {
 
-			TokenService.verifyRefreshToken(refreshToken);
+			const email = await TokenService.verifyRefreshToken(refreshToken);
+			const accessToken = TokenService.generateAccessToken(refreshToken);
 
-			return TokenService.generateAccessToken(refreshToken);
+			let role, name;
+
+			const user = await UserDatabase.getUser(email);
+			if (!user){
+				const admin = await AdminDatabase.getAdmin(email);
+				name = admin!.name
+				role = admin!.role == Role.SUPERADMIN ? UserRoles.SUPERADMIN : UserRoles.ADMIN;
+			} else {
+				name = user.name;
+				role = UserRoles.USER;
+			}
+
+			const refreshData = {
+				token: accessToken,
+				role: role,
+				name: name
+			}
+
+			return refreshData;
 
 		} catch (err) {
 

@@ -1,5 +1,5 @@
 export interface AuthData {
-	isAdmin: boolean;
+	role: string;
 	isLoggedIn: boolean;
 	username: string;
 	accessToken: string;

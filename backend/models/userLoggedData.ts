@@ -1,7 +1,9 @@
+import { UserRoles } from "./userRoles";
+
 export default interface UserLoggedData {
     name: string;
     email: string;
-    isAdmin: boolean;
+    role: UserRoles;
     accessToken: string;
     refreshToken: string;
 }

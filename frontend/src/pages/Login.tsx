@@ -81,7 +81,7 @@ function Login() {
 			} else {
 				setAuth({
 					isLoggedIn: true,
-					isAdmin: response.data.isAdmin,
+					role: response.data.role,
 					username: response.data.name,
 					accessToken: response.data.accessToken,
 				});

@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { RefreshTokenDatabase } from "../database";
 import HttpException from "../models/httpException";
 
 class TokenService {
@@ -15,12 +16,20 @@ class TokenService {
         return jwt.sign({ id: id }, this.refreshSecret, { expiresIn: '2h' });
     }
 
-    public static verifyRefreshToken = (refreshToken: string): void => {
+    public static verifyRefreshToken = async (refreshToken: string): Promise<string> => {
+
+        const email = await RefreshTokenDatabase.getRefreshToken(refreshToken);
+        if (!email) {
+            throw new HttpException(403, "Invalid refresh token.");
+        }
+
         jwt.verify(refreshToken, this.refreshSecret, (err: any) => {
             if (err) {
                 throw new HttpException(403, "Invalid refresh token.");
             }
         })
+
+        return email;
     }
 
     // Authentication middleware
