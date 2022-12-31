@@ -92,14 +92,24 @@ function Navbar() {
 								<Typography textAlign="center">Landing</Typography>
 							</MenuItem>
 							{auth.isLoggedIn && (
-								<MenuItem
-									onClick={() => {
-										setAnchorElNav(null);
-										navigate("/home");
-									}}
-								>
-									<Typography textAlign="center">Home</Typography>
-								</MenuItem>
+								<>
+									<MenuItem
+										onClick={() => {
+											setAnchorElNav(null);
+											navigate("/home");
+										}}
+									>
+										<Typography textAlign="center">Home</Typography>
+									</MenuItem>
+										<MenuItem
+										onClick={() => {
+											setAnchorElNav(null);
+											navigate("/change-password");
+										}}
+									>
+										<Typography textAlign="center">Change Password</Typography>
+									</MenuItem>
+								</>
 							)}
 							{(auth.role === "ADMIN" || auth.role === "SUPERADMIN") && (
 								<>

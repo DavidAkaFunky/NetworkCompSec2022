@@ -142,18 +142,8 @@ class AuthService {
 		
 		const user = await this.loginVerification(loginData);
 
-		console.log(user)
-		console.log(user.twoFASecret)
-		console.log(user.email)
-		console.log(this.adminEmailRegex.test(user.email))
-		console.log(this.adminEmailRegex.test(user.email))
-		console.log(this.adminEmailRegex.test(user.email))
-		console.log(this.adminEmailRegex.test(user.email))
-
-
 		//Check if is admin or client
 		if (this.adminEmailRegex.test(user.email) && !user.twoFASecret){
-			console.log("HERE")
 			return await TwoFAService.generateTOTPQRCode(user.email);
 		}
 
@@ -258,10 +248,16 @@ class AuthService {
 
 	public static changeUserPassword = async (email: string, oldPassword: string, newPassword: string): Promise<void> => {
 
-		const success = await UserDatabase.changeUserPassword(email, oldPassword, newPassword);
+		const user = await this.loginVerification({ email: email, password: oldPassword } as LoginData);
+		
+		if (!user) {
+			throw new HttpException(401, "There was a problem changing the password. Please check if the old password is correct and try again.");
+		}
+
+		const success = await UserDatabase.changeUserPassword(email, newPassword);
 
 		if (!success) {
-			throw new HttpException(401, "There was a problem changing the password. Please check if the old password is correct and try again.");
+			throw new HttpException(500, "There was a problem changing the password.");
 		}
 	};
 

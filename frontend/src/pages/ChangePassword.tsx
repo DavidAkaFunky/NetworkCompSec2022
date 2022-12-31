@@ -6,14 +6,16 @@ import {
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 import axios from "../interceptors/Axios";
 
 function ChangePassword() {
 	const navigate = useNavigate();
+    const { auth } = useAuth();
 
 	const [currentPassword, setCurrentPassword] = useState("");
 
-	const passwordRegex = /^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-_+.]){1,}).{8,32}$/g;
+	const passwordRegex = /^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-_+.]){1,}).{8,32}$/;
     const [newPassword, setNewPassword] = useState("");
 	const [newPasswordError, setNewPasswordError] = useState("");
 	const isValidNewPassword = passwordRegex.test(newPassword) && newPassword !== currentPassword;
@@ -43,7 +45,9 @@ function ChangePassword() {
 
 		try {
             const response = await axios.post("/api/auth/change-password", {
-                password: newPassword
+                //email: auth.email,
+                oldPassword: currentPassword,
+                newPassword: newPassword
 			});
 
 			if (response.status === 200) {

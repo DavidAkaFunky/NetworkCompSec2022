@@ -12,17 +12,17 @@ import axios from "../interceptors/Axios";
 function Register() {
 	const navigate = useNavigate();
 
-	const nameRegex = /^[a-zA-Z]([a-zA-Z ]){3,}$/g;
+	const nameRegex = /^[a-zA-Z]([a-zA-Z ]){3,}$/;
 	const [name, setName] = useState("");
 	const [nameError, setNameError] = useState("");
 	const isValidName = nameRegex.test(name.trim());
 
-	const emailRegex = /^([a-zA-Z0-9\.\-_]){4,60}@([a-zA-Z\.\-_]){1,30}.([a-zA-Z]){1,4}$/g;
+	const emailRegex = /^([a-zA-Z0-9\.\-_]){4,60}@([a-zA-Z\.\-_]){1,30}.([a-zA-Z]){1,4}$/;
 	const [email, setEmail] = useState("");
 	const [emailError, setEmailError] = useState("");
 	const isValidEmail = emailRegex.test(email.trim());
 
-	const passwordRegex = /^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-_+.]){1,}).{8,32}$/g;
+	const passwordRegex = /^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-_+.]){1,}).{8,32}$/;
 	const [password, setPassword] = useState("");
 	const [passwordError, setPasswordError] = useState("");
 	const isValidPassword = passwordRegex.test(password);
@@ -36,7 +36,7 @@ function Register() {
 	
 	const [qrCode, setQrCode] = useState("");
 
-	const tokenRegex = /^[0-9]{6}$/g;
+	const tokenRegex = /^[0-9]{6}$/;
 	const [twoFA, setTwoFA] = useState(false);
 	const [twoFAToken, setTwoFAToken] = useState("");
 	const isValidToken = tokenRegex.test(twoFAToken);

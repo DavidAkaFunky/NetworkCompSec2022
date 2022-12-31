@@ -75,12 +75,11 @@ class UserDatabase {
 		}
 	}
 
-	public static changeUserPassword = async (email: string, oldPassword: string, newPassword: string): Promise<boolean> => {
+	public static changeUserPassword = async (email: string, newPassword: string): Promise<boolean> => {
 		try {
-			await prisma.user.updateMany({//should only allow changing the password if the old one match.
+			await prisma.user.update({
 				where: {
-					email: email,
-					password: oldPassword,
+					email: email
 				},
 				data: {
 					password: newPassword

@@ -16,12 +16,12 @@ import axios from "../interceptors/Axios";
 
 function RegisterAdmin() {
 
-	const nameRegex = /^[a-zA-Z]([a-zA-Z ]){3,}$/g;
+	const nameRegex = /^[a-zA-Z]([a-zA-Z ]){3,}$/;
 	const [name, setName] = useState("");
 	const [nameError, setNameError] = useState("");
 	const isValidName = nameRegex.test(name.trim());
 
-	const partialEmailRegex = /^([a-zA-Z0-9\.\-_]){4,60}$/g;
+	const partialEmailRegex = /^([a-zA-Z0-9\.\-_]){4,60}$/;
 	const [partialEmail, setPartialEmail] = useState("");
 	const [partialEmailError, setPartialEmailError] = useState("");
 	const isValidPartialEmail = partialEmailRegex.test(partialEmail.trim());

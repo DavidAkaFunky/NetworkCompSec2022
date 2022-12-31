@@ -23,7 +23,7 @@ type TwoFADialogProps = {
 
 const TwoFADialog = ({ qrCode, twoFA, setTwoFA, token, setToken, sending, setSending, handleSubmit }: TwoFADialogProps) => {
 
-    const tokenRegex = /^[0-9]{6}$/g;
+    const tokenRegex = /^[0-9]{6}$/;
 	const isValidToken = tokenRegex.test(token);
 	const [tokenError, setTokenError] = useState("");
     
