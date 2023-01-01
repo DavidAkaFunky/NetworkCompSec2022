@@ -91,46 +91,37 @@ function Navbar() {
 							>
 								<Typography textAlign="center">Landing</Typography>
 							</MenuItem>
-							{auth.isLoggedIn && (
-								<>
-									<MenuItem
-										onClick={() => {
-											setAnchorElNav(null);
-											navigate("/home");
-										}}
-									>
-										<Typography textAlign="center">Home</Typography>
-									</MenuItem>
-										<MenuItem
-										onClick={() => {
-											setAnchorElNav(null);
-											navigate("/change-password");
-										}}
-									>
-										<Typography textAlign="center">Change Password</Typography>
-									</MenuItem>
-								</>
-							)}
-							{(auth.role === "ADMIN" || auth.role === "SUPERADMIN") && (
-								<>
-									<MenuItem
-										onClick={() => {
-											setAnchorElNav(null);
-											navigate("/admin");
-										}}
-									>
-										<Typography textAlign="center">Admin</Typography>
-									</MenuItem>
-									<MenuItem
-										onClick={() => {
-											setAnchorElNav(null);
-											navigate("/register-admin");
-										}}
-									>
-										<Typography textAlign="center">Register admin</Typography>
-									</MenuItem>
-								</>
-							)}
+							{auth.isLoggedIn && [
+								<MenuItem
+									key="home"
+									onClick={() => {
+										setAnchorElNav(null);
+										navigate("/home");
+									}}
+								>
+									<Typography textAlign="center">Home</Typography>
+								</MenuItem>,
+							]}
+							{(auth.role === "ADMIN" || auth.role === "SUPERADMIN") && [
+								<MenuItem
+									key="admin"
+									onClick={() => {
+										setAnchorElNav(null);
+										navigate("/admin");
+									}}
+								>
+									<Typography textAlign="center">Admin</Typography>
+								</MenuItem>,
+								<MenuItem
+									key="register-admin"
+									onClick={() => {
+										setAnchorElNav(null);
+										navigate("/register-admin");
+									}}
+								>
+									<Typography textAlign="center">Register admin</Typography>
+								</MenuItem>,
+							]}
 						</Menu>
 					</Box>
 					<AccountBalanceIcon
@@ -184,8 +175,9 @@ function Navbar() {
 								Home
 							</Button>
 						)}
-						{(auth.role === "ADMIN" || auth.role === "SUPERADMIN") && (
+						{(auth.role === "ADMIN" || auth.role === "SUPERADMIN") && [
 							<Button
+								key="admin"
 								onClick={() => {
 									setAnchorElNav(null);
 									navigate("/admin");
@@ -193,8 +185,17 @@ function Navbar() {
 								sx={{ my: 2, color: "inherit" }}
 							>
 								Admin
-							</Button>
-						)}
+							</Button>,
+							<Button
+								key="register-admin"
+								onClick={() => {
+									setAnchorElNav(null);
+									navigate("/register-admin");
+								}}
+							>
+								Register admin
+							</Button>,
+						]}
 					</Box>
 					{!auth.isLoggedIn && (
 						<>
@@ -265,10 +266,19 @@ function Navbar() {
 								</MenuItem>
 								<Divider />
 								<MenuItem
+									key="change-password"
+									onClick={() => {
+										setAnchorElNav(null);
+										navigate("/change-password");
+									}}
+								>
+									<Typography textAlign="center">Change Password</Typography>
+								</MenuItem>
+								<MenuItem
 									onClick={() => {
 										logout().then(() => {
 											setAnchorElUserSettings(null);
-										})
+										});
 									}}
 								>
 									<LogoutIcon sx={{ mr: 1 }} />
