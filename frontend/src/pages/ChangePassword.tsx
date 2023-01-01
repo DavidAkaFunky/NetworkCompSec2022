@@ -49,15 +49,9 @@ function ChangePassword() {
                 newPassword: newPassword
 			});
 
-			if (response.status === 200) {
-                navigate("/login");
-			} else {
-				setGeneralError(response.data);
-			}
-
             navigate("/login");
 		} catch (err: any) {
-			setGeneralError(err.message);
+			setGeneralError(err);
 		} finally {
 			setSending(false);
 		}

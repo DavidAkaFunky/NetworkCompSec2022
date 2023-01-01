@@ -55,15 +55,11 @@ function RegisterAdmin() {
 				partialEmail: partialEmail
 			});
 
-			if (response.status === 200) {
-				setPassword(response.data.password);
-				setShowCredentials(true);
-			} else {
-				setGeneralError(response.data);
-			}
+			setPassword(response.data.password);
+			setShowCredentials(true);
 
 		} catch (err: any) {
-			setGeneralError(err.message);
+			setGeneralError(err);
 		} finally {
 			setSending(false);
 		}

@@ -43,18 +43,15 @@ function Login() {
 				email: email,
 				password: password,
 			});
-			if (response.status === 200){
-				if (response.data){
-					secret.current = response.data.secret;
-					setQrCode(response.data.qrCode);
-				}
-				setTwoFA(true);
-			} else {
-				setError(response.data);
-			} 
+
+			if (response.data){
+				secret.current = response.data.secret;
+				setQrCode(response.data.qrCode);
+			}
+			setTwoFA(true);
 
 		} catch (err: any) {
-			setError(err.message);
+			setError(err);
 		} finally {
 			setFirstSending(false);
 		}
@@ -76,20 +73,16 @@ function Login() {
 				token: twoFAToken
 			});
 
-			if (response.status !== 200){
-				setError(response.data);
-			} else {
-				setAuth({
-					isLoggedIn: true,
-					role: response.data.role,
-					username: response.data.name,
-					accessToken: response.data.accessToken,
-				});
-				navigate("/home");
-			}
+			setAuth({
+				isLoggedIn: true,
+				role: response.data.role,
+				username: response.data.name,
+				accessToken: response.data.accessToken,
+			});
+			navigate("/home");
 
 		} catch (err: any) {
-			setError(err.message);
+			setError(err);
 		} finally {
 			setSecondSending(false);
 			setTwoFA(false);

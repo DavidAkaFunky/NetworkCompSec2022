@@ -45,9 +45,9 @@ app.use("/api", routes);
 app.use((err: any, req: any, res: any, next: any) => {
     console.error(err);
     if (err instanceof HttpException) {
-        res.status(err.errorCode).json(err.message);
+        res.status(err.errorCode).send(err.message);
     } else if (err instanceof Error) {
-        res.status(500).json("Something went wrong.");
+        res.status(500).send("Something went wrong.");
     }
 });
 

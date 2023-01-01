@@ -83,7 +83,7 @@ router.get("/refresh", async (req: Request, res: Response, next: NextFunction): 
                 httpOnly: true,
                 expires: new Date(0),
             });
-            res.status(err.errorCode).json(err.message);
+            res.status(err.errorCode).send(err.message);
         } else {
             next(err);
         }
@@ -115,7 +115,7 @@ router.get("/logout", async (req: Request, res: Response, next: NextFunction): P
                 httpOnly: true,
                 expires: new Date(0),
             });
-            res.status(err.errorCode).json(err.message);
+            res.status(err.errorCode).send(err.message);
         } else {
             next(err);
         }

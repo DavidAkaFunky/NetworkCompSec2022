@@ -49,7 +49,6 @@ const TwoFADialog = ({ qrCode, twoFA, setTwoFA, token, setToken, sending, setSen
                         required
                         name="token"
                         label={"Insert Code"}
-                        type="password"
                         id="token"
                         autoComplete="current-password"
                         value={token}

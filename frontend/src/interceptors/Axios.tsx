@@ -55,6 +55,8 @@ axios.interceptors.response.use(undefined, async (error: AxiosError) => {
 		} catch (error) {
 			console.log(error);
 		}
+	} else {
+		return Promise.reject(error.response?.data);
 	}
 });
 

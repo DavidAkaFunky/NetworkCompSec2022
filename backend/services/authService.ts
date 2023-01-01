@@ -49,10 +49,15 @@ class AuthService {
 			throw new HttpException(422, "This email is already taken. Please remove your 2FA code from the app, then try with a different email.");
 		}
 
+		console.log("secret: " + secret)
+		console.log("token: " + token);
+
 		const match = await TwoFAService.verifyTOTPQRCode(token, secret);
 
+		console.log("match: " + match)
+
 		if (!match) {
-			throw new HttpException(401, "Wrong 2FA token. Please try again.");
+			throw new HttpException(422, "Wrong 2FA token. Please try again.");
 		}
 
 		const hashedPassword = await bcrypt.hash(password, 10);
@@ -203,7 +208,7 @@ class AuthService {
 	public static refreshToken = async (cookies: any): Promise<RefreshData> => {
 
 		if (!cookies || !cookies.refreshToken) {
-			throw new HttpException(400, "No refresh token was provided!");
+			throw new HttpException(401, "No refresh token was provided!");
 		}
 
 		const refreshToken = cookies.refreshToken;

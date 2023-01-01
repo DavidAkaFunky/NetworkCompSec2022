@@ -75,16 +75,12 @@ function Register() {
 				email: email,
 			});
 
-			if (response.status === 200) {
-				secret.current = response.data.secret;
-				setQrCode(response.data.qrCode);
-				setTwoFA(true);
-			} else {
-				setGeneralError(response.data);
-			}
+			secret.current = response.data.secret;
+			setQrCode(response.data.qrCode);
+			setTwoFA(true);
 
 		} catch (err: any) {
-			setGeneralError(err.message);
+			setGeneralError(err);
 		} finally {
 			setFirstSending(false);
 		}
@@ -100,7 +96,9 @@ function Register() {
                 return;
             }
             
-			const response = await axios.post("/api/auth/register-client", {
+			console.log(twoFAToken);
+
+			await axios.post("/api/auth/register-client", {
 				name: name,
 				email: email,
 				password: password,
@@ -108,15 +106,14 @@ function Register() {
 				token: twoFAToken,
 			});
 
-			if (response.status === 200){
-				navigate("/login");
-			} else {
-				setGeneralError(response.data);
-			}
+			navigate("/login");
+			
 		} catch (err: any) {
-			setGeneralError(err.message);
+			console.log(err);
+			setGeneralError(err);
 		} finally {
             setSecondSending(false);
+			setTwoFAToken("");
             setTwoFA(false);
         }
 	};
