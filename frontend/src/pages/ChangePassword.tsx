@@ -11,7 +11,6 @@ import axios from "../interceptors/Axios";
 
 function ChangePassword() {
 	const navigate = useNavigate();
-    const { auth } = useAuth();
 
 	const [currentPassword, setCurrentPassword] = useState("");
 
@@ -45,7 +44,7 @@ function ChangePassword() {
 
 		try {
             const response = await axios.post("/api/auth/change-password", {
-                //email: auth.email,
+                withCredentials: true,
                 oldPassword: currentPassword,
                 newPassword: newPassword
 			});
