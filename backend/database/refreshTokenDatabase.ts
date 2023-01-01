@@ -31,7 +31,7 @@ class RefreshTokenDatabase {
 
             await prisma.refreshToken.delete({
                 where: {
-                    id: token.id
+                    email: token.email
                 }
             });
 

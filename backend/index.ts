@@ -22,7 +22,7 @@ const app = express();
 //    const accessToken = req.headers.authorization?.split(" ")[1];
 //    if (accessToken){
 //        const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_TOKEN as string) as JwtPayload;
-//        byWho = `access-token (user_id: ${decoded.id})`;
+//        byWho = `access-token (user_email: ${decoded.email})`;
 //    }
 //
 //    return [

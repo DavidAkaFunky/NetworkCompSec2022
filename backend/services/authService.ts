@@ -179,9 +179,9 @@ class AuthService {
 
 		//---------TODO: change tokens for admins
 
-		const accessToken = TokenService.generateAccessToken(user.id);
+		const accessToken = TokenService.generateAccessToken(user.email);
 
-		const refreshToken = TokenService.generateRefreshToken(user.id);
+		const refreshToken = TokenService.generateRefreshToken(user.email);
 
 		const success: boolean = await RefreshTokenDatabase.createRefreshToken(refreshToken, user.email);
 
@@ -211,12 +211,12 @@ class AuthService {
 		try {
 
 			const email = await TokenService.verifyRefreshToken(refreshToken);
-			const accessToken = TokenService.generateAccessToken(refreshToken);
+			const accessToken = TokenService.generateAccessToken(email);
 
 			let role, name;
 
 			const user = await UserDatabase.getUser(email);
-			if (!user){
+			if (!user) {
 				const admin = await AdminDatabase.getAdmin(email);
 				name = admin!.name
 				role = admin!.role == Role.SUPERADMIN ? UserRoles.SUPERADMIN : UserRoles.ADMIN;
@@ -242,11 +242,27 @@ class AuthService {
 				//throw new HttpException(500, { message: { token: ["fail to delete refresh token"] } });
 			}
 
-			throw new HttpException(401, "The refresh token has expired.")
+			throw new HttpException(401, "The refresh token has expired.");
 		}
 	};
 
-	public static changeUserPassword = async (email: string, oldPassword: string, newPassword: string): Promise<void> => {
+	public static changeUserPassword = async (cookies: any, oldPassword: string, newPassword: string): Promise<void> => {
+
+		if (!cookies || !cookies.refreshToken) {
+			throw new HttpException(400, "No refresh token was provided!");
+		}
+
+		const refreshToken = cookies.refreshToken;
+		let email;
+
+		try {
+			email = await TokenService.verifyRefreshToken(refreshToken);
+			if (!email){
+				throw new HttpException(401, "The refresh token has expired.");
+			}
+		} catch (err) {
+			throw new HttpException(401, "The refresh token has expired.");
+		}
 
 		const user = await this.loginVerification({ email: email, password: oldPassword } as LoginData);
 		
@@ -261,7 +277,13 @@ class AuthService {
 		}
 	};
 
-	public static logoutUser = async (refreshToken: string): Promise<void> => {
+	public static logoutUser = async (cookies: any): Promise<void> => {
+
+		if (!cookies || !cookies.refreshToken) {
+			throw new HttpException(400, "No refresh token was provided!");
+		}
+
+		const refreshToken = cookies.refreshToken;
 
 		const success = await RefreshTokenDatabase.deleteRefreshToken(refreshToken);
 

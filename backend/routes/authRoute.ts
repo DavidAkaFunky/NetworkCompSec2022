@@ -92,8 +92,8 @@ router.get("/refresh", async (req: Request, res: Response, next: NextFunction): 
 
 router.get("/change-password", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const accessToken = await AuthService.refreshToken(req.cookies);
-        res.status(200).json({ accessToken });
+        await AuthService.changeUserPassword(req.cookies, req.body.oldPassword, req.body.newPassword);
+        res.sendStatus(200);
     } catch (err: any) {
         next(err);
     }
@@ -101,7 +101,7 @@ router.get("/change-password", async (req: Request, res: Response, next: NextFun
 
 router.get("/logout", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        await AuthService.logoutUser(req.body.refreshToken);
+        await AuthService.logoutUser(req.cookies);
         res.cookie("refreshToken", "", {
             httpOnly: true,
             expires: new Date(0),
