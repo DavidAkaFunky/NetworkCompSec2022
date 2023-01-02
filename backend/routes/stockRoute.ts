@@ -22,5 +22,13 @@ router.get("/:isin", async (req: Request, res: Response, next: NextFunction): Pr
     }
 });
 
+router.post("/create", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const stock = await StockService.createStock(req.body);
+        res.status(200).json({ stock });
+    } catch (err: any) {
+        next(err);
+    }
+});
 
 export const stockRoutes: Router = router;

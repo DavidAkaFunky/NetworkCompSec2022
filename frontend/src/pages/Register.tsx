@@ -95,8 +95,6 @@ function Register() {
                 setSecondSending(false);
                 return;
             }
-            
-			console.log(twoFAToken);
 
 			await axios.post("/api/auth/register-client", {
 				name: name,
@@ -109,7 +107,6 @@ function Register() {
 			navigate("/login");
 			
 		} catch (err: any) {
-			console.log(err);
 			setGeneralError(err);
 		} finally {
             setSecondSending(false);

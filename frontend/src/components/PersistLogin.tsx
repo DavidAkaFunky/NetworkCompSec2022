@@ -15,7 +15,7 @@ const PersistLogin = () => {
 			try {
 				await refresh();
 			} catch (err) {
-				console.log(err);
+				
 			} finally {
 				// Only set state if it's still mounted
 				isMounted && setIsLoading(false);

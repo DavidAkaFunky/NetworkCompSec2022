@@ -9,9 +9,10 @@ import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import Landing from "./pages/Landing";
 import Register from "./pages/Register";
+import ManageUser from "./pages/ManageUser";
 import RegisterAdmin from "./pages/RegisterAdmin";
-import CertificationAuthority from "./pages/CertificationAuthority";
 import ChangePassword from "./pages/ChangePassword";
+import CertificationAuthority from "./pages/CertificationAuthority";
 
 function App() {
 	return (
@@ -25,14 +26,16 @@ function App() {
 						<Route path="/ca" element={<CertificationAuthority />} />
 						<Route path="/register" element={<Register />} />
 						<Route path="/login" element={<Login />} />
-						{/* Protected routes */}
+						{/* Protected User routes */}
 						<Route element={<RequireAuth adminPrivileges={false} />}>
 							<Route path="/home" element={<Home />} />
 							<Route path="/change-password" element={<ChangePassword />} />
 						</Route>
+						{/* Protected Admin routes */}
 						<Route element={<RequireAuth adminPrivileges={true} />}>
 							<Route path="/register-admin" element={<RegisterAdmin />} />
 							<Route path="/admin" element={<Admin />} />
+							<Route path="/admin/manage-user" element={<ManageUser />} />
 						</Route>
 						{/* Fallback route */}
 						<Route path="/*" element={<Navigate to="/" />} />

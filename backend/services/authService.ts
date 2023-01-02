@@ -49,12 +49,7 @@ class AuthService {
 			throw new HttpException(422, "This email is already taken. Please remove your 2FA code from the app, then try with a different email.");
 		}
 
-		console.log("secret: " + secret)
-		console.log("token: " + token);
-
 		const match = await TwoFAService.verifyTOTPQRCode(token, secret);
-
-		console.log("match: " + match)
 
 		if (!match) {
 			throw new HttpException(422, "Wrong 2FA token. Please try again.");

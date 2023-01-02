@@ -7,7 +7,6 @@ const loansInfo: LoanInfo[] = [
     {
         "loanAmount": 1000,
         "loanDuration": 12,
-
         "interestRate": 0.1,
         "bank": {
             "name": "Bank 1",

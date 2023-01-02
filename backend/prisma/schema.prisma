@@ -15,6 +15,11 @@ enum Role {
   SUPERADMIN
 }
 
+enum TransactionType {
+  BUY
+  SELL
+}
+
 model User {
   id           Int                @id @default(autoincrement())
   name         String             @db.VarChar(255)
@@ -57,4 +62,5 @@ model StockTransaction {
   user      User     @relation("UserTransaction", fields: [userId], references: [id])
   price     Float    @default(0)
   createdAt DateTime @default(now())
+  type      TransactionType
 }

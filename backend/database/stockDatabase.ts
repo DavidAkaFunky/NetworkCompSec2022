@@ -1,23 +1,24 @@
-import { Stock } from "@prisma/client";
+
+import { Stock, StockTransaction, TransactionType } from "@prisma/client";
 import prisma from "../prisma/client";
 
 class StockDatabase {
 
-    public static createStock = async (): Promise<boolean> => {
+    public static createStock = async (name: string, ISIN: string, exchange: string, lastPrice: number, volume: number): Promise<Stock | null> => {
         try {
-            await prisma.stock.create({
+            const createdStock = await prisma.stock.create({
                 data: {
-                    name: "",
-                    ISIN: "",
-                    exchange: "",
-                    lastPrice: 0,
-                    volume: 0,
+                    name: name,
+                    ISIN: ISIN,
+                    exchange: exchange,
+                    lastPrice: lastPrice,
+                    volume: volume,
                 }
             });
-            return true;
+            return createdStock;
 
         } catch (err) {
-            return false;
+            return null;
         }
     }
 
@@ -43,6 +44,23 @@ class StockDatabase {
             return [];
         }
     }
+
+    public static createStockTransaction = async (userId: number, stockId: number, price: number, type: TransactionType): Promise<StockTransaction | null> => {
+        try {
+            const stockTransaction = await prisma.stockTransaction.create({
+                data: {
+                    stockId: stockId,
+                    userId: userId,
+                    price: price,
+                    type: type,
+                }
+            });
+            return stockTransaction;
+        } catch (err) {
+            return null;
+        }
+    }
+
 }
 
 export default StockDatabase;

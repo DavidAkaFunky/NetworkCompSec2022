@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { StockTransaction, User } from "@prisma/client";
 import prisma from "../prisma/client"
 
 class UserDatabase {
@@ -46,6 +46,22 @@ class UserDatabase {
 			});
 			return user;
 
+		} catch (err) {
+			return null;
+		}
+	}
+
+	public static getUserAndTransactions = async (userId: number): Promise<User & { transactions: StockTransaction[] } | null> => {
+		try {
+			const user = await prisma.user.findUnique({
+				where: {
+					id: userId
+				},
+				include: {
+					transactions: true
+				}
+			});
+			return user;
 		} catch (err) {
 			return null;
 		}

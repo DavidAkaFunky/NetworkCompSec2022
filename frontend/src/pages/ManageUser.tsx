@@ -11,8 +11,6 @@ import {
 	TableRow,
 	Typography,
 } from "@mui/material";
-import axios from "axios";
-import { useEffect } from "react";
 
 function createStockTransaction(
 	id: number,
@@ -50,26 +48,11 @@ function Title(props: TitleProps) {
 	);
 }
 
-function Home() {
-
-	useEffect(() => {
-
-		const getStocks = async () => {
-			const response = await axios.get("/api/stocks");
-			return response;
-		}
-
-		getStocks().then((response) => {
-			console.log(response);
-		});
-		
-	},[])
-
-
+function ManageUser() {
 	return (
 		<>
 			<Typography component="h2" variant="h3" align="left">
-				Home
+				ManageUser
 			</Typography>
 			<Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
 				<Grid container spacing={3}>
@@ -174,4 +157,4 @@ function Home() {
 	);
 }
 
-export default Home;
+export default ManageUser;

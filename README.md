@@ -241,6 +241,17 @@ npm run build
 npm start
 ```
 
+Create a super admin
+First generate the password hash:
+``` 
+await require('bcryptjs').hash("password", 10);
+```
+Then connect to the database and insert the super admin:
+```bash
+sudo -u postgres psql # TODO should be IP
+INSERT INTO "Admin"(name, email, password, role) VALUES ('name', 'email','hashedPassword','SUPERADMIN');
+```
+
 Build the frontend:
 ```bash
 cd frontend
