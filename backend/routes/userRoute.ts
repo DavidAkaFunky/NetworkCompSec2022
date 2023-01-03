@@ -3,7 +3,7 @@ import { UserService } from "../services/index";
 
 const router = Router();
 
-router.post("/all", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.get("/get-all", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const users = await UserService.getAllUsers();
         res.status(200).json(users);
@@ -12,7 +12,7 @@ router.post("/all", async (req: Request, res: Response, next: NextFunction): Pro
     }
 });
 
-router.post("/get-user", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.get("/get-user", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const user = await UserService.getUser(req.body.email);
         res.status(200).send(user);

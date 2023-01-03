@@ -226,7 +226,7 @@ class AuthService {
 			}
 
 			const refreshData = {
-				token: accessToken,
+				accessToken: accessToken,
 				role: role,
 				name: name
 			}

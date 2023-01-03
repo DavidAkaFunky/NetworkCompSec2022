@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { StockService, TokenService } from "../services";
+import { StockService } from "../services";
 
 const router = Router();
 
@@ -33,8 +33,8 @@ router.post("/create", async (req: Request, res: Response, next: NextFunction): 
 
 router.post("/buy", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {  
-        const stockTransaction = await StockService.buyStock(req.body.email, req.body.ISIN);
-        res.status(200).json(stockTransaction);
+        await StockService.buyStock(req.body.email, req.body.ISIN);
+        res.sendStatus(200);
     } catch (err: any) {
         next(err);
     }
@@ -42,9 +42,19 @@ router.post("/buy", async (req: Request, res: Response, next: NextFunction): Pro
 
 router.post("/sell", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {  
-        const stockTransaction = await StockService.sellStock(req.body.email, req.body.ISIN);
-        res.status(200).json(stockTransaction);
+        await StockService.sellStock(req.body.email, req.body.ISIN);
+        res.sendStatus(200);
     } catch (err: any) {
+        next(err);
+    }
+});
+
+router.get("/transactions", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const transactions = await StockService.getUserTransactions(req.body.email);
+        res.status(200).send(transactions);
+    } catch (err: any) {
+        console.log(err)
         next(err);
     }
 });

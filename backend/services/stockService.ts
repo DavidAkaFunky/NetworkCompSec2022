@@ -1,5 +1,6 @@
 import { Stock, StockTransaction, TransactionType } from "@prisma/client";
 import { StockDatabase, UserDatabase } from "../database";
+import StockData from "../models/stock";
 
 class StockService {
     public static getAllStocks = async (): Promise<Stock[]> => {
@@ -12,46 +13,47 @@ class StockService {
         return stock;
     }
 
-    public static createStock = async (stock: Stock): Promise<Stock | null> => {
+    public static createStock = async (stock: StockData): Promise<Stock | null> => {
         const name = stock.name?.trim();
         const ISIN = stock.ISIN?.trim();
         const exchange = stock.exchange?.trim();
-        const lastPrice = stock.lastPrice;
-        const volume = stock.volume;
-        
+        const lastPrice = parseFloat(stock.lastPrice.replace(',', '.'));
+        const volume = parseInt(stock.volume);
         const createdStock = await StockDatabase.createStock(name, ISIN, exchange, lastPrice, volume);
         return createdStock;
     }
 
-    public static buyStock = async (email: string, ISIN: string): Promise<StockTransaction | null> => {
+    public static buyStock = async (email: string, ISIN: string): Promise<void> => {
         
         // Verify if user exists
-        const user = await UserDatabase.getUserAndTransactions(email);
+        const user = await UserDatabase.getUser(email);
         if (!user) {
-            return null;
+            // THROW ERROR
+            return;
         }
         // Verify if stock exists
         const stock = await StockDatabase.getStockByISIN(ISIN);
         if (!stock) {
-            return null;
+            // THROW ERROR
+            return;
         }
-        const stockTransaction = await StockDatabase.createStockTransaction(email, stock.id, stock.lastPrice, TransactionType.BUY);
-        return stockTransaction;
+        await StockDatabase.createStockTransaction(email, stock.id, stock.lastPrice, TransactionType.BUY);
     }
 
-    public static sellStock = async (email: string, ISIN: string): Promise<StockTransaction | null> => {
+    public static sellStock = async (email: string, ISIN: string): Promise<void> => {
         // Verify if user exists
-        const user = await UserDatabase.getUserAndTransactions(email);
+        const user = await UserDatabase.getUser(email);
         if (!user) {
-            return null;
+            // THROW ERROR
+            return;
         }
         // Verify if stock exists
         const stock = await StockDatabase.getStockByISIN(ISIN);
         if (!stock) {
-            return null;
+            // THROW ERROR
+            return;
         }
-        const stockTransaction = await StockDatabase.createStockTransaction(email, stock.id, stock.lastPrice, TransactionType.SELL);
-        return stockTransaction;
+        await StockDatabase.createStockTransaction(email, stock.id, stock.lastPrice, TransactionType.SELL);
     }
 
     public static getUserTransactions = async (email: string): Promise<StockTransaction[]> => {

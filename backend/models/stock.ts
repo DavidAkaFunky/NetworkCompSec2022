@@ -1,7 +1,7 @@
-export default interface Stock {
+export default interface StockData {
     name: string;
     ISIN: string;
     exchange: string;
-    lastPrice: number;
-    volume: number;
+    lastPrice: string;
+    volume: string;
 }

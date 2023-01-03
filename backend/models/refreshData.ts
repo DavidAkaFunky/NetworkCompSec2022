@@ -1,5 +1,5 @@
 export default interface RefreshData {
-    token: string;
+    accessToken: string;
     role: string;
     name: string;
 }

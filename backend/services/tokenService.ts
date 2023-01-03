@@ -30,15 +30,8 @@ class TokenService {
         return email;
     }
 
-    // Should only be called after the authenticateAccessToken middleware
-    public static getUserEmailFromRequest = (req: any) => {
-        const token = req.headers['authorization'].split(' ')[1];
-        return jwt.decode(token);
-    }
-
     // Authentication middleware
     public static authenticateAccessToken = (req: any, res: any, next: any) => {
-
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1];
 
