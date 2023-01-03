@@ -33,7 +33,7 @@ function Loans() {
     const getLoans = async () => { 
         
         try{
-            const response = await axios.get("/api/loans", {
+            const response = await axios.get("/api/loans/all", {
                 withCredentials: true
             });
             if(response.data) {
