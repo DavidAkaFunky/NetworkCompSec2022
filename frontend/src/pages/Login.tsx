@@ -86,6 +86,7 @@ function Login() {
 		} finally {
 			setSecondSending(false);
 			setTwoFA(false);
+			setTwoFAToken("");
 		}
 	};
 

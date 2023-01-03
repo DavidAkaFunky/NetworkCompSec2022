@@ -6,8 +6,6 @@ class TokenService {
     private static accessSecret: string = process.env.JWT_ACCESS_TOKEN as string;
     private static refreshSecret: string = process.env.JWT_REFRESH_TOKEN as string;
 
-    // Nota podemos implementar com chave publica/chave privada
-
     public static generateAccessToken = (email: string): string => {
         return jwt.sign({ email: email }, this.accessSecret, { expiresIn: '10m' });
     }
@@ -32,6 +30,12 @@ class TokenService {
         return email;
     }
 
+    // Should only be called after the authenticateAccessToken middleware
+    public static getUserEmailFromRequest = (req: any) => {
+        const token = req.headers['authorization'].split(' ')[1];
+        return jwt.decode(token);
+    }
+
     // Authentication middleware
     public static authenticateAccessToken = (req: any, res: any, next: any) => {
 
@@ -39,14 +43,14 @@ class TokenService {
         const token = authHeader && authHeader.split(' ')[1];
 
         if (!token) {
-            throw new HttpException(400, "The refresh token does not exist.");
+            throw new HttpException(400, "The access token does not exist.");
         }
 
-        jwt.verify(token, this.accessSecret, (err: any, id: any) => {
+        jwt.verify(token, this.accessSecret, (err: any, decoded: any) => {
             if (err) {
                 throw new HttpException(403, "Invalid refresh token");
             }
-            req.body.id = id;
+            req.body.email = decoded.email;
             next();
         })
     }

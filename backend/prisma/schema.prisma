@@ -30,18 +30,18 @@ model User {
 }
 
 model Admin {
-  id           Int                @id @default(autoincrement())
-  name         String             @db.VarChar(255)
-  email        String             @unique @db.VarChar(255)
-  password     String             @db.VarChar(255)
-  role         Role
-  twoFASecret  String?            @map("two_fa_secret") @db.VarChar(255)
+  id          Int     @id @default(autoincrement())
+  name        String  @db.VarChar(255)
+  email       String  @unique @db.VarChar(255)
+  password    String  @db.VarChar(255)
+  role        Role
+  twoFASecret String? @map("two_fa_secret") @db.VarChar(255)
 }
 
 model RefreshToken {
-  id           Int                @id @default(autoincrement())
-  token        String             @unique @db.VarChar(255) 
-  email        String             @unique @db.VarChar(255)
+  id    Int    @id @default(autoincrement())
+  token String @unique @db.VarChar(255)
+  email String @unique @db.VarChar(255)
 }
 
 model Stock {
@@ -55,12 +55,12 @@ model Stock {
 }
 
 model StockTransaction {
-  id        Int      @id @default(autoincrement())
-  stockId   Int      @map("stock_id")
-  stock     Stock    @relation("StockTransaction", fields: [stockId], references: [id])
-  userId    Int      @map("user_id")
-  user      User     @relation("UserTransaction", fields: [userId], references: [id])
-  price     Float    @default(0)
-  createdAt DateTime @default(now())
+  id        Int             @id @default(autoincrement())
+  stockId   Int             @map("stock_id")
+  stock     Stock           @relation("StockTransaction", fields: [stockId], references: [id])
+  userEmail String          @map("user_email")
+  user      User            @relation("UserTransaction", fields: [userEmail], references: [email])
+  price     Float           @default(0)
+  createdAt DateTime        @default(now())
   type      TransactionType
 }

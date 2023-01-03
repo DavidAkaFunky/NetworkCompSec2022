@@ -51,11 +51,11 @@ class UserDatabase {
 		}
 	}
 
-	public static getUserAndTransactions = async (userId: number): Promise<User & { transactions: StockTransaction[] } | null> => {
+	public static getUserAndTransactions = async (email: string): Promise<User & { transactions: StockTransaction[] } | null> => {
 		try {
 			const user = await prisma.user.findUnique({
 				where: {
-					id: userId
+					email: email
 				},
 				include: {
 					transactions: true

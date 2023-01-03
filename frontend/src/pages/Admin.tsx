@@ -6,10 +6,16 @@ import {
 	Container,
 	Grid,
 	Paper,
+	Table,
+	TableHead,
+	TableRow,
+	TableCell,
+	TableBody,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import axios from "../interceptors/Axios";
 
 function Admin() {
 	const { auth } = useAuth();
@@ -23,11 +29,60 @@ function Admin() {
 		volume: "",
 	});
 
+	const [users, setUsers] = useState([
+		{
+			id: "",
+			name: "",
+			email: "",
+		},
+	]);
+
+	useEffect(() => {
+		const getAllUsers = async () => {
+			try {
+				const response = await axios.get("/api/users/get-all", {
+					withCredentials: true,
+				});
+				console.log(response.data);
+				return response.data;
+			} catch (err: any) {
+				console.log(err);
+				return [];
+			}
+		};
+
+		getAllUsers().then((data) => {
+			setUsers(data);
+		});
+	}, []);
+
 	const handleClick = async (e: any) => {
 		navigate("/register-admin");
 	};
 
-	const handleSubmit = async (e: any) => {};
+	const handleSubmit = async (e: any) => {
+		try {
+			const response = await axios.post("/api/stocks/create", {
+				withCredentials: true,
+				name: stock.name,
+				ISIN: stock.ISIN,
+				exchange: stock.exchange,
+				lastPrice: stock.lastPrice,
+				volume: stock.volume,
+			});
+
+			// Reset
+			setStock({
+				name: "",
+				ISIN: "",
+				exchange: "",
+				lastPrice: "",
+				volume: "",
+			});
+		} catch (err: any) {
+			console.log(err);
+		}
+	};
 
 	return (
 		<>
@@ -90,36 +145,42 @@ function Admin() {
 									variant="filled"
 									required
 									fullWidth
-									id="name"
-									label={"Stock name"}
-									name="name"
+									id="exchange"
+									label={"Exchange"}
+									name="exchange"
 									autoFocus
-									value={stock.name}
-									onChange={(e) => setStock({ ...stock, name: e.target.value })}
+									value={stock.exchange}
+									onChange={(e) =>
+										setStock({ ...stock, exchange: e.target.value })
+									}
 								/>
 								<TextField
 									margin="normal"
 									variant="filled"
 									required
 									fullWidth
-									id="name"
-									label={"Stock name"}
-									name="name"
+									id="lastPrice"
+									label={"Last Price"}
+									name="lastPrice"
 									autoFocus
-									value={stock.name}
-									onChange={(e) => setStock({ ...stock, name: e.target.value })}
+									value={stock.lastPrice}
+									onChange={(e) =>
+										setStock({ ...stock, lastPrice: e.target.value })
+									}
 								/>
 								<TextField
 									margin="normal"
 									variant="filled"
 									required
 									fullWidth
-									id="name"
-									label={"Stock name"}
-									name="name"
+									id="volume"
+									label={"Volume"}
+									name="volume"
 									autoFocus
-									value={stock.name}
-									onChange={(e) => setStock({ ...stock, name: e.target.value })}
+									value={stock.volume}
+									onChange={(e) =>
+										setStock({ ...stock, volume: e.target.value })
+									}
 								/>
 								<Button
 									fullWidth
@@ -155,6 +216,30 @@ function Admin() {
 							>
 								All users
 							</Typography>
+							<Table sx={{ minWidth: 650 }}>
+								<TableHead>
+									<TableRow>
+										<TableCell>Name</TableCell>
+										<TableCell align="right">Email</TableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									{users.map((user) => (
+										<TableRow
+											key={user.id}
+											sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+											onClick={() => {
+												console.log(user);
+											}}
+										>
+											<TableCell component="th" scope="row">
+												{user.name}
+											</TableCell>
+											<TableCell align="right">{user.email}</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
 						</Paper>
 					</Grid>
 				</Grid>

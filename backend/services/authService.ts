@@ -156,7 +156,7 @@ class AuthService {
 		const isAdmin: boolean = this.adminEmailRegex.test(user.email);
 		const isSuperAdmin: boolean = isAdmin && (user as Admin).role == Role.SUPERADMIN;
 
-		let match: boolean
+		let match: boolean;
 
 		if (isAdmin && !user.twoFASecret) {
 			if (!secret) {
@@ -176,7 +176,7 @@ class AuthService {
 		if (!match) {
 			throw new HttpException(401, "The 2FA token is incorrect. Please try again!");
 		}
-
+	
 		//---------TODO: change tokens for admins
 
 		const accessToken = TokenService.generateAccessToken(user.email);
@@ -246,23 +246,7 @@ class AuthService {
 		}
 	};
 
-	public static changeUserPassword = async (cookies: any, oldPassword: string, newPassword: string): Promise<void> => {
-
-		if (!cookies || !cookies.refreshToken) {
-			throw new HttpException(400, "No refresh token was provided!");
-		}
-
-		const refreshToken = cookies.refreshToken;
-		let email;
-
-		try {
-			email = await TokenService.verifyRefreshToken(refreshToken);
-			if (!email){
-				throw new HttpException(401, "The refresh token has expired.");
-			}
-		} catch (err) {
-			throw new HttpException(401, "The refresh token has expired.");
-		}
+	public static changeUserPassword = async (email: string, oldPassword: string, newPassword: string): Promise<void> => {
 
 		const user = await this.loginVerification({ email: email, password: oldPassword } as LoginData);
 		

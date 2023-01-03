@@ -23,12 +23,10 @@ class StockService {
         return createdStock;
     }
 
-    public static buyStock = async (userId: number, ISIN: string, amount: number): Promise<StockTransaction | null> => {
+    public static buyStock = async (email: string, ISIN: string): Promise<StockTransaction | null> => {
         
-        // TODO: Amount is not being used
-
         // Verify if user exists
-        const user = await UserDatabase.getUserAndTransactions(userId);
+        const user = await UserDatabase.getUserAndTransactions(email);
         if (!user) {
             return null;
         }
@@ -37,13 +35,13 @@ class StockService {
         if (!stock) {
             return null;
         }
-        const stockTransaction = await StockDatabase.createStockTransaction(userId, stock.id, stock.lastPrice, TransactionType.BUY);
+        const stockTransaction = await StockDatabase.createStockTransaction(email, stock.id, stock.lastPrice, TransactionType.BUY);
         return stockTransaction;
     }
 
-    public static sellStock = async (userId: number, ISIN: string, amount: number): Promise<StockTransaction | null> => {
+    public static sellStock = async (email: string, ISIN: string): Promise<StockTransaction | null> => {
         // Verify if user exists
-        const user = await UserDatabase.getUserAndTransactions(userId);
+        const user = await UserDatabase.getUserAndTransactions(email);
         if (!user) {
             return null;
         }
@@ -52,12 +50,12 @@ class StockService {
         if (!stock) {
             return null;
         }
-        const stockTransaction = await StockDatabase.createStockTransaction(userId, stock.id, stock.lastPrice, TransactionType.SELL);
+        const stockTransaction = await StockDatabase.createStockTransaction(email, stock.id, stock.lastPrice, TransactionType.SELL);
         return stockTransaction;
     }
 
-    public static getUserTransactions = async (userId: number): Promise<StockTransaction[]> => {
-        const user = await UserDatabase.getUserAndTransactions(userId);
+    public static getUserTransactions = async (email: string): Promise<StockTransaction[]> => {
+        const user = await UserDatabase.getUserAndTransactions(email);
         if (!user) {
             return [];
         }

@@ -1,12 +1,12 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { StockService } from "../services";
+import { StockService, TokenService } from "../services";
 
 const router = Router();
 
 router.get("/all", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const stocks = await StockService.getAllStocks();
-        res.status(200).json({ stocks });
+        res.status(200).json(stocks);
 
     } catch (err: any) {
         next(err);
@@ -15,8 +15,8 @@ router.get("/all", async (req: Request, res: Response, next: NextFunction): Prom
 
 router.get("/:isin", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const stock = await StockService.getStockByISIN(req.params.isin);
-        res.status(200).json({ stock });
+        const stock = await StockService.getStockByISIN(req.params.ISIN);
+        res.status(200).json(stock);
     } catch (err: any) {
         next(err);
     }
@@ -25,7 +25,25 @@ router.get("/:isin", async (req: Request, res: Response, next: NextFunction): Pr
 router.post("/create", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const stock = await StockService.createStock(req.body);
-        res.status(200).json({ stock });
+        res.status(200).json(stock);
+    } catch (err: any) {
+        next(err);
+    }
+});
+
+router.post("/buy", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {  
+        const stockTransaction = await StockService.buyStock(req.body.email, req.body.ISIN);
+        res.status(200).json(stockTransaction);
+    } catch (err: any) {
+        next(err);
+    }
+});
+
+router.post("/sell", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {  
+        const stockTransaction = await StockService.sellStock(req.body.email, req.body.ISIN);
+        res.status(200).json(stockTransaction);
     } catch (err: any) {
         next(err);
     }

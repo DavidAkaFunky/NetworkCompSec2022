@@ -45,12 +45,12 @@ class StockDatabase {
         }
     }
 
-    public static createStockTransaction = async (userId: number, stockId: number, price: number, type: TransactionType): Promise<StockTransaction | null> => {
+    public static createStockTransaction = async (email: string, stockId: number, price: number, type: TransactionType): Promise<StockTransaction | null> => {
         try {
             const stockTransaction = await prisma.stockTransaction.create({
                 data: {
                     stockId: stockId,
-                    userId: userId,
+                    userEmail: email,
                     price: price,
                     type: type,
                 }

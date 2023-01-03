@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import LoginData from "../models/loginData";
 import UserRegisterData from "../models/userRegisterData";
 import AdminRegisterData from "../models/adminRegisterData";
-import { AuthService, TwoFAService } from "../services/index";
+import { AuthService, TwoFAService, TokenService } from "../services/index";
 
 const router = Router();
 
@@ -90,9 +90,9 @@ router.get("/refresh", async (req: Request, res: Response, next: NextFunction): 
     }
 });
 
-router.get("/change-password", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.get("/change-password", TokenService.authenticateAccessToken, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        await AuthService.changeUserPassword(req.cookies, req.body.oldPassword, req.body.newPassword);
+        await AuthService.changeUserPassword(req.body.email, req.body.oldPassword, req.body.newPassword);
         res.sendStatus(200);
     } catch (err: any) {
         next(err);

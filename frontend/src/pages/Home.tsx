@@ -1,5 +1,6 @@
 import { Copyright } from "@mui/icons-material";
 import {
+	Button,
 	Container,
 	Grid,
 	Link,
@@ -12,31 +13,8 @@ import {
 	Typography,
 } from "@mui/material";
 import axios from "axios";
-import { useEffect } from "react";
-
-function createStockTransaction(
-	id: number,
-	name: string,
-	ISIN: string,
-	exchange: string,
-	lastPrice: number,
-	volume: number,
-	date: string
-) {
-	return { id, name, ISIN, exchange, lastPrice, volume, date };
-}
-
-const rows = [
-	createStockTransaction(
-		0,
-		"Galp",
-		"PTGALP0AM000",
-		"Euronext Lisbon",
-		12.5,
-		100,
-		"2021-06-01"
-	),
-];
+import { useState, useEffect } from "react";
+import BuyOrSellDialog from "../components/BuyOrSellDialog";
 
 interface TitleProps {
 	children?: React.ReactNode;
@@ -51,26 +29,65 @@ function Title(props: TitleProps) {
 }
 
 function Home() {
+	const [stocks, setStocks] = useState([]);
+	const [sending, setSending] = useState(false);
+	const [ISIN, setISIN] = useState("");
+	const [error, setError] = useState("");
 
 	useEffect(() => {
-
 		const getStocks = async () => {
-			const response = await axios.get("/api/stocks");
-			return response;
-		}
+			try {
+				const response = await axios.get("/api/stocks/all");
+				setStocks(response.data);
+			} catch (err: any) {
+				setStocks([]);
+				setError(err);
+			}
+		};
 
-		getStocks().then((response) => {
+		getStocks();
+	}, []);
+
+	const handleBuyStock = async (e: any) => {
+		setSending(true);
+
+		try {
+			const response = await axios.post("/api/stocks/buy", {
+				ISIN,
+			});
 			console.log(response);
-		});
-		
-	},[])
+		} catch (err: any) {
+			setError(err);
+		} finally {
+			setSending(false);
+		}
+	};
 
+	const handleSellStock = async (e: any) => {
+		setSending(true);
+
+		try {
+			const response = await axios.post("/api/stocks/sell", {
+				ISIN,
+			});
+			console.log(response);
+		} catch (err: any) {
+			setError(err);
+		} finally {
+			setSending(false);
+		}
+	};
 
 	return (
 		<>
 			<Typography component="h2" variant="h3" align="left">
 				Home
 			</Typography>
+			{error && (
+				<Typography fontSize={15} color="red">
+					There was an error with your login: {error}
+				</Typography>
+			)}
 			<Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
 				<Grid container spacing={3}>
 					{/* Chart */}
@@ -150,14 +167,19 @@ function Home() {
 									</TableRow>
 								</TableHead>
 								<TableBody>
-									{rows.map((row) => (
-										<TableRow key={row.id}>
-											<TableCell>{row.name}</TableCell>
-											<TableCell>{row.ISIN}</TableCell>
-											<TableCell>{row.exchange}</TableCell>
-											<TableCell>{`${row.lastPrice} €`}</TableCell>
-											<TableCell>{row.volume}</TableCell>
-											<TableCell align="right">{row.date}</TableCell>
+									{stocks.map((stock) => (
+										<TableRow key={stock["id"]}>
+											<TableCell>{stock["name"]}</TableCell>
+											<TableCell>{stock["ISIN"]}</TableCell>
+											<TableCell>{stock["exchange"]}</TableCell>
+											<TableCell>{`${stock["lastPrice"]} €`}</TableCell>
+											<TableCell>{stock["volume"]}</TableCell>
+											<TableCell align="right">{stock["date"]}</TableCell>
+											<TableCell>
+												<Button onClick={() => setISIN(stock["ISIN"])}>
+													Buy
+												</Button>
+											</TableCell>
 										</TableRow>
 									))}
 								</TableBody>
@@ -170,6 +192,22 @@ function Home() {
 				</Grid>
 				<Copyright sx={{ pt: 4 }} />
 			</Container>
+			<BuyOrSellDialog
+				ISIN={ISIN}
+				setISIN={setISIN}
+				buyOrSell="buy"
+				sending={sending}
+				setSending={setSending}
+				handleSubmit={handleBuyStock}
+			/>
+			<BuyOrSellDialog
+				ISIN={ISIN}
+				setISIN={setISIN}
+				buyOrSell="sell"
+				sending={sending}
+				setSending={setSending}
+				handleSubmit={handleSellStock}
+			/>
 		</>
 	);
 }

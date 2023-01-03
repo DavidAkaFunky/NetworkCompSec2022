@@ -249,6 +249,7 @@ await require('bcryptjs').hash("password", 10);
 Then connect to the database and insert the super admin:
 ```bash
 sudo -u postgres psql # TODO should be IP
+\c ncmb;
 INSERT INTO "Admin"(name, email, password, role) VALUES ('name', 'email','hashedPassword','SUPERADMIN');
 ```
 
