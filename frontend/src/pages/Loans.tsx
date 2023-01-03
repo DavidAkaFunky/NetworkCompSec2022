@@ -10,51 +10,46 @@ import {
 	Typography,
 } from "@mui/material";
 import StarIcon from "@mui/icons-material/StarBorder";
+import { useState, useEffect } from "react";
+import axios from "../interceptors/Axios";
 
+function Loans() {
+    const dummyLoan = {
+        "loanAmount": 1000,
+        "loanDuration": 12,
+        "interestRate": 0.1,
+        "description": ["Loan 1"],
+        "bank": {
+            "name": "Bank 1",
+            "address": "Address 1",
+            "phone": "32545261269",
+            "email": ""
+        }
+    };
 
-const tiers = [
-	{
-		title: "Loan",
-		price: "7.49%",
-		priceDescription: "/APR",
-		description: [
-			"From €3000 to €100000",
-			"Fixed interest rate",
-			"No origination fee",
-			"Same-day credit decision",
-		],
-		buttonText: "Get started",
-		buttonVariant: "outlined",
-	},
-	{
-		title: "Credit Card",
-		subheader: "Most popular",
-		price: "€0",
-		priceDescription: "/mo",
-		description: [
-			"1% cashback on all purchases",
-			"Transfer money for free",
-			"Free ATM withdrawals",
-			"Unlimited foreign exchange",
-		],
-		buttonText: "Sign up for free",
-		buttonVariant: "contained",
-	},
-	{
-		title: "Mortgage",
-		price: "4.85%",
-		priceDescription: "/APR",
-		description: [
-			"Up to 70% of the house value",
-			"Minimum of 7 years and maximum of 30 years",
-			"Mixed or fixed interest rate",
-		],
-		buttonText: "Contact us",
-		buttonVariant: "outlined",
-	},
-];
+    const [loans, setloans] = useState([dummyLoan]); 
+    const [error, setError] = useState(false);
 
-function Landing() {
+    const getLoans = async () => { 
+        
+        try{
+            const response = await axios.get("/api/loans", {
+                withCredentials: true
+            });
+            if(response.data) {
+                setloans(response.data);
+            } else {
+                setError(true);
+            }      
+        } catch (err: any) {
+			setError(err);
+		}
+    }
+
+    useEffect(() => {
+        getLoans();
+    }, []);
+
 	return (
 		<>
 			<Box
@@ -72,36 +67,26 @@ function Landing() {
 						color="text.primary"
 						gutterBottom
 					>
-						Nova Caixa Milenar Bancária
-					</Typography>
-					<Typography
-						variant="h5"
-						align="center"
-						color="text.secondary"
-						paragraph
-					>
-						NCMB is a bank that operates in Portugal since 1900. It has a large
-						portfolio of clients, from individuals to small businesses, and
-						large multi-national organizations.
+						Loans
 					</Typography>
 				</Container>
 				<Container maxWidth="md" component="main" sx={{ mt: 5 }}>
 					<Grid container spacing={5} alignItems="flex-end">
-						{tiers.map((tier) => (
+						{loans.map((loan) => (
 							// Enterprise card is full width at sm breakpoint
 							<Grid
 								item
-								key={tier.title}
+								key={loan.loanAmount}
 								xs={12}
-								sm={tier.title === "Enterprise" ? 12 : 6}
+								sm={6}
 								md={4}
 							>
 								<Card>
 									<CardHeader
-										title={tier.title}
-										subheader={tier.subheader}
+										title={loan["loanAmount"]}
+										subheader={loan["loanDuration"]}
 										titleTypographyProps={{ align: "center" }}
-										action={tier.title === "Pro" ? <StarIcon /> : null}
+										action={<StarIcon />}
 										subheaderTypographyProps={{
 											align: "center",
 										}}
@@ -126,14 +111,14 @@ function Landing() {
 												variant="h3"
 												color="text.primary"
 											>
-												{tier.price}
+												{loan["interestRate"]}
 											</Typography>
 											<Typography variant="h6" color="text.secondary">
-												{tier.priceDescription}
+												{loan["bank"]["name"]}
 											</Typography>
 										</Box>
 										<ul>
-											{tier.description.map((line) => (
+											{loan["description"].map((line) => (
 												<Typography
 													component="li"
 													variant="subtitle1"
@@ -148,9 +133,9 @@ function Landing() {
 									<CardActions>
 										<Button
 											fullWidth
-											variant={tier.buttonVariant as "outlined" | "contained"}
+											variant={"outlined"}
 										>
-											{tier.buttonText}
+											{"Acquire"}
 										</Button>
 									</CardActions>
 								</Card>
@@ -163,4 +148,4 @@ function Landing() {
 	);
 }
 
-export default Landing;
+export default Loans;

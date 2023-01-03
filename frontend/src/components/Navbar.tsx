@@ -164,7 +164,7 @@ function Navbar() {
 						>
 							Certification Authority
 						</Button>
-						{auth.isLoggedIn && (
+						{auth.isLoggedIn && [
 							<Button
 								onClick={() => {
 									setAnchorElNav(null);
@@ -173,8 +173,17 @@ function Navbar() {
 								sx={{ my: 2, color: "inherit" }}
 							>
 								Home
-							</Button>
-						)}
+							</Button>,
+							<Button
+								onClick={() => {
+									setAnchorElNav(null);
+									navigate("/loans");
+								}}
+								sx={{ my: 2, color: "inherit" }}
+							>
+								Loans
+						</Button>
+						]}
 						{(auth.role === "ADMIN" || auth.role === "SUPERADMIN") && [
 							<Button
 								key="admin"

@@ -8,6 +8,7 @@ const loansInfo: LoanInfo[] = [
         "loanAmount": 1000,
         "loanDuration": 12,
         "interestRate": 0.1,
+        "description": ["Loan 1"],
         "bank": {
             "name": "Bank 1",
             "address": "Address 1",
@@ -19,6 +20,7 @@ const loansInfo: LoanInfo[] = [
         "loanAmount": 2000,
         "loanDuration": 24,
         "interestRate": 0.2,
+        "description": ["Loan 2"],
         "bank": {
             "name": "Bank 2",
             "address": "Address 2",
@@ -30,6 +32,7 @@ const loansInfo: LoanInfo[] = [
         "loanAmount": 15000,
         "loanDuration": 36,
         "interestRate": 0.05,
+        "description": ["Loan 3"],
         "bank": {
             "name": "Bank 3",
             "address": "Address 3",

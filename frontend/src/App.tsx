@@ -13,6 +13,7 @@ import ManageUser from "./pages/ManageUser";
 import RegisterAdmin from "./pages/RegisterAdmin";
 import ChangePassword from "./pages/ChangePassword";
 import CertificationAuthority from "./pages/CertificationAuthority";
+import Loans from "./pages/Loans";
 
 function App() {
 	return (
@@ -30,6 +31,7 @@ function App() {
 						<Route element={<RequireAuth adminPrivileges={false} />}>
 							<Route path="/home" element={<Home />} />
 							<Route path="/change-password" element={<ChangePassword />} />
+							<Route path="/loans" element={<Loans/>} />
 						</Route>
 						{/* Protected Admin routes */}
 						<Route element={<RequireAuth adminPrivileges={true} />}>
