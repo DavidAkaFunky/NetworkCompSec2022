@@ -38,6 +38,17 @@ function Admin() {
 		},
 	]);
 
+	const [stocks, setStocks] = useState([
+		{
+			id: "",
+			name: "",
+			ISIN: "",
+			exchange: "",
+			lastPrice: "",
+			volume: "",
+		},
+	]);
+
 	const priceRegex = /^[0-9]+[.,][0-9]{2}$/;
 	const isValidPrice = priceRegex.test(stock.lastPrice.trim());
 	const [priceError, setPriceError] = useState("");
@@ -60,15 +71,35 @@ function Admin() {
 			}
 		};
 
+		const getAllStocks = async () => {
+			try {
+				const response = await axios.get("/api/stocks/all", {
+					withCredentials: true,
+				});
+				setStocks(response.data);
+				console.log(response.data);
+			} catch (err: any) {
+				console.log(err);
+				return [];
+			}
+		};
+
 		getAllUsers();
+		getAllStocks();
 	}, []);
 
 	useEffect(() => {
-		setPriceError(stock.lastPrice && !isValidPrice ? "The price is not correctly formatted." : "");
+		setPriceError(
+			stock.lastPrice && !isValidPrice
+				? "The price is not correctly formatted."
+				: ""
+		);
 	}, [stock.lastPrice]);
 
 	useEffect(() => {
-		setVolumeError(stock.volume && !isValidVolume ? "The volume must be an integer." : "");
+		setVolumeError(
+			stock.volume && !isValidVolume ? "The volume must be an integer." : ""
+		);
 	}, [stock.volume]);
 
 	const handleClick = async (e: any) => {
@@ -99,6 +130,10 @@ function Admin() {
 		}
 	};
 
+	const goToUserPortfolio = (user: any) => {
+		navigate("/admin/manage-user", { state: { user } });
+	}
+
 	return (
 		<>
 			<Typography component="h2" variant="h3" align="left">
@@ -110,7 +145,7 @@ function Admin() {
 					variant="contained"
 					sx={{ mt: 3, width: 200, height: 30 }}
 				>
-					Register Admin
+					Register New Admin
 				</Button>
 			)}
 			<Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -120,7 +155,7 @@ function Admin() {
 							sx={{
 								p: 2,
 								display: "flex",
-								flexDirection: "column"
+								flexDirection: "column",
 							}}
 						>
 							<Typography
@@ -169,7 +204,12 @@ function Admin() {
 										setStock({ ...stock, exchange: e.target.value })
 									}
 								/>
-								<Stack sx={{width: "100%"}} direction="row" spacing={1} alignItems="center">
+								<Stack
+									sx={{ width: "100%" }}
+									direction="row"
+									spacing={1}
+									alignItems="center"
+								>
 									<TextField
 										margin="normal"
 										variant="filled"
@@ -186,9 +226,7 @@ function Admin() {
 										error={stock.lastPrice.length > 0 && !isValidPrice}
 										helperText={priceError}
 									/>
-									<Typography variant="h6" >
-										€
-									</Typography>
+									<Typography variant="h6">€</Typography>
 								</Stack>
 								<TextField
 									margin="normal"
@@ -232,6 +270,7 @@ function Admin() {
 								p: 2,
 								display: "flex",
 								flexDirection: "column",
+								height: "100%",
 							}}
 						>
 							<Typography
@@ -256,12 +295,56 @@ function Admin() {
 											sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
 											onClick={() => {
 												console.log(user);
+												goToUserPortfolio(user);
 											}}
 										>
 											<TableCell component="th" scope="row">
 												{user.name}
 											</TableCell>
 											<TableCell align="right">{user.email}</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</Paper>
+					</Grid>
+					<Grid item xs={12} md={8} lg={8}>
+						<Paper
+							sx={{
+								p: 2,
+								display: "flex",
+								flexDirection: "column",
+							}}
+						>
+							<Typography
+								component="h2"
+								variant="h6"
+								color="primary"
+								gutterBottom
+							>
+								All stocks
+							</Typography>
+							<Table sx={{ minWidth: 650 }}>
+								<TableHead>
+									<TableRow>
+										<TableCell>Name</TableCell>
+										<TableCell>ISIN</TableCell>
+										<TableCell>Exchange</TableCell>
+										<TableCell>Last Price</TableCell>
+										<TableCell>Volume</TableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									{stocks.map((stock) => (
+										<TableRow
+											key={stock.id}
+											sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+										>
+											<TableCell>{stock.name}</TableCell>
+											<TableCell>{stock.ISIN}</TableCell>
+											<TableCell>{stock.exchange}</TableCell>
+											<TableCell>{stock.lastPrice}</TableCell>
+											<TableCell>{stock.volume}</TableCell>
 										</TableRow>
 									))}
 								</TableBody>

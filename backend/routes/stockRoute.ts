@@ -13,9 +13,19 @@ router.get("/all", async (req: Request, res: Response, next: NextFunction): Prom
     }
 })
 
-router.get("/transactions", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.get("/transactions/user", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {  
         const transactions = await StockService.getUserTransactions(req.body.email);
+        res.status(200).json(transactions);
+    } catch (err: any) {
+        next(err);
+    }
+});
+
+router.post("/transactions/admin", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {  
+        console.log(req.body.userEmail);
+        const transactions = await StockService.getUserTransactions(req.body.userEmail);
         res.status(200).json(transactions);
     } catch (err: any) {
         next(err);
@@ -40,7 +50,7 @@ router.post("/create", async (req: Request, res: Response, next: NextFunction): 
     }
 });
 
-router.post("/buy", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.post("/buy/user", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {  
         await StockService.buyStock(req.body.email, req.body.ISIN);
         res.sendStatus(200);
@@ -49,9 +59,28 @@ router.post("/buy", async (req: Request, res: Response, next: NextFunction): Pro
     }
 });
 
-router.post("/sell", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.post("/buy/admin", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {  
+        await StockService.buyStock(req.body.userEmail, req.body.ISIN);
+        res.sendStatus(200);
+    } catch (err: any) {
+        next(err);
+    }
+});
+
+router.post("/sell/user", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {  
         await StockService.sellStock(req.body.email, req.body.ISIN);
+        res.sendStatus(200);
+    } catch (err: any) {
+        next(err);
+    }
+});
+
+
+router.post("/sell/admin", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {  
+        await StockService.sellStock(req.body.userEmail, req.body.ISIN);
         res.sendStatus(200);
     } catch (err: any) {
         next(err);

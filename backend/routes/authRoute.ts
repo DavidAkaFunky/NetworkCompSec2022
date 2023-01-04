@@ -90,7 +90,7 @@ router.get("/refresh", async (req: Request, res: Response, next: NextFunction): 
     }
 });
 
-router.get("/change-password", TokenService.authenticateAccessToken, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.patch("/change-password", TokenService.authenticateAccessToken, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         await AuthService.changeUserPassword(req.body.email, req.body.oldPassword, req.body.newPassword);
         res.sendStatus(200);

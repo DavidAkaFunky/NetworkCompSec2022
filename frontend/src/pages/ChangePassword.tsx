@@ -43,7 +43,7 @@ function ChangePassword() {
 		}
 
 		try {
-            const response = await axios.post("/api/auth/change-password", {
+            await axios.patch("/api/auth/change-password", {
                 withCredentials: true,
                 oldPassword: currentPassword,
                 newPassword: newPassword

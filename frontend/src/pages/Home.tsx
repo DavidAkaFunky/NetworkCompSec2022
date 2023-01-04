@@ -12,7 +12,7 @@ import {
 	Typography,
 } from "@mui/material";
 import axios from "axios";
-import { useState, useEffect, SetStateAction } from "react";
+import { useState, useEffect } from "react";
 import BuyOrSellDialog from "../components/BuyOrSellDialog";
 import Title from "../components/Title";
 import StockTable from "../components/StockTable";
@@ -27,43 +27,58 @@ function Home() {
 	const [error, setError] = useState("");
 
 	useEffect(() => {
-		if (sending)
-			return;
+		const getStocks = async () => {
+			try {
+				const response = await axios.get("/api/stocks/all");
+				setStocks(response.data);
+			} catch (err: any) {
+				setStocks([]);
+				setError(err);
+			}
+		};
+
+		const getTransactions = async () => {
+			try {
+				const response = await axios.get("/api/stocks/transactions/user");
+
+				let ownedStocksIDs: { [index: number]: number } = {};
+				response.data.forEach((stock: any) => {
+					const id = stock.stock.id as number;
+					stock.type === "BUY"
+						? ownedStocksIDs[id]
+							? ownedStocksIDs[id]++
+							: (ownedStocksIDs[id] = 1)
+						: ownedStocksIDs[id]
+							? ownedStocksIDs[id]--
+							: (ownedStocksIDs[id] = -1);
+				});
+
+				const ownedStocks = response.data
+					.filter(
+						(value: any, index: any, self: any) =>
+							ownedStocksIDs[value.stock.id] &&
+							index ===
+								self.findIndex((t: any) => t.stock.id === value.stock.id)
+					)
+					.map((t: any) => t.stock);
+
+				setTransactions(response.data);
+				setOwnedStocks(ownedStocks);
+			} catch (err: any) {
+				setTransactions([]);
+				setError(err);
+			}
+		};
+
+		if (sending) return;
 		getStocks();
 		getTransactions();
 	}, [sending]);
 
-	const getStocks = async () => {
-		try {
-			const response = await axios.get("/api/stocks/all");
-			setStocks(response.data);
-		} catch (err: any) {
-			setStocks([]);
-			setError(err);
-		}
-	};
-
-	const getTransactions = async () => {
-		try {
-			const response = await axios.get("/api/stocks/transactions");
-			// CHANGE TO SUBTRACT BOUGHT STOCKS FROM SOLD STOCKS
-			const ownedStocks = response.data.filter((value: any, index: any, self: any) =>
-				index === self.findIndex((t: any) => (
-					t.stock.id === value.stock.id
-				))
-			).map((t: any) => t.stock);
-			setTransactions(response.data);
-			setOwnedStocks(ownedStocks);
-		} catch (err: any) {
-			setTransactions([]);
-			setError(err);
-		}
-	};
-
 	const handleBuyStock = async (e: any) => {
 		setSending(true);
 		try {
-			await axios.post("/api/stocks/buy", {
+			await axios.post("/api/stocks/buy/user", {
 				ISIN: buyISIN,
 			});
 		} catch (err: any) {
@@ -78,7 +93,7 @@ function Home() {
 		setSending(true);
 
 		try {
-			await axios.post("/api/stocks/sell", {
+			await axios.post("/api/stocks/sell/user", {
 				ISIN: sellISIN,
 			});
 		} catch (err: any) {
@@ -132,7 +147,7 @@ function Home() {
 								on 15 March, 2019
 							</Typography>
 							<div>
-								<Link color="primary" href="#" onClick={() => { }}>
+								<Link color="primary" href="#" onClick={() => {}}>
 									View balance
 								</Link>
 							</div>
@@ -142,7 +157,11 @@ function Home() {
 						<StockTable setISIN={setBuyISIN} info="Buy" stocks={stocks} />
 					</Grid>
 					<Grid item xs={6}>
-						<StockTable setISIN={setSellISIN} info="Sell" stocks={ownedStocks} />
+						<StockTable
+							setISIN={setSellISIN}
+							info="Sell"
+							stocks={ownedStocks}
+						/>
 					</Grid>
 					{/* Recent Orders */}
 					<Grid item xs={12}>
