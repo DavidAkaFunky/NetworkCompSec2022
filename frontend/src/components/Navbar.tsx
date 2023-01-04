@@ -91,7 +91,7 @@ function Navbar() {
 							>
 								<Typography textAlign="center">Landing</Typography>
 							</MenuItem>
-							{auth.isLoggedIn && [
+							{auth.role === "USER" && [
 								<MenuItem
 									key="home"
 									onClick={() => {
@@ -164,7 +164,7 @@ function Navbar() {
 						>
 							Certification Authority
 						</Button>
-						{auth.isLoggedIn && [
+						{auth.role === "USER" && [
 							<Button
 								onClick={() => {
 									setAnchorElNav(null);
@@ -271,7 +271,7 @@ function Navbar() {
 								anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
 							>
 								<MenuItem>
-									<Typography sx={{ mx: 2 }}>Profile</Typography>
+									<Typography textAlign="center">Profile</Typography>
 								</MenuItem>
 								<Divider />
 								<MenuItem

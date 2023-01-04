@@ -58,7 +58,11 @@ class UserDatabase {
 					email: email
 				},
 				include: {
-					transactions: true
+					transactions: {
+						include: {
+							stock: true
+						}
+					}
 				}
 			});
 			return user;

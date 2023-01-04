@@ -28,13 +28,15 @@ function App() {
 						<Route path="/register" element={<Register />} />
 						<Route path="/login" element={<Login />} />
 						{/* Protected User routes */}
-						<Route element={<RequireAuth adminPrivileges={false} />}>
+						<Route element={<RequireAuth userOnly />}>
 							<Route path="/home" element={<Home />} />
+						</Route>
+						<Route element={<RequireAuth />}>
 							<Route path="/change-password" element={<ChangePassword />} />
 							<Route path="/loans" element={<Loans/>} />
 						</Route>
 						{/* Protected Admin routes */}
-						<Route element={<RequireAuth adminPrivileges={true} />}>
+						<Route element={<RequireAuth adminPrivileges />}>
 							<Route path="/register-admin" element={<RegisterAdmin />} />
 							<Route path="/admin" element={<Admin />} />
 							<Route path="/admin/manage-user" element={<ManageUser />} />

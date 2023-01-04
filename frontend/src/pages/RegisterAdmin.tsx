@@ -91,7 +91,7 @@ function RegisterAdmin() {
 						error={name.length > 0 && !isValidName}
 						helperText={nameError}
 					/>
-					<Stack sx={{width: "100%"}} direction="row" spacing={1}  alignItems="center">
+					<Stack sx={{width: "100%"}} direction="row" spacing={1} alignItems="center">
 						<TextField
 							margin="normal"
 							variant="filled"

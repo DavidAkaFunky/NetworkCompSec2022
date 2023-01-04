@@ -9,7 +9,7 @@ const useRefreshToken = () => {
 			const response = await axios.get("/api/auth/refresh", {
 				withCredentials: true,
 			});
-
+			
 			setAuth({
 				isLoggedIn: true,
 				role: response.data.role,

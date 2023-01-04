@@ -11,6 +11,7 @@ import {
 	TableRow,
 	TableCell,
 	TableBody,
+	Stack,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -37,24 +38,38 @@ function Admin() {
 		},
 	]);
 
+	const priceRegex = /^[0-9]+[.,][0-9]{2}$/;
+	const isValidPrice = priceRegex.test(stock.lastPrice.trim());
+	const [priceError, setPriceError] = useState("");
+
+	const volumeRegex = /^[0-9]+$/;
+	const isValidVolume = volumeRegex.test(stock.volume.trim());
+	const [volumeError, setVolumeError] = useState("");
+
 	useEffect(() => {
 		const getAllUsers = async () => {
 			try {
 				const response = await axios.get("/api/users/get-all", {
 					withCredentials: true,
 				});
+				setUsers(response.data);
 				console.log(response.data);
-				return response.data;
 			} catch (err: any) {
 				console.log(err);
 				return [];
 			}
 		};
 
-		getAllUsers().then((data) => {
-			setUsers(data);
-		});
+		getAllUsers();
 	}, []);
+
+	useEffect(() => {
+		setPriceError(stock.lastPrice && !isValidPrice ? "The price is not correctly formatted." : "");
+	}, [stock.lastPrice]);
+
+	useEffect(() => {
+		setVolumeError(stock.volume && !isValidVolume ? "The volume must be an integer." : "");
+	}, [stock.volume]);
 
 	const handleClick = async (e: any) => {
 		navigate("/register-admin");
@@ -62,7 +77,7 @@ function Admin() {
 
 	const handleSubmit = async (e: any) => {
 		try {
-			const response = await axios.post("/api/stocks/create", {
+			await axios.post("/api/stocks/create", {
 				withCredentials: true,
 				name: stock.name,
 				ISIN: stock.ISIN,
@@ -105,7 +120,7 @@ function Admin() {
 							sx={{
 								p: 2,
 								display: "flex",
-								flexDirection: "column",
+								flexDirection: "column"
 							}}
 						>
 							<Typography
@@ -154,20 +169,27 @@ function Admin() {
 										setStock({ ...stock, exchange: e.target.value })
 									}
 								/>
-								<TextField
-									margin="normal"
-									variant="filled"
-									required
-									fullWidth
-									id="lastPrice"
-									label={"Last Price"}
-									name="lastPrice"
-									autoFocus
-									value={stock.lastPrice}
-									onChange={(e) =>
-										setStock({ ...stock, lastPrice: e.target.value })
-									}
-								/>
+								<Stack sx={{width: "100%"}} direction="row" spacing={1} alignItems="center">
+									<TextField
+										margin="normal"
+										variant="filled"
+										required
+										fullWidth
+										id="lastPrice"
+										label={"Last Price"}
+										name="lastPrice"
+										autoFocus
+										value={stock.lastPrice}
+										onChange={(e) =>
+											setStock({ ...stock, lastPrice: e.target.value })
+										}
+										error={stock.lastPrice.length > 0 && !isValidPrice}
+										helperText={priceError}
+									/>
+									<Typography variant="h6" >
+										€
+									</Typography>
+								</Stack>
 								<TextField
 									margin="normal"
 									variant="filled"
@@ -181,6 +203,8 @@ function Admin() {
 									onChange={(e) =>
 										setStock({ ...stock, volume: e.target.value })
 									}
+									error={stock.volume.length > 0 && !isValidVolume}
+									helperText={volumeError}
 								/>
 								<Button
 									fullWidth
@@ -192,7 +216,9 @@ function Admin() {
 										!stock.ISIN ||
 										!stock.exchange ||
 										!stock.lastPrice ||
-										!stock.volume
+										!stock.volume ||
+										!isValidPrice ||
+										!isValidVolume
 									}
 								>
 									Submit

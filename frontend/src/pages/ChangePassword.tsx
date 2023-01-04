@@ -61,7 +61,7 @@ function ChangePassword() {
 	return (
         <Box sx={{ mx: "auto", width: "80vw", maxWidth: 500 }}>
             <Typography variant="h4" component="h1">
-                <strong>Register</strong>
+                <strong>Change Password</strong>
             </Typography>
             {generalError && (
                 <Typography fontSize={15} color="red">

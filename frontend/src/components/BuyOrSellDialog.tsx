@@ -36,7 +36,7 @@ const BuyOrSellDialog = ({ ISIN, setISIN, buyOrSell, sending, setSending, handle
             <DialogActions>
                 <Button onClick={() => setISIN("")}>Close</Button>
                 <Button
-                    onClick={() => handleSubmit}
+                    onClick={handleSubmit}
                     variant="contained"
                     disabled={sending}
                 >

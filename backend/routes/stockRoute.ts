@@ -11,16 +11,25 @@ router.get("/all", async (req: Request, res: Response, next: NextFunction): Prom
     } catch (err: any) {
         next(err);
     }
+})
+
+router.get("/transactions", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {  
+        const transactions = await StockService.getUserTransactions(req.body.email);
+        res.status(200).json(transactions);
+    } catch (err: any) {
+        next(err);
+    }
 });
 
-router.get("/:isin", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+/*router.get("/:isin", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const stock = await StockService.getStockByISIN(req.params.ISIN);
         res.status(200).json(stock);
     } catch (err: any) {
         next(err);
     }
-});
+}); */
 
 router.post("/create", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -45,16 +54,6 @@ router.post("/sell", async (req: Request, res: Response, next: NextFunction): Pr
         await StockService.sellStock(req.body.email, req.body.ISIN);
         res.sendStatus(200);
     } catch (err: any) {
-        next(err);
-    }
-});
-
-router.get("/transactions", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const transactions = await StockService.getUserTransactions(req.body.email);
-        res.status(200).send(transactions);
-    } catch (err: any) {
-        console.log(err)
         next(err);
     }
 });

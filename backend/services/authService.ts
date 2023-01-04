@@ -126,13 +126,13 @@ class AuthService {
 		}
 
 		if (!user) {
-			throw new HttpException(401, "Login failed; invalid email or password.");
+			throw new HttpException(401, "Invalid email or password.");
 		}
 
 		const isPasswordMatching = await bcrypt.compare(password, user.password);
 
 		if (!isPasswordMatching) {
-			throw new HttpException(401, "Login failed; invalid email or password.");
+			throw new HttpException(401, "Invalid email or password.");
 		}
 
 		return user;

@@ -1,6 +1,5 @@
 import { Copyright } from "@mui/icons-material";
 import {
-	Button,
 	Container,
 	Grid,
 	Link,
@@ -13,52 +12,64 @@ import {
 	Typography,
 } from "@mui/material";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, SetStateAction } from "react";
 import BuyOrSellDialog from "../components/BuyOrSellDialog";
-
-interface TitleProps {
-	children?: React.ReactNode;
-}
-
-function Title(props: TitleProps) {
-	return (
-		<Typography component="h2" variant="h6" color="primary" gutterBottom>
-			{props.children}
-		</Typography>
-	);
-}
+import Title from "../components/Title";
+import StockTable from "../components/StockTable";
 
 function Home() {
 	const [stocks, setStocks] = useState([]);
+	const [ownedStocks, setOwnedStocks] = useState([]);
+	const [transactions, setTransactions] = useState([]);
 	const [sending, setSending] = useState(false);
-	const [ISIN, setISIN] = useState("");
+	const [buyISIN, setBuyISIN] = useState("");
+	const [sellISIN, setSellISIN] = useState("");
 	const [error, setError] = useState("");
 
 	useEffect(() => {
-		const getStocks = async () => {
-			try {
-				const response = await axios.get("/api/stocks/all");
-				setStocks(response.data);
-			} catch (err: any) {
-				setStocks([]);
-				setError(err);
-			}
-		};
-
+		if (sending)
+			return;
 		getStocks();
-	}, []);
+		getTransactions();
+	}, [sending]);
+
+	const getStocks = async () => {
+		try {
+			const response = await axios.get("/api/stocks/all");
+			setStocks(response.data);
+		} catch (err: any) {
+			setStocks([]);
+			setError(err);
+		}
+	};
+
+	const getTransactions = async () => {
+		try {
+			const response = await axios.get("/api/stocks/transactions");
+			// CHANGE TO SUBTRACT BOUGHT STOCKS FROM SOLD STOCKS
+			const ownedStocks = response.data.filter((value: any, index: any, self: any) =>
+				index === self.findIndex((t: any) => (
+					t.stock.id === value.stock.id
+				))
+			).map((t: any) => t.stock);
+			setTransactions(response.data);
+			setOwnedStocks(ownedStocks);
+		} catch (err: any) {
+			setTransactions([]);
+			setError(err);
+		}
+	};
 
 	const handleBuyStock = async (e: any) => {
 		setSending(true);
-
 		try {
-			const response = await axios.post("/api/stocks/buy", {
-				ISIN,
+			await axios.post("/api/stocks/buy", {
+				ISIN: buyISIN,
 			});
-			console.log(response);
 		} catch (err: any) {
 			setError(err);
 		} finally {
+			setBuyISIN("");
 			setSending(false);
 		}
 	};
@@ -67,13 +78,13 @@ function Home() {
 		setSending(true);
 
 		try {
-			const response = await axios.post("/api/stocks/sell", {
-				ISIN,
+			await axios.post("/api/stocks/sell", {
+				ISIN: sellISIN,
 			});
-			console.log(response);
 		} catch (err: any) {
 			setError(err);
 		} finally {
+			setSellISIN("");
 			setSending(false);
 		}
 	};
@@ -85,7 +96,7 @@ function Home() {
 			</Typography>
 			{error && (
 				<Typography fontSize={15} color="red">
-					There was an error with your login: {error}
+					There was an error: {error}
 				</Typography>
 			)}
 			<Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -97,7 +108,7 @@ function Home() {
 								p: 2,
 								display: "flex",
 								flexDirection: "column",
-								height: 240,
+								height: 300,
 							}}
 						>
 							<Title>Credit Card</Title>
@@ -110,7 +121,7 @@ function Home() {
 								p: 2,
 								display: "flex",
 								flexDirection: "column",
-								height: 240,
+								height: 300,
 							}}
 						>
 							<Title>Mortgage & Loans</Title>
@@ -121,35 +132,17 @@ function Home() {
 								on 15 March, 2019
 							</Typography>
 							<div>
-								<Link color="primary" href="#" onClick={() => {}}>
+								<Link color="primary" href="#" onClick={() => { }}>
 									View balance
 								</Link>
 							</div>
 						</Paper>
 					</Grid>
 					<Grid item xs={6}>
-						<Paper
-							sx={{
-								p: 2,
-								display: "flex",
-								flexDirection: "column",
-								height: 240,
-							}}
-						>
-							<Title>Buy Stocks</Title>
-						</Paper>
+						<StockTable setISIN={setBuyISIN} info="Buy" stocks={stocks} />
 					</Grid>
 					<Grid item xs={6}>
-						<Paper
-							sx={{
-								p: 2,
-								display: "flex",
-								flexDirection: "column",
-								height: 240,
-							}}
-						>
-							<Title>Sell Stocks</Title>
-						</Paper>
+						<StockTable setISIN={setSellISIN} info="Sell" stocks={ownedStocks} />
 					</Grid>
 					{/* Recent Orders */}
 					<Grid item xs={12}>
@@ -161,48 +154,42 @@ function Home() {
 										<TableCell>Name</TableCell>
 										<TableCell>ISIN</TableCell>
 										<TableCell>Exchange</TableCell>
-										<TableCell>Last Price</TableCell>
-										<TableCell>Volume</TableCell>
-										<TableCell align="right">Date</TableCell>
+										<TableCell>Price</TableCell>
+										<TableCell>Type</TableCell>
+										<TableCell>Date</TableCell>
 									</TableRow>
 								</TableHead>
 								<TableBody>
-									{stocks.map((stock) => (
-										<TableRow key={stock["id"]}>
-											<TableCell>{stock["name"]}</TableCell>
-											<TableCell>{stock["ISIN"]}</TableCell>
-											<TableCell>{stock["exchange"]}</TableCell>
-											<TableCell>{`${stock["lastPrice"]} €`}</TableCell>
-											<TableCell>{stock["volume"]}</TableCell>
-											<TableCell align="right">{stock["date"]}</TableCell>
+									{transactions.map((transaction) => (
+										<TableRow key={transaction["id"]}>
+											<TableCell>{transaction["stock"]["name"]}</TableCell>
+											<TableCell>{transaction["stock"]["ISIN"]}</TableCell>
+											<TableCell>{transaction["stock"]["exchange"]}</TableCell>
+											<TableCell>{`${transaction["price"]} €`}</TableCell>
+											<TableCell>{transaction["type"]}</TableCell>
 											<TableCell>
-												<Button onClick={() => setISIN(stock["ISIN"])}>
-													Buy
-												</Button>
+												{new Date(transaction["createdAt"]).toLocaleString()}
 											</TableCell>
 										</TableRow>
 									))}
 								</TableBody>
 							</Table>
-							<Link color="primary" href="#" onClick={() => {}} sx={{ mt: 3 }}>
-								See more orders
-							</Link>
 						</Paper>
 					</Grid>
 				</Grid>
 				<Copyright sx={{ pt: 4 }} />
 			</Container>
 			<BuyOrSellDialog
-				ISIN={ISIN}
-				setISIN={setISIN}
+				ISIN={buyISIN}
+				setISIN={setBuyISIN}
 				buyOrSell="buy"
 				sending={sending}
 				setSending={setSending}
 				handleSubmit={handleBuyStock}
 			/>
 			<BuyOrSellDialog
-				ISIN={ISIN}
-				setISIN={setISIN}
+				ISIN={sellISIN}
+				setISIN={setSellISIN}
 				buyOrSell="sell"
 				sending={sending}
 				setSending={setSending}
