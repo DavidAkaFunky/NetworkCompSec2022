@@ -20,8 +20,9 @@ server {
         }
 
         location /admin {
-                return 302 /;
+                allow 192.168.2.0/24;
                 deny all;
+                #return 302 /;
                 try_files $uri $uri/ =404;
         }
 
