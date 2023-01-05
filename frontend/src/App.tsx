@@ -14,7 +14,6 @@ import RegisterAdmin from "./pages/RegisterAdmin";
 import ChangePassword from "./pages/ChangePassword";
 import CertificationAuthority from "./pages/CertificationAuthority";
 import Loans from "./pages/Loans";
-import BankPortugal from "./pages/BankPortugal";
 
 function App() {
 	return (
@@ -41,7 +40,6 @@ function App() {
 							<Route path="/register-admin" element={<RegisterAdmin />} />
 							<Route path="/admin" element={<Admin />} />
 							<Route path="/admin/manage-user" element={<ManageUser />} />
-							<Route path="/admin/bank-of-portugal" element={<BankPortugal />} />
 						</Route>
 						{/* Fallback route */}
 						<Route path="/*" element={<Navigate to="/" />} />

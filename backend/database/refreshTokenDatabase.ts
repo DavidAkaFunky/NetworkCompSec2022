@@ -3,9 +3,16 @@ import prisma from "../prisma/client"
 class RefreshTokenDatabase {
     public static createRefreshToken = async (refreshToken: string, email: string): Promise<boolean> => {
         try {
-            await prisma.refreshToken.create({
-                data: {
+            await prisma.refreshToken.upsert({
+                create: {
                     token: refreshToken,
+                    email: email
+                },
+                update: {
+                    token: refreshToken,
+                
+                },
+                where: {
                     email: email
                 }
             });

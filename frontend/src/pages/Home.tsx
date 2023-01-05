@@ -33,6 +33,7 @@ function Home() {
 				setStocks(response.data);
 			} catch (err: any) {
 				setStocks([]);
+				console.log(err);
 				setError(err);
 			}
 		};

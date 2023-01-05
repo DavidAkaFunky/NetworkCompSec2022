@@ -94,7 +94,6 @@ function ManageUser() {
 			}
 		};
 
-		console.log(state);
 		if (sending) return;
 		getStocks();
 		getUserTransactions();
@@ -155,7 +154,7 @@ function ManageUser() {
 						>
 							<Title>Credit Card</Title>
 							<img
-								style={{ aspectRatio: "auto", height: "100%" }}
+								style={{ display: "block", maxHeight: "100%" }}
 								src="/Cx-Classic-Visa_480x380.png"
 								alt="card"
 							/>

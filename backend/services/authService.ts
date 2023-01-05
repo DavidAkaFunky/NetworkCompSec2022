@@ -177,9 +177,14 @@ class AuthService {
 			throw new HttpException(401, "The 2FA token is incorrect. Please try again!");
 		}
 	
-		//---------TODO: change tokens for admins
+		let role
+		if (isAdmin) {
+			role = isSuperAdmin ? UserRoles.SUPERADMIN : UserRoles.ADMIN;
+		} else {
+			role = UserRoles.USER;
+		}
 
-		const accessToken = TokenService.generateAccessToken(user.email);
+		const accessToken = TokenService.generateAccessToken(user.email, role);
 
 		const refreshToken = TokenService.generateRefreshToken(user.email);
 
@@ -192,7 +197,7 @@ class AuthService {
 		const userTokens = {
 			name: user.name,
 			email: user.email,
-			role: isAdmin ? (isSuperAdmin ? UserRoles.SUPERADMIN : UserRoles.ADMIN) : UserRoles.USER,
+			role: role,
 			accessToken,
 			refreshToken
 		}
@@ -211,10 +216,9 @@ class AuthService {
 		try {
 
 			const email = await TokenService.verifyRefreshToken(refreshToken);
-			const accessToken = TokenService.generateAccessToken(email);
-
+			
 			let role, name;
-
+			
 			const user = await UserDatabase.getUser(email);
 			if (!user) {
 				const admin = await AdminDatabase.getAdmin(email);
@@ -224,6 +228,8 @@ class AuthService {
 				name = user.name;
 				role = UserRoles.USER;
 			}
+			
+			const accessToken = TokenService.generateAccessToken(email, role);
 
 			const refreshData = {
 				accessToken: accessToken,

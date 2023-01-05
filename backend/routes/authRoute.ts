@@ -3,10 +3,11 @@ import LoginData from "../models/loginData";
 import UserRegisterData from "../models/userRegisterData";
 import AdminRegisterData from "../models/adminRegisterData";
 import { AuthService, TwoFAService, TokenService } from "../services/index";
+import { UserRoles } from "../models/userRoles";
 
 const router = Router();
 
-router.post("/totp/generate", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.post("/totp/generate",  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const content = await TwoFAService.generateTOTPQRCode(req.body.email);
         res.status(200).json({
@@ -27,7 +28,7 @@ router.post("/register-client", async (req: Request, res: Response, next: NextFu
     }
 });
 
-router.post("/register-admin", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.post("/register-admin", TokenService.checkSuperAdminPermission, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const result = await AuthService.registerAdmin(req.body as AdminRegisterData);
         res.status(200).json(result);
@@ -90,7 +91,7 @@ router.get("/refresh", async (req: Request, res: Response, next: NextFunction): 
     }
 });
 
-router.patch("/change-password", TokenService.authenticateAccessToken, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.patch("/change-password", TokenService.checkAuthPermission, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         await AuthService.changeUserPassword(req.body.email, req.body.oldPassword, req.body.newPassword);
         res.sendStatus(200);
@@ -99,7 +100,7 @@ router.patch("/change-password", TokenService.authenticateAccessToken, async (re
     }
 });
 
-router.get("/logout", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.get("/logout", TokenService.checkAuthPermission, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         await AuthService.logoutUser(req.cookies);
         res.cookie("refreshToken", "", {

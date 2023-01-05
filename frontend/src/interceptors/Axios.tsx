@@ -53,7 +53,8 @@ axios.interceptors.response.use(undefined, async (error: AxiosError) => {
 
 			return axios.request(originalRequestConfig);
 		} catch (error) {
-			Promise.reject(error);
+			
+			return Promise.reject(error);
 		}
 	} else {
 		return Promise.reject(error.response?.data);

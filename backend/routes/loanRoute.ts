@@ -1,9 +1,10 @@
 import { Router, Request, Response, NextFunction } from "express";
+import { TokenService } from "../services";
 //import axios from "axios";
 
 const router = Router();
 
-router.get("/all", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.get("/all", TokenService.checkUserPermission, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         //const res = await axios.get('https://external/loansInfo');
         //res.status(res.status).json(res.data);
@@ -12,7 +13,7 @@ router.get("/all", async (req: Request, res: Response, next: NextFunction): Prom
     }
 });
 
-router.get("/acquire/:id", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.get("/acquire/:id", TokenService.checkUserPermission, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         //const res = await axios.get('https://external/loan/acquire/' + req.params.id);
         //res.status(res.status).json(res.data);

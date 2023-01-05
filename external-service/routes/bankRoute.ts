@@ -7,23 +7,22 @@ const clientsInfo: ClientInfo[] = []
 
 // The system has integration with external institutions, namely, the Bank of Portugal (to communicate the financial details of the customers) 
 
-router.post("/clientInfo", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.post("/clients", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const clientInfo: ClientInfo = {
-            "name": "Client 1",
-            "address": "Address 1",
-            "phone": "32545261269",
-            "email": ""
-        };
 
-        clientsInfo.push(req.body as ClientInfo);
+        const clients = req.body as ClientInfo[];
+
+        for (let client of clients) {
+            clientsInfo.push(client);
+        }
+
         res.sendStatus(200);
     } catch (err: any) {
         next(err);
     }
 });
 
-router.get("/clientsInfo/:email", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.get("/client/:email", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
 
         for (let clientInfo of clientsInfo) {
