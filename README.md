@@ -31,11 +31,11 @@ The network is composed of 3 internal networks and 1 host-only network:
 |                            |                         |                          | External service|
 
 
-
 Who's communicating<sup>1</sup> ? 
 
 |  Entity 1            | Entity 2          | Security protocol |
 |----------------------|-------------------|-------------------|
+| Internal User        | Web server(nginx) | HTTPS             |
 | External user        | Web server(nginx) | HTTPS             |   
 | Web server(nginx)    | Backend           | HTTP              |
 | Backend              | Database          | TLS               |
@@ -43,6 +43,24 @@ Who's communicating<sup>1</sup> ?
 
 1: All requests go through the firewall before reaching their destination
 
+
+# Create the Virtual Machines
+
+In virtual box, create a new VM using the disk given in the first lab class.
+Leave the network adpaters as default (Nat in adapter 1, only).
+
+Create 4 more VMs by cloning the first one as in the first lab class.
+
+
+# How to configure VMs (common steps)
+
+Update package manager:
+```bash
+sudo apt update
+sudo apt upgrade
+```
+
+# Webserver(VM1)
 
 ## Generating Certificate Authority (CA) and necessary certificates for the webserver (WebServer VM)
 
@@ -61,7 +79,7 @@ md5sum rootCA.crt
 Generate the web server key and create a certificate request with the pre-defined configuration
 ```
 openssl genrsa -out webserver.key
-openssl req -new -key webserver.key -out webserver.csr -config webserver.conf
+openssl req -new -key webserver.key -out webserver.csr -config ../SIRS2022/openssl-config/webserver.csr.conf 
 ```
 
 Use the CA certificate and key to sign the certificate request of the web server which generates a certificate
@@ -79,47 +97,83 @@ mv webserver.key /etc/ssl/private/
 mv webserver.crt /etc/ssl/certs/
 ```
 
-## Generating Certificate Authority (CA) and necessary certificates for the external service
+## Install recquired tools
 
-Start by generating the CA key and certificate which will be used to sign the web server certificate request
-```
-openssl req -x509 -sha256 -days 356 -nodes -newkey rsa:2048 -subj "/CN=192.168.56.102/C=PT/L=Lisboa" -keyout externalCA.key -out externalCA.crt 
-```
-
-Generate the web server key and create a certificate request with the pre-defined configuration
-```
-openssl genrsa -out externalwebserver.key
-openssl req -new -key externalwebserver.key -out externalwebserver.csr -config externalwebserver.conf
-```
-
-Use the CA certificate and key to sign the certificate request of the external web server which generates a certificate
-```
-openssl x509 -req -in externalwebserver.csr -CA externalCA.crt -CAkey externalCA.key -CAcreateserial -out externalwebserver.crt -days 365 -sha256 -extfile externalwebserver.conf
-```
-
-Copy the external web server certificate and key to the external web server.  
-Depending on where you generated them, you may drag-and-drop from the local machine to inside the VMs or if they 
-were locally generated, just move them to:
-```
-mv externalwebserver.key /etc/ssl/private/
-mv externalwebserver.crt /etc/ssl/certs/
-```
-
-
-## How to configure VMs (common steps)
-
-Update package manager:
+Install nvm (0.39.2):
 ```bash
-sudo apt update
-sudo apt upgrade
+wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
 ```
+
+Or, alternatively:
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
+```
+Restart the shell
+
+Install node (16.18.1) and npm (8.19.2):
+```bash
+nvm install 16.18.1
+nvm use 16.18.1
+nvm alias default 16.18.1
+```
+
+## Setup Backend
+
+Go to frontend folder and install the recquired packages:
+```bash
+cd frontend
+npm i
+```
+
+Go to backend folder and install the recquired packages:
+```bash
+cd backend
+npm i
+```
+
+Copy the example file and then populate the .env for the backend:
+```bash
+cp .env.example .env
+```
+The database options should look like this:
+```
+PGUSER=postgres #change to webserver
+PGPASSWORD=dees
+PGHOST=192.168.1.2
+PGPORT=5432
+PGDATABASE=ncmb
+```
+
+Generate the JWT_*_TOKEN and add it in `.env` file:
+```
+node
+require('crypto').randomBytes(64).toString('hex')
+```
+
+Run prisma to configure the database(after configuring Database VM):
+```bash
+npx prisma migrate dev --name init
+```
+
+Shut down the VM. In `Settigns -> Network`
 
 Run the script to configure and install dependencies:
 ```bash
-sudo ./firewall-setup.sh <webserver|firewall|database|externalservice> 
+sudo ./vm-setup.sh webserver 
 ```
 
-### Firewall
+Start the backend:
+```bash
+npm run build
+npm start
+```
+
+Build the frontend:
+```bash
+npm run build
+```
+
+# Firewall(VM2)
 
 Allow IP forwarding:
 ```bash
@@ -136,7 +190,7 @@ telnet 192.168.1.2 5432
 ping 192.168.56.102
 ```
 
-### Database
+# Database(VM3)
 
 Check that postgresql is working:
 ```bash
@@ -183,64 +237,6 @@ Create database with name `ncmb`:
 CREATE DATABASE ncmb;
 ```
 
-# TODO: Create user with non super admin privileges
-
-If something goes wrong check the logs:
-```bash
-tail /var/log/postgresql/postgresql-14-main.log
-```
-
-### Web server
-
-Copy the example file and then populate the .env for the backend:
-```bash
-cd backend
-cp .env.example .env
-```
-The database options should look like this:
-```
-PGUSER=postgres
-PGPASSWORD=dees
-PGHOST=192.168.1.2
-PGPORT=5432
-PGDATABASE=ncmb
-```
-
-To generate the JWT_*_TOKEN:
-```
-node
-require('crypto').randomBytes(64).toString('hex')
-```
-
-Install nvm (0.39.2):
-```bash
-wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
-```
-
-Or, alternatively:
-```bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh | bash
-```
-
-Install node (16.18.1) and npm (8.19.2):
-```bash
-nvm install 16.18.1
-nvm use 16.18.1
-nvm alias default 16.18.1
-```
-
-Run prisma to configure the database:
-```bash
-npm i
-npx prisma migrate dev --name init
-```
-
-Start the backend:
-```bash
-npm run build
-npm start
-```
-
 Create a super admin
 First generate the password hash:
 ``` 
@@ -253,14 +249,40 @@ sudo -u postgres psql # TODO should be IP
 INSERT INTO "Admin"(name, email, password, role) VALUES ('name', 'email','hashedPassword','SUPERADMIN');
 ```
 
-Build the frontend:
+# TODO: Create user with non super admin privileges
+
+If something goes wrong check the logs:
 ```bash
-cd frontend
-npm i
-npm run build
+tail /var/log/postgresql/postgresql-14-main.log
 ```
 
 ### External service
+
+## Generating Certificate Authority (CA) and necessary certificates for the external service
+
+Start by generating the CA key and certificate which will be used to sign the web server certificate request
+```
+openssl req -x509 -sha256 -days 356 -nodes -newkey rsa:2048 -subj "/CN=192.168.56.102/C=PT/L=Lisboa" -keyout externalCA.key -out externalCA.crt 
+```
+
+Generate the web server key and create a certificate request with the pre-defined configuration
+```
+openssl genrsa -out externalwebserver.key
+openssl req -new -key externalwebserver.key -out externalwebserver.csr -config externalwebserver.conf
+```
+
+Use the CA certificate and key to sign the certificate request of the external web server which generates a certificate
+```
+openssl x509 -req -in externalwebserver.csr -CA externalCA.crt -CAkey externalCA.key -CAcreateserial -out externalwebserver.crt -days 365 -sha256 -extfile externalwebserver.conf
+```
+
+Copy the external web server certificate and key to the external web server.  
+Depending on where you generated them, you may drag-and-drop from the local machine to inside the VMs or if they 
+were locally generated, just move them to:
+```
+mv externalwebserver.key /etc/ssl/private/
+mv externalwebserver.crt /etc/ssl/certs/
+```
 
 Copy the example file and then populate the .env for the external service:
 ```bash

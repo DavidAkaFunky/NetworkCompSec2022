@@ -7,13 +7,6 @@ then
 
     cp -f network-managers/webserver_vm.yaml /etc/netplan/01-network-manager-all.yaml
 
-    echo "Configuring NGINX"
-
-    sudo apt install nginx -y
-    rm /etc/nginx/sites-available/default
-    cp nginx-config/webserver_config /etc/nginx/sites-available/default
-    sudo systemctl restart nginx
-
 # Firewall
 elif [ "$1" == "firewall" ]
 then    
