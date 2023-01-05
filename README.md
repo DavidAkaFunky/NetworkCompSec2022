@@ -24,7 +24,7 @@ The system architecture is composed by 5 VMs:
 
 The network is composed of 3 internal networks and 1 host-only network:
 
-|  Internal Network 1 (sw1)  | Internal Network 2 (sw2)| Internal Network 3 (sw3) | Host-only       |
+|  Internal Network 1        | Internal Network 2      | Internal Network 3       | Host-only       |
 |----------------------------|-------------------------|--------------------------|-----------------|
 | Firewall (ad. 1)           | Firewall (ad. 2)        | Firewall (ad. 3)         | Firewall (ad. 4)|
 | Web server (ad. 1)         | Database (ad. 1)        | Internal user (ad. 1)    | External user   |
@@ -91,10 +91,10 @@ systemctl status postgresql
 
 Edit `/etc/postgresql/14/main/postgresql.conf`:
 ```
-listen_address = *
+listen_address = '*''
 ssl = on
 ssl_cert_file = '/etc/ssl/certs/webserver.crt'
-ssl_key_file = '/etc/ssl/certs/webserver.key'
+ssl_key_file = '/etc/ssl/private/webserver.key'
 ```
 
 Edit `/etc/postgresql/14/main/pg_hba.conf`: 
@@ -104,10 +104,10 @@ Edit `/etc/postgresql/14/main/pg_hba.conf`:
  hostssl             all       all    0.0.0.0/0   md5
 ```
 
-Copy  the following files in the Webserver(VM1) to the Database VM:
+Copy the following files in the Webserver(VM1) to the Database VM:
 ```
 ~/openssl/webserver.crt (on webserver)    to    /etc/ssl/certs/webserver.crt (on database)
-~/openssl/webserver.key (on webserver)    to    /etc/ssl/certs/webserver.key (on database)
+~/openssl/webserver.key (on webserver)    to    /etc/ssl/private/webserver.key (on database)
 ```
 
 Finally restart postgres:
@@ -155,6 +155,21 @@ tail /var/log/postgresql/postgresql-14-main.log
 ```
 
 # Firewall(VM2)
+
+In `Settigns -> Network` set adapters as follow: 
+```
+Adapter 1 -> 
+Adapter 2 -> ...
+# Complete this 
+
+```
+Make sure the MAC address is unique.
+
+Start the VM again and run the script to configure the network:
+```bash
+chmod +x vm-setup.sh
+sudo ./vm-setup.sh database 
+```
 
 Allow IP forwarding:
 ```bash

@@ -79,6 +79,8 @@ then
     chown postgres:ssl-cert /etc/ssl/certs/
     chown postgres:postgres /etc/ssl/certs/webserver.crt
 
+    chmod 0600 /etc/ssl/private/webserver.key
+
 # Internal user
 elif [ "$1" == "internaluser" ]
 then
