@@ -156,7 +156,7 @@ tail /var/log/postgresql/postgresql-14-main.log
 
 # Firewall(VM2)
 
-In `Settigns -> Network` set adapters as follow: 
+In `Settings -> Network` set adapters as follow: 
 ```
 Adapter 1 -> 
 Adapter 2 -> ...

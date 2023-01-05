@@ -3,7 +3,7 @@ import { authRoutes } from './authRoute';
 import { stockRoutes } from './stockRoute';
 import { userRoutes } from './userRoute';
 import { loanRoutes } from './loanRoute';
-import { portugalBankRoutes } from './BankPortugalRoute';
+import { portugalBankRoutes } from './portugalBankRoute';
 
 const router: Router = Router();
 

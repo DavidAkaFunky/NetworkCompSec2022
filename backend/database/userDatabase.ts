@@ -95,6 +95,23 @@ class UserDatabase {
 		}
 	}
 
+	public static getAllUsersAndTransactions = async (): Promise<(User & { transactions: StockTransaction[] })[]> => {
+		try {
+			const users = await prisma.user.findMany({
+				include: {
+					transactions: {
+						include: {
+							stock: true
+						}
+					}
+				}
+			});
+			return users;
+		} catch (err) {
+			return [];
+		}
+	}
+
 	public static changeUserPassword = async (email: string, newPassword: string): Promise<boolean> => {
 		try {
 			await prisma.user.update({

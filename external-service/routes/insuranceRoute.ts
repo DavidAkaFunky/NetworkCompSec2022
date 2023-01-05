@@ -44,9 +44,9 @@ const loansInfo: LoanInfo[] = [
 
 // insurance companies (to promote insurance services that are associated with the loans).
 
-router.get("/loansInfo", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.get("/loans-info", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        res.status(200).json({ loansInfo });
+        res.status(200).json(loansInfo);
     } catch (err: any) {
         next(err);
     }

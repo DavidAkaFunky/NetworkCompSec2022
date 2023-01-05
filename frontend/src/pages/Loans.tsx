@@ -14,50 +14,20 @@ import { useState, useEffect } from "react";
 import axios from "../interceptors/Axios";
 
 function Loans() {
-    const dummyLoan = {
-		"id": 0,
-        "loanAmount": 1000,
-        "loanDuration": 12,
-        "interestRate": 0.1,
-		"acquired": false,
-        "description": ["Loan 1"],
-        "bank": {
-            "name": "Bank 1",
-            "address": "Address 1",
-            "phone": "32545261269",
-            "email": ""
-        }
-    };
 
-    const [loans, setloans] = useState([dummyLoan]); 
+    const [loans, setLoans] = useState([]); 
     const [error, setError] = useState(false);
 
     const getLoans = async () => { 
         
         try{
-            const response = await axios.get("/api/loans/all", {
-                withCredentials: true
-            });
-            if(response.data) {
-                setloans(response.data);
-            } else {
-                setError(true);
-            }      
+            const response = await axios.get("/api/loans/all");
+			console.log(response.data);
+            setLoans(response.data);   
         } catch (err: any) {
 			setError(err);
 		}
     }
-
-	const acquireLoan = async (id: number) => {
-		try {
-			loans[id]["acquired"] = true;
-			const response = await axios.get("/api/loans/acquire/" + id);
-			//getLoans();
-		} catch (err: any) {
-			setError(err);
-		}
-	};
-
 
     useEffect(() => {
         getLoans();
@@ -82,6 +52,11 @@ function Loans() {
 					>
 						Loans
 					</Typography>
+					{error && (
+						<Typography fontSize={15} color="red">
+							There was an error: {error}
+						</Typography>
+					)}
 				</Container>
 				<Container maxWidth="md" component="main" sx={{ mt: 5 }}>
 					<Grid container spacing={5} alignItems="flex-end">
@@ -89,17 +64,16 @@ function Loans() {
 							// Enterprise card is full width at sm breakpoint
 							<Grid
 								item
-								key={loan.loanAmount}
+								key={loan["loanAmount"]}
 								xs={12}
 								sm={6}
 								md={4}
 							>
 								<Card>
 									<CardHeader
-										title={loan["loanAmount"]}
-										subheader={loan["loanDuration"]}
+										title={loan["loanAmount"] + " €"}
+										subheader={loan["loanDuration"] + " months"}
 										titleTypographyProps={{ align: "center" }}
-										action={<StarIcon />}
 										subheaderTypographyProps={{
 											align: "center",
 										}}
@@ -123,15 +97,16 @@ function Loans() {
 												component="h2"
 												variant="h3"
 												color="text.primary"
+												sx={{ mr: 1 }}
 											>
-												{loan["interestRate"]}
+												{loan["interestRate"] + "%"}
 											</Typography>
 											<Typography variant="h6" color="text.secondary">
 												{loan["bank"]["name"]}
 											</Typography>
 										</Box>
 										<ul>
-											{loan["description"].map((line) => (
+											{(loan["description"] as never[]).map((line: any) => (
 												<Typography
 													component="li"
 													variant="subtitle1"
@@ -143,18 +118,6 @@ function Loans() {
 											))}
 										</ul>
 									</CardContent>
-									<CardActions>
-										{!loan["acquired"] && (
-											<Button
-												fullWidth
-												variant="outlined"
-												onClick={() => acquireLoan(loan["id"])}
-											>	
-												Acquire
-											</Button>
-										)}
-										
-									</CardActions>
 								</Card>
 							</Grid>
 						))}

@@ -1,11 +1,15 @@
 import { UserDatabase } from '../database/index';
-import { User } from '@prisma/client';
+import { StockTransaction, User } from '@prisma/client';
 import HttpException from '../models/httpException';
 
 class UserService {
 
 	public static getAllUsers = async (): Promise<User[]> => {
         return UserDatabase.getAllUsers();
+    }
+
+    public static getAllUsersAndTransactions = async (): Promise<(User & { transactions: StockTransaction[] })[]> => {
+        return UserDatabase.getAllUsersAndTransactions();
     }
 
     public static getUser = async (email: string): Promise<User> => {
