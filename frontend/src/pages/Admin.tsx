@@ -321,7 +321,7 @@ function Admin() {
 							</Table>
 						</Paper>
 					</Grid>
-					<Grid item xs={12} md={8} lg={8}>
+					<Grid item xs={12}>
 						<Paper
 							sx={{
 								p: 2,
@@ -335,7 +335,7 @@ function Admin() {
 								color="primary"
 								gutterBottom
 							>
-								All stocks
+								All Stocks
 							</Typography>
 							<Table>
 								<TableHead>

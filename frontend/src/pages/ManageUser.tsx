@@ -133,7 +133,7 @@ function ManageUser() {
 	return (
 		<>
 			<Typography component="h2" variant="h3" align="left">
-				{state.user.name} Portfolio
+				{state.user.name}'s Portfolio
 			</Typography>
 			{error && (
 				<Typography fontSize={15} color="red">
