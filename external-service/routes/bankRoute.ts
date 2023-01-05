@@ -16,18 +16,24 @@ router.post("/clientInfo", async (req: Request, res: Response, next: NextFunctio
             "email": ""
         };
 
-        //req.body.clientInfo = clientInfo;
-
-        clientsInfo.push(clientInfo);
-        res.status(200).json({ clientInfo });
+        clientsInfo.push(req.body as ClientInfo);
+        res.sendStatus(200);
     } catch (err: any) {
         next(err);
     }
 });
 
-router.get("/clientsInfo", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.get("/clientsInfo/:email", async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        res.status(200).json({ clientsInfo });
+
+        for (let clientInfo of clientsInfo) {
+            if (clientInfo.email == req.params.email) {
+                res.status(200).json({ clientInfo });
+                return;
+            }
+        }
+
+        res.status(404).json({ message: "Client not found" });
     } catch (err: any) {
         next(err);
     }

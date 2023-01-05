@@ -148,6 +148,13 @@ function Admin() {
 					Register New Admin
 				</Button>
 			)}
+			<Button
+				onClick={() => navigate("/admin/bank-of-portugal")}
+				variant="contained"
+				sx={{ ml: 4, mt: 3, width: 200, height: 30 }}
+			>
+				Bank of Portugal
+			</Button>
 			<Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
 				<Grid container spacing={3}>
 					<Grid item xs={12} md={4} lg={4}>

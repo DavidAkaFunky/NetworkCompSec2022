@@ -15,9 +15,11 @@ import axios from "../interceptors/Axios";
 
 function Loans() {
     const dummyLoan = {
+		"id": 0,
         "loanAmount": 1000,
         "loanDuration": 12,
         "interestRate": 0.1,
+		"acquired": false,
         "description": ["Loan 1"],
         "bank": {
             "name": "Bank 1",
@@ -45,6 +47,17 @@ function Loans() {
 			setError(err);
 		}
     }
+
+	const acquireLoan = async (id: number) => {
+		try {
+			loans[id]["acquired"] = true;
+			const response = await axios.get("/api/loans/acquire/" + id);
+			//getLoans();
+		} catch (err: any) {
+			setError(err);
+		}
+	};
+
 
     useEffect(() => {
         getLoans();
@@ -131,12 +144,16 @@ function Loans() {
 										</ul>
 									</CardContent>
 									<CardActions>
-										<Button
-											fullWidth
-											variant={"outlined"}
-										>
-											{"Acquire"}
-										</Button>
+										{!loan["acquired"] && (
+											<Button
+												fullWidth
+												variant="outlined"
+												onClick={() => acquireLoan(loan["id"])}
+											>	
+												Acquire
+											</Button>
+										)}
+										
 									</CardActions>
 								</Card>
 							</Grid>
