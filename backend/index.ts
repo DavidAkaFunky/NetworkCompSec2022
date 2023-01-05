@@ -16,26 +16,31 @@ const app = express();
 //    flags: "a"
 //})
 //// Logging middleware
-//app.use(morgan(function (tokens, req, res) {
-//
-//    let byWho = "no-access-token";
-//    const accessToken = req.headers.authorization?.split(" ")[1];
-//    if (accessToken){
-//        const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_TOKEN as string) as JwtPayload;
-//        byWho = `access-token (user_email: ${decoded.email})`;
-//    }
-//
-//    return [
-//        tokens.method(req, res),
-//        tokens.url(req, res),
-//        tokens.status(req, res),
-//        tokens["response-time"](req, res), "ms",
-//        byWho
-//    ].join(' ')
+app.use(morgan(function (tokens, req, res) {
+
+    let byWho = "no-access-token";
+    const accessToken = req.headers.authorization?.split(" ")[1];
+    if (accessToken){
+        try {
+            const decoded = jwt.verify(accessToken, process.env.JWT_ACCESS_TOKEN as string) as JwtPayload;
+            byWho = `access-token (user_email: ${decoded.email})`;
+        } catch (err) {
+            byWho = "invalid-access-token";
+        }
+    }
+
+    return [
+        tokens.method(req, res),
+        tokens.url(req, res),
+        tokens.status(req, res),
+        tokens["response-time"](req, res), "ms",
+        byWho
+    ].join(' ')
+}));
 //}, { stream: logStream }));
 
 // Parsers middleware
-app.use(morgan("tiny"));
+//app.use(morgan("tiny"));
 app.use(bodyParser.json());
 app.use(cookieParser())
 

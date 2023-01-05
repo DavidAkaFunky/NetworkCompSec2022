@@ -64,7 +64,6 @@ function Admin() {
 					withCredentials: true,
 				});
 				setUsers(response.data);
-				console.log(response.data);
 			} catch (err: any) {
 				console.log(err);
 				return [];
@@ -77,7 +76,6 @@ function Admin() {
 					withCredentials: true,
 				});
 				setStocks(response.data);
-				console.log(response.data);
 			} catch (err: any) {
 				console.log(err);
 				return [];
@@ -130,6 +128,14 @@ function Admin() {
 		}
 	};
 
+	const handleBankSubmit = async (e: any) => {
+		try {
+			await axios.get("/api/portugal-bank/clients");
+		} catch (err: any) {
+			console.log(err);
+		}
+	};
+
 	const goToUserPortfolio = (user: any) => {
 		navigate("/admin/manage-user", { state: { user } });
 	}
@@ -149,7 +155,7 @@ function Admin() {
 				</Button>
 			)}
 			<Button
-				onClick={() => navigate("/admin/bank-of-portugal")}
+				onClick={handleBankSubmit}
 				variant="contained"
 				sx={{ ml: 4, mt: 3, width: 200, height: 30 }}
 			>
@@ -288,7 +294,7 @@ function Admin() {
 							>
 								All users
 							</Typography>
-							<Table sx={{ minWidth: 650 }}>
+							<Table>
 								<TableHead>
 									<TableRow>
 										<TableCell>Name</TableCell>
@@ -331,7 +337,7 @@ function Admin() {
 							>
 								All stocks
 							</Typography>
-							<Table sx={{ minWidth: 650 }}>
+							<Table>
 								<TableHead>
 									<TableRow>
 										<TableCell>Name</TableCell>

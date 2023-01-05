@@ -166,6 +166,7 @@ function Navbar() {
 						</Button>
 						{auth.role === "USER" && [
 							<Button
+								key="home"
 								onClick={() => {
 									setAnchorElNav(null);
 									navigate("/home");
@@ -175,6 +176,7 @@ function Navbar() {
 								Home
 							</Button>,
 							<Button
+								key="loans"
 								onClick={() => {
 									setAnchorElNav(null);
 									navigate("/loans");
