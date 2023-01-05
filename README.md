@@ -60,6 +60,117 @@ sudo apt update
 sudo apt upgrade
 ```
 
+# Database(VM3)
+
+## Postgres instalation
+
+```bash
+sudo wget http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc
+sudo apt-key add ACCC4CF8.asc
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
+sudo apt -y update
+sudo apt -y install postgresql-14
+```
+    
+## Configure database
+
+Shut down the VM. 
+In `Settigns -> Network` set adapter 1 to Internal Network and name the network `sw2`. 
+Make sure the MAC address is unique.
+
+Start the VM again and run the script to configure the network:
+```bash
+chmod +x vm-setup.sh
+sudo ./vm-setup.sh database 
+```
+
+Check that postgresql is working:
+```bash
+systemctl status postgresql
+```
+
+Edit `/etc/postgresql/14/main/postgresql.conf`:
+```
+listen_address = *
+ssl = on
+ssl_cert_file = '/etc/ssl/certs/webserver.crt'
+ssl_key_file = '/etc/ssl/certs/webserver.key'
+```
+
+Edit `/etc/postgresql/14/main/pg_hba.conf`: 
+
+```bash
+[CONNECTION_TYPE][DATABASE][USER] [ADDRESS]   [METHOD]
+ hostssl             all       all    0.0.0.0/0   md5
+```
+
+Copy  the following files in the Webserver(VM1) to the Database VM:
+```
+~/openssl/webserver.crt (on webserver)    to    /etc/ssl/certs/webserver.crt (on database)
+~/openssl/webserver.key (on webserver)    to    /etc/ssl/certs/webserver.key (on database)
+```
+
+Finally restart postgres:
+```bash
+systemctl restart postgresql
+```
+
+Check that server is listening to port 5432:
+```bash
+ss -nlt | grep 5432
+```
+
+Run psql:
+```bash
+sudo -u postgres psql
+```
+
+Change password:
+```bash
+ALTER USER postgres WITH ENCRYPTED PASSWORD 'postgres';
+```
+
+Create database with name `ncmb`:
+```bash
+CREATE DATABASE ncmb;
+```
+
+Create a super admin
+First generate the password hash:
+``` 
+await require('bcryptjs').hash("password", 10);
+```
+Then connect to the database and insert the super admin:
+```bash
+sudo -u postgres psql # TODO should be IP
+\c ncmb;
+INSERT INTO "Admin"(name, email, password, role) VALUES ('name', 'email','hashedPassword','SUPERADMIN');
+```
+
+# TODO: Create user with non super admin privileges
+
+If something goes wrong check the logs:
+```bash
+tail /var/log/postgresql/postgresql-14-main.log
+```
+
+# Firewall(VM2)
+
+Allow IP forwarding:
+```bash
+vi /etc/sysctl.conf
+#Uncomment net.ipv4.ip_forward=1
+```
+
+Later test connections with:
+```
+ping 192.168.0.2
+ping 192.168.1.2
+ping 192.168.2.2
+telnet 192.168.1.2 5432   
+ping 192.168.56.102
+```
+
 # Webserver(VM1)
 
 ## Generating Certificate Authority (CA) and necessary certificates for the webserver (WebServer VM)
@@ -137,7 +248,7 @@ cp .env.example .env
 ```
 The database options should look like this:
 ```
-PGUSER=postgres #change to webserver
+PGUSER=webserver
 PGPASSWORD=dees
 PGHOST=192.168.1.2
 PGPORT=5432
@@ -155,10 +266,20 @@ Run prisma to configure the database(after configuring Database VM):
 npx prisma migrate dev --name init
 ```
 
-Shut down the VM. In `Settigns -> Network`
-
-Run the script to configure and install dependencies:
+Install and configure nginx:
 ```bash
+cd ../nginx-config
+chmod +x install_config.sh
+sudo ./install_config.sh
+```
+
+Shut down the VM. 
+In `Settigns -> Network` set adapter 1 to Internal Network and name the network `sw1`. 
+Make sure the MAC address is unique.
+
+Start the VM again and run the script to configure the network:
+```bash
+chmod +x vm-setup.sh
 sudo ./vm-setup.sh webserver 
 ```
 
@@ -171,89 +292,6 @@ npm start
 Build the frontend:
 ```bash
 npm run build
-```
-
-# Firewall(VM2)
-
-Allow IP forwarding:
-```bash
-vi /etc/sysctl.conf
-#Uncomment net.ipv4.ip_forward=1
-```
-
-Later test connections with:
-```
-ping 192.168.0.2
-ping 192.168.1.2
-ping 192.168.2.2
-telnet 192.168.1.2 5432   
-ping 192.168.56.102
-```
-
-# Database(VM3)
-
-Check that postgresql is working:
-```bash
-systemctl status postgresql
-```
-
-Edit `/etc/postgresql/14/main/postgresql.conf`:
-```
-listen_address = *
-ssl = on
-ssl_cert_file = '/etc/ssl/certs/webserver.crt'
-ssl_key_file = '/etc/ssl/certs/webserver.key'
-```
-
-Edit `/etc/postgresql/14/main/pg_hba.conf`: 
-
-```bash
-[CONNECTION_TYPE][DATABASE][USER] [ADDRESS]   [METHOD]
- hostssl             all       all    0.0.0.0/0   md5
-```
-
-Finally restart postgres:
-```bash
-systemctl restart postgresql
-```
-
-Check that server is listening to port 5432:
-```bash
-ss -nlt | grep 5432
-```
-
-Run psql:
-```bash
-sudo -u postgres psql
-```
-
-Change password:
-```bash
-ALTER USER postgres WITH ENCRYPTED PASSWORD 'postgres';
-```
-
-Create database with name `ncmb`:
-```bash
-CREATE DATABASE ncmb;
-```
-
-Create a super admin
-First generate the password hash:
-``` 
-await require('bcryptjs').hash("password", 10);
-```
-Then connect to the database and insert the super admin:
-```bash
-sudo -u postgres psql # TODO should be IP
-\c ncmb;
-INSERT INTO "Admin"(name, email, password, role) VALUES ('name', 'email','hashedPassword','SUPERADMIN');
-```
-
-# TODO: Create user with non super admin privileges
-
-If something goes wrong check the logs:
-```bash
-tail /var/log/postgresql/postgresql-14-main.log
 ```
 
 ### External service

@@ -72,14 +72,6 @@ then
 
     cp -f network-managers/database_vm.yaml /etc/netplan/01-network-manager-all.yaml
 
-    echo "Installing PostgreSQL"
-
-    sudo wget http://apt.postgresql.org/pub/repos/apt/ACCC4CF8.asc
-    sudo apt-key add ACCC4CF8.asc
-    sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" >> /etc/apt/sources.list.d/pgdg.list'
-    sudo apt -y update
-    sudo apt -y install postgresql-14
-
     echo "Configuring postgres permissions for ssl"
 
     chown postgres:ssl-cert /etc/ssl/private/
