@@ -142,7 +142,7 @@ await require('bcryptjs').hash("password", 10);
 ```
 Then connect to the database and insert the super admin:
 ```bash
-sudo psql -h 192.168.0.2 -p 5432 -U postgres
+sudo psql -h 192.168.2.2 -p 5432 -U postgres
 \c ncmb;
 INSERT INTO "Admin"(name, email, password, role) VALUES ('name', 'email','hashedPassword','SUPERADMIN');
 ```
