@@ -22,7 +22,7 @@ router.get("/clients", TokenService.checkAdminPermission, async (req: Request, r
                 })
             }
         });
-        const serviceRes = await axios.post("http:/" + process.env.EXTERNAL_HOST + ":" + process.env.EXTERNAL_PORT + "/bank/clients", { users });
+        const serviceRes = await axios.post("http://" + process.env.EXTERNAL_HOST + "/bank/clients", { users });
         res.sendStatus(serviceRes.status);
     } catch (err: any) {
         next(err);

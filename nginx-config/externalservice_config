@@ -2,16 +2,23 @@ server {
         listen 443 ssl default_server;
         listen [::]:443 ssl default_server;
 
-	ssl_certificate /etc/ssl/certs/externalwebserver.crt;
-	ssl_certificate_key /etc/ssl/private/externalwebserver.key;
+		ssl_certificate /etc/ssl/certs/externalwebserver.crt;
+		ssl_certificate_key /etc/ssl/private/externalwebserver.key;
 
         server_name localhost;
         
-	if ($scheme != "https") {
-        	return 301 https://$host$request_uri;
-    	}
+		location / {
+			proxy_pass http://192.168.56.102:3002;
+		}
+}
 
-	location / {
-                proxy_pass http://localhost:3001;
-        }
+server {
+		listen 80 ssl default_server;
+		listen [::]:80 ssl default_server;
+
+		server_name localhost;
+		
+		location / {
+			proxy_pass http://192.168.56.102:3002;
+		}
 }

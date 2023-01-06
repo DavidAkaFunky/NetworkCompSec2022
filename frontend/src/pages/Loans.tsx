@@ -1,15 +1,12 @@
 import {
 	Box,
-	Button,
 	Card,
-	CardActions,
 	CardContent,
 	CardHeader,
 	Container,
 	Grid,
 	Typography,
 } from "@mui/material";
-import StarIcon from "@mui/icons-material/StarBorder";
 import { useState, useEffect } from "react";
 import axios from "../interceptors/Axios";
 
@@ -22,7 +19,6 @@ function Loans() {
         
         try{
             const response = await axios.get("/api/loans/all");
-			console.log(response.data);
             setLoans(response.data);   
         } catch (err: any) {
 			setError(err);

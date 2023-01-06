@@ -1,5 +1,0 @@
-/.env
-/backend/package-lock.json
-/frontend/package-lock.json
-node_modules/
-/backend/prisma/migrations/

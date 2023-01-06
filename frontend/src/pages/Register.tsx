@@ -54,7 +54,7 @@ function Register() {
 	}, [email]);
 
 	useEffect(() => {
-		setPasswordError(password && !isValidPassword ? "The password is invalid. It must be 8-32 characters long and have at least: an uppercase letter, a lowercase letter, a digit and one of these symbols: !@#$%^&*()\-_+." : "");
+		setPasswordError(password && !isValidPassword ? "The password is invalid. It must be 8-32 characters long and have at least: an uppercase letter, a lowercase letter, a digit and one of these symbols: !@#$%^&*()-_+." : "");
 	}, [password]);
 
 	useEffect(() => {

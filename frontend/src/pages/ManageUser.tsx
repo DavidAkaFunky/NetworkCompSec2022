@@ -153,11 +153,6 @@ function ManageUser() {
 							}}
 						>
 							<Title>Credit Card</Title>
-							<img
-								style={{ display: "block", maxHeight: "100%" }}
-								src="/Cx-Classic-Visa_480x380.png"
-								alt="card"
-							/>
 						</Paper>
 					</Grid>
 					{/* Recent Deposits */}

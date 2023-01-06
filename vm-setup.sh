@@ -11,8 +11,6 @@ then
 elif [ "$1" == "firewall" ]
 then    
 
-    sudo apt install iptables-persistent -y
-
     echo "Configuring netplan"
 
     cp -f network-managers/firewall_vm.yaml /etc/netplan/01-network-manager-all.yaml
@@ -30,7 +28,6 @@ then
     # Allow outgoing to 192.168.0.2 to 80/443
     iptables -A OUTPUT -p tcp -m multiport --dports 80,443 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
 
-
     echo "Allowing icmp traffic"
     iptables -A INPUT -p icmp -j ACCEPT
     iptables -A OUTPUT -p icmp -j ACCEPT
@@ -39,14 +36,14 @@ then
     iptables -A INPUT -i lo -j ACCEPT
     iptables -A OUTPUT -o lo -j ACCEPT
 
-    #echo "Allowing internal network to access external network"
-    #iptables -A FORWARD -i "ethTODO" -o "ethTODO" -j ACCEPT
-
     echo "Allowing tcp traffic between web server and database"
-    iptables -A FORWARD -p tcp -s 192.168.0.2/24 -d 192.168.1.2/24 --dport 5432 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
-    iptables -A FORWARD -p tcp -s 192.168.1.2/24 --sport 5432 -d 192.168.0.2/24 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+    iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+    iptables -A FORWARD -p tcp -s 192.168.0.2 -d 192.168.1.2 --dport 5432 -j ACCEPT
 
     echo "Allowing external traffic to enter the web server through the firewall without knowing its IP address"
+
+    iptables -A FORWARD -p tcp -s 192.168.0.2 -d 192.168.56.102 --dport 80 -j ACCEPT
+    iptables -A FORWARD -p tcp -s 192.168.0.2 -d 192.168.56.102 --dport 443 -j ACCEPT
 
     #Redirect requests to firewall:80/443 to web_server:80/443
     iptables -A PREROUTING -t nat -p tcp -d 192.168.56.101 --dport 80 -j DNAT --to 192.168.0.2:80 
@@ -55,10 +52,8 @@ then
     iptables -A FORWARD -d 192.168.0.2 -p tcp -m tcp --dport 443 -j ACCEPT
     
     #Redirect requests from web_server:80/443 to firewall:80/443 and change the source IP
-    iptables -A FORWARD -s 192.168.0.2 -p tcp -m tcp --sport 80 -j ACCEPT
-    iptables -A FORWARD -s 192.168.0.2 -p tcp -m tcp --sport 443 -j ACCEPT
-    iptables -A POSTROUTING -t nat -p tcp -s 192.168.0.2 --sport 80 -j MASQUERADE
-    iptables -A POSTROUTING -t nat -p tcp -s 192.168.0.2 --sport 443 -j MASQUERADE
+    iptables -A POSTROUTING -t nat -p tcp -s 192.168.0.2 -j MASQUERADE
+    iptables -A POSTROUTING -t nat -p tcp -s 192.168.0.2 -j MASQUERADE
 
     # FOR IPv4
     sudo sh -c 'iptables-save > /etc/iptables/rules.v4'

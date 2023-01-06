@@ -6,7 +6,7 @@ const router = Router();
 
 router.get("/all", TokenService.checkUserPermission, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const serviceRes = await axios.get("http:/" + process.env.EXTERNAL_HOST + ":" + process.env.EXTERNAL_PORT + "/insurance/loans-info");
+        const serviceRes = await axios.get("http://" + process.env.EXTERNAL_HOST + "/insurance/loans-info");
         res.status(serviceRes.status).json(serviceRes.data);
     } catch (err: any) {
         next(err);

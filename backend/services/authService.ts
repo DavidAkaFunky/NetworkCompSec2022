@@ -254,16 +254,26 @@ class AuthService {
 
 	public static changeUserPassword = async (email: string, oldPassword: string, newPassword: string): Promise<void> => {
 
-		const user = await this.loginVerification({ email: email, password: oldPassword } as LoginData);
+		const user: User | Admin = await this.loginVerification({ email: email, password: oldPassword } as LoginData);
 		
 		if (!user) {
 			throw new HttpException(401, "There was a problem changing the password. Please check if the old password is correct and try again.");
 		}
 
-		const success = await UserDatabase.changeUserPassword(email, newPassword);
+		newPassword = await bcrypt.hash(newPassword, 10);
 
-		if (!success) {
-			throw new HttpException(500, "There was a problem changing the password.");
+		if (this.adminEmailRegex.test(user.email)) {
+			const success = await AdminDatabase.changeAdminPassword(email, newPassword);
+
+			if (!success) {
+				throw new HttpException(401, "There was a problem changing the password. Please check if the old password is correct and try again.");
+			}
+		} else {
+			const success = await UserDatabase.changeUserPassword(email, newPassword);
+
+			if (!success) {
+				throw new HttpException(401, "There was a problem changing the password. Please check if the old password is correct and try again.");
+			}
 		}
 	};
 

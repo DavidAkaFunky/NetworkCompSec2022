@@ -44,12 +44,11 @@ function ChangePassword() {
 
 		try {
             await axios.patch("/api/auth/change-password", {
-                withCredentials: true,
                 oldPassword: currentPassword,
                 newPassword: newPassword
 			});
 
-            navigate("/login");
+            navigate("/");
 		} catch (err: any) {
 			setGeneralError(err);
 		} finally {

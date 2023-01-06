@@ -49,8 +49,4 @@ network:
                 - 192.168.56.101/24
             nameservers:
                 addresses: [8.8.8.8, 8.8.4.4]
-        # NAT network
-        enp0s11:
-            dhcp4: yes
-            nameservers:
-                addresses: [8.8.8.8, 8.8.4.4]
+

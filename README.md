@@ -142,7 +142,7 @@ await require('bcryptjs').hash("password", 10);
 ```
 Then connect to the database and insert the super admin:
 ```bash
-sudo -u postgres psql # TODO should be IP
+sudo psql -h 192.168.0.2 -p 5432 -U postgres
 \c ncmb;
 INSERT INTO "Admin"(name, email, password, role) VALUES ('name', 'email','hashedPassword','SUPERADMIN');
 ```
@@ -155,6 +155,13 @@ tail /var/log/postgresql/postgresql-14-main.log
 ```
 
 # Firewall(VM2)
+
+To make iptable rules persistent, install:
+```bash
+sudo apt install iptables-persistent -y
+```
+
+Shut down the VM. 
 
 In `Settings -> Network` set adapters as follow: 
 ```
