@@ -1,4 +1,7 @@
 # Insurance & Banking: NCMB
+
+Final grade: 17
+
 ## Business context
 
 Nova Caixa Milenar Bancária (NCMB) is a bank that operates in Portugal since 1900. It has a large portfolio of clients, from individuals to small businesses, and large multi-national organizations. NCMB has a large catalog of products: credit cards, mortgages, and small loans, and acts as a financial broker (allowing customers to trade shares and other assets).
